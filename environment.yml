@@ -1,0 +1,13 @@
+name: hydroutils
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - tqdm
+  - black
+  - hydroerr
