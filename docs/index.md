@@ -1,8 +1,7 @@
-# hydroutils
+# Welcome to hydroutils
 
 
 [![image](https://img.shields.io/pypi/v/hydroutils.svg)](https://pypi.python.org/pypi/hydroutils)
-[![image](https://img.shields.io/conda/vn/conda-forge/hydroutils.svg)](https://anaconda.org/conda-forge/hydroutils)
 
 [![image](https://pyup.io/repos/github/OuyangWenyu/hydroutils/shield.svg)](https://pyup.io/repos/github/OuyangWenyu/hydroutils)
 
@@ -11,7 +10,7 @@
 
 
 -   Free software: MIT license
--   Documentation: https://OuyangWenyu.github.io/hydroutils
+-   Documentation: <https://OuyangWenyu.github.io/hydroutils>
     
 
 ## Features
