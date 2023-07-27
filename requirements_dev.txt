@@ -1,4 +1,3 @@
-pip
 bump2version
 wheel
 watchdog
@@ -10,7 +9,6 @@ twine
 grip
 
 pytest
-python
 numpy
 pandas
 matplotlib
