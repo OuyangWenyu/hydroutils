@@ -22,6 +22,8 @@ import functools
 import tqdm
 
 import logging
+
+
 def get_hydro_logger(log_level_param):
     logger = logging.getLogger(__name__)
     # StreamHandler
@@ -32,12 +34,12 @@ def get_hydro_logger(log_level_param):
 
 
 log_level = logging.INFO
-hydro_logger = get_hydro_logger(log_level)
+HydroLogger = get_hydro_logger(log_level)
 
 
 # ------------------------------------------------progress bar----------------------------------------------------
 def provide_progress_bar(
-        function, estimated_time, tstep=0.2, tqdm_kwargs={}, args=[], kwargs={}
+    function, estimated_time, tstep=0.2, tqdm_kwargs={}, args=[], kwargs={}
 ):
     """
     Tqdm wrapper for a long-running function

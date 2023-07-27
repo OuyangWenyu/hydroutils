@@ -16,7 +16,7 @@ import numpy as np
 import scipy.stats
 from scipy.stats import wilcoxon
 import pandas as pd
-from hydro_logger import hydro_logger
+from hydro_logger import HydroLogger
 
 ALL_METRICS = ["Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV"]
 
@@ -423,7 +423,7 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
         FHV=PBiashigh,
         FLV=PBiaslow,
     )
-    hydro_logger.debug(
+    HydroLogger.debug(
         "The CDF of BFLV will not reach 1.0 because some basins have all zero flow observations for the "
         "30% low flow interval, the percent bias can be infinite\n"
         + "The number of these cases is "
