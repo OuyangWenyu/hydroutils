@@ -1,5 +1,6 @@
 import copy
 import itertools
+from typing import Union
 import HydroErr as he
 import numpy as np
 import scipy.stats

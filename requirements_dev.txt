@@ -11,3 +11,11 @@ grip
 
 pytest
 pytest-runner
+python==3.10
+numpy
+pandas
+matplotlib
+seaborn
+tqdm
+black
+hydroerr

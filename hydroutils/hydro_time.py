@@ -1,13 +1,22 @@
+"""
+Author: Wenyu Ouyang
+Date: 2022-12-02 11:03:04
+LastEditTime: 2023-07-27 10:01:29
+LastEditors: Wenyu Ouyang
+Description: 
+FilePath: \hydroutils\hydroutils\hydro_time.py
+Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
+"""
 import datetime
+from typing import Union
 import numpy as np
 
-def t2str(t_: Union[str, dt.datetime]):
+
+def t2str(t_: Union[str, datetime.datetime]):
     if type(t_) is str:
-        t_str = dt.datetime.strptime(t_, "%Y-%m-%d")
-        return t_str
-    elif type(t_) is dt.datetime:
-        t = t_.strftime("%Y-%m-%d")
-        return t
+        return datetime.datetime.strptime(t_, "%Y-%m-%d")
+    elif type(t_) is datetime.datetime:
+        return t_.strftime("%Y-%m-%d")
     else:
         raise NotImplementedError("We don't support this data type yet")
 
@@ -27,10 +36,9 @@ def t_range_days(t_range, *, step=np.timedelta64(1, "D")) -> np.array:
     np.array
         a uniformly-spaced (daily) list
     """
-    sd = dt.datetime.strptime(t_range[0], "%Y-%m-%d")
-    ed = dt.datetime.strptime(t_range[1], "%Y-%m-%d")
-    t_array = np.arange(sd, ed, step)
-    return t_array
+    sd = datetime.datetime.strptime(t_range[0], "%Y-%m-%d")
+    ed = datetime.datetime.strptime(t_range[1], "%Y-%m-%d")
+    return np.arange(sd, ed, step)
 
 
 def t_range_days_timedelta(t_array, td=12, td_type="h"):
@@ -84,11 +92,11 @@ def t_range_years(t_range):
     end_year = int(t_range[1].split("-")[0])
     end_month = int(t_range[1].split("-")[1])
     end_day = int(t_range[1].split("-")[2])
-    if end_month == 1 and end_day == 1:
-        year_range_list = np.arange(start_year, end_year)
-    else:
-        year_range_list = np.arange(start_year, end_year + 1)
-    return year_range_list
+    return (
+        np.arange(start_year, end_year)
+        if end_month == 1 and end_day == 1
+        else np.arange(start_year, end_year + 1)
+    )
 
 
 def get_year(a_time):
@@ -97,7 +105,7 @@ def get_year(a_time):
     elif isinstance(a_time, np.datetime64):
         return a_time.astype("datetime64[Y]").astype(int) + 1970
     else:
-        return int(a_time[0:4])
+        return int(a_time[:4])
 
 
 def intersect(t_lst1, t_lst2):
@@ -112,12 +120,10 @@ def date_to_julian(a_time):
     else:
         dt = a_time
     tt = dt.timetuple()
-    julian_date = tt.tm_yday
-    return julian_date
+    return tt.tm_yday
 
 
 def t_range_to_julian(t_range):
     t_array = t_range_days(t_range)
     t_array_str = np.datetime_as_string(t_array)
-    julian_dates = [date_to_julian(a_time[0:10]) for a_time in t_array_str]
-    return julian_dates
+    return [date_to_julian(a_time[:10]) for a_time in t_array_str]
