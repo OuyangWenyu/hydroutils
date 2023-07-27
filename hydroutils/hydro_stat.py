@@ -1,7 +1,7 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2023-07-27 10:15:55
+LastEditTime: 2023-07-27 18:07:39
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
 FilePath: \hydroutils\hydroutils\hydro_stat.py
@@ -16,7 +16,7 @@ import numpy as np
 import scipy.stats
 from scipy.stats import wilcoxon
 import pandas as pd
-import hydro_logger
+from hydro_logger import hydro_logger
 
 ALL_METRICS = ["Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV"]
 
@@ -60,7 +60,7 @@ def fms(obs, sim, lower: float = 0.2, upper: float = 0.7) -> float:
     if len(obs) < 1:
         return np.nan
 
-    if any([(x <= 0) or (x >= 1) for x in [upper, lower]]):
+    if any((x <= 0) or (x >= 1) for x in [upper, lower]):
         raise ValueError("upper and lower have to be in range ]0,1[")
 
     if lower >= upper:
@@ -185,7 +185,7 @@ def mean_peak_timing(
 
         timing_errors.append(timing_error)
 
-    return np.mean(timing_errors) if len(timing_errors) > 0 else np.nan
+    return np.mean(timing_errors) if timing_errors else np.nan
 
 
 def KGE(xs, xo):
@@ -200,8 +200,7 @@ def KGE(xs, xo):
     r = np.corrcoef(xo, xs)[0, 1]
     alpha = np.std(xs) / np.std(xo)
     beta = np.mean(xs) / np.mean(xo)
-    kge = 1 - np.sqrt((r - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
-    return kge
+    return 1 - np.sqrt((r - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
 
 
 def stat_error_i(targ_i, pred_i):
@@ -376,7 +375,7 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
     PBiashigh = np.full(ngrid, np.nan)
     PBias = np.full(ngrid, np.nan)
     num_lowtarget_zero = 0
-    for k in range(0, ngrid):
+    for k in range(ngrid):
         x = pred[k, :]
         y = target[k, :]
         ind = np.where(np.logical_and(~np.isnan(x), ~np.isnan(y)))[0]
@@ -559,8 +558,8 @@ def trans_norm(x, var_lst, stat_dict, *, to_norm):
     ----------
     x
         2d or 3d data
-        2d：1st-sites，2nd-var type
-        3d：1st-sites，2nd-time, 3rd-var type
+        2d: 1st-sites, 2nd-var type
+        3d: 1st-sites, 2nd-time, 3rd-var type
     var_lst
         variables
     stat_dict
@@ -584,11 +583,10 @@ def trans_norm(x, var_lst, stat_dict, *, to_norm):
                 out[:, :, k] = (x[:, :, k] - stat[2]) / stat[3]
             elif len(x.shape) == 2:
                 out[:, k] = (x[:, k] - stat[2]) / stat[3]
-        else:
-            if len(x.shape) == 3:
-                out[:, :, k] = x[:, :, k] * stat[3] + stat[2]
-            elif len(x.shape) == 2:
-                out[:, k] = x[:, k] * stat[3] + stat[2]
+        elif len(x.shape) == 3:
+            out[:, :, k] = x[:, :, k] * stat[3] + stat[2]
+        elif len(x.shape) == 2:
+            out[:, k] = x[:, k] * stat[3] + stat[2]
     return out
 
 
