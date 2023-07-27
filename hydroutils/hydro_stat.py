@@ -1,7 +1,7 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2023-07-27 18:07:39
+LastEditTime: 2023-07-27 19:14:26
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
 FilePath: \hydroutils\hydroutils\hydro_stat.py
@@ -16,7 +16,6 @@ import numpy as np
 import scipy.stats
 from scipy.stats import wilcoxon
 import pandas as pd
-from hydro_logger import HydroLogger
 
 ALL_METRICS = ["Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV"]
 
@@ -423,12 +422,9 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
         FHV=PBiashigh,
         FLV=PBiaslow,
     )
-    HydroLogger.debug(
-        "The CDF of BFLV will not reach 1.0 because some basins have all zero flow observations for the "
-        "30% low flow interval, the percent bias can be infinite\n"
-        + "The number of these cases is "
-        + str(num_lowtarget_zero)
-    )
+    # "The CDF of BFLV will not reach 1.0 because some basins have all zero flow observations for the "
+    # "30% low flow interval, the percent bias can be infinite\n"
+    # "The number of these cases is " + str(num_lowtarget_zero)
     return outDict
 
 
