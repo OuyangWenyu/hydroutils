@@ -1,6 +1,6 @@
 pytest
 pytest-runner
-python==3.10
+python
 numpy
 pandas
 matplotlib

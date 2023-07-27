@@ -1,10 +1,22 @@
+"""
+Author: MHPI group, Wenyu Ouyang
+Date: 2021-12-31 11:08:29
+LastEditTime: 2023-07-27 10:15:55
+LastEditors: Wenyu Ouyang
+Description: statistics calculation
+FilePath: \hydroutils\hydroutils\hydro_stat.py
+Copyright (c) 2021-2022 MHPI group, Wenyu Ouyang. All rights reserved.
+"""
+
 import copy
 import itertools
-from typing import Union
+import warnings
 import HydroErr as he
 import numpy as np
 import scipy.stats
 from scipy.stats import wilcoxon
+import pandas as pd
+import hydro_logger
 
 ALL_METRICS = ["Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV"]
 
@@ -13,13 +25,16 @@ def fms(obs, sim, lower: float = 0.2, upper: float = 0.7) -> float:
     r"""
     TODO: not fully tested
     Calculate the slope of the middle section of the flow duration curve [#]_
+
     .. math::
         \%\text{BiasFMS} = \frac{\left | \log(Q_{s,\text{lower}}) - \log(Q_{s,\text{upper}}) \right | -
             \left | \log(Q_{o,\text{lower}}) - \log(Q_{o,\text{upper}}) \right |}{\left |
             \log(Q_{s,\text{lower}}) - \log(Q_{s,\text{upper}}) \right |} \times 100,
+
     where :math:`Q_{s,\text{lower/upper}}` corresponds to the FDC of the simulations (here, `sim`) at the `lower` and
     `upper` bound of the middle section and :math:`Q_{o,\text{lower/upper}}` similarly for the observations (here,
     `obs`).
+
     Parameters
     ----------
     obs : DataArray
@@ -30,10 +45,12 @@ def fms(obs, sim, lower: float = 0.2, upper: float = 0.7) -> float:
         Lower bound of the middle section in range ]0,1[, by default 0.2
     upper : float, optional
         Upper bound of the middle section in range ]0,1[, by default 0.7
+
     Returns
     -------
     float
         Slope of the middle section of the flow duration curve.
+
     References
     ----------
     .. [#] Yilmaz, K. K., Gupta, H. V., and Wagener, T. ( 2008), A process-based diagnostic approach to model
@@ -76,12 +93,14 @@ def mean_peak_timing(
     """
     TODO: not finished
     Mean difference in peak flow timing.
+
     Uses scipy.find_peaks to find peaks in the observed time series. Starting with all observed peaks, those with a
     prominence of less than the standard deviation of the observed time series are discarded. Next, the lowest peaks
     are subsequently discarded until all remaining peaks have a distance of at least 100 steps. Finally, the
     corresponding peaks in the simulated time series are searched in a window of size `window` on either side of the
     observed peaks and the absolute time differences between observed and simulated peaks is calculated.
     The final metric is the mean absolute time difference across all peaks. For more details, see Appendix of [#]_
+
     Parameters
     ----------
     obs : DataArray
@@ -97,10 +116,13 @@ def mean_peak_timing(
         Temporal resolution of the time series in pandas format, e.g. '1D' for daily and '1H' for hourly.
     datetime_coord : str, optional
         Name of datetime coordinate. Tried to infer automatically if not specified.
+
+
     Returns
     -------
     float
         Mean peak time difference.
+
     References
     ----------
     .. [#] Kratzert, F., Klotz, D., Hochreiter, S., and Nearing, G. S.: A note on leveraging synergy in multiple
@@ -217,7 +239,7 @@ def stat_error_i(targ_i, pred_i):
         hightarget = target_sort[indexhigh:]
         pbiaslow = np.sum(lowpred - lowtarget) / np.sum(lowtarget) * 100
         pbiashigh = np.sum(highpred - hightarget) / np.sum(hightarget) * 100
-        out_dict = dict(
+        return dict(
             Bias=bias,
             RMSE=rmse,
             ubRMSE=ubrmse,
@@ -228,7 +250,6 @@ def stat_error_i(targ_i, pred_i):
             FHV=pbiashigh,
             FLV=pbiaslow,
         )
-        return out_dict
     else:
         raise ValueError(
             "The number of data is less than 2, we don't calculate the statistics."
@@ -238,6 +259,7 @@ def stat_error_i(targ_i, pred_i):
 def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
     """
     Statistics indicators include: Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
+
     Parameters
     ----------
     target
@@ -250,6 +272,7 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
         For example, observations are [1, nan, nan, 2], and predictions are [0.3, 0.3, 0.3, 1.5].
         Then, "no" means [1, 2] v.s. [0.3, 1.5] while "sum" means [1, 2] v.s. [0.3 + 0.3 + 0.3, 1.5];
         "mean" represents calculate average value the following values in the NaN locations.
+
     Returns
     -------
     dict
@@ -264,9 +287,8 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
             k_dict = stat_error(target[:, :, k], pred[:, :, k], fill_nan=fill_nan[k])
             dict_list.append(k_dict)
         return dict_list
-    if len(target.shape) == 2:
-        if type(fill_nan) is list or type(fill_nan) is tuple:
-            fill_nan = fill_nan[0]
+    if len(target.shape) == 2 and (type(fill_nan) is list or type(fill_nan) is tuple):
+        fill_nan = fill_nan[0]
     assert type(fill_nan) is str
     if fill_nan != "no":
         each_non_nan_idx = []
@@ -283,7 +305,15 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
         # the non_nan_idx: [1, 9, 17, 33, 41], then there are 16 elements in 17 -> 33, so use all_non_nan_idx is better
         # hence we don't use each_non_nan_idx finally
         out_dict = dict(
-            Bias=[], RMSE=[], ubRMSE=[], Corr=[], R2=[], NSE=[], KGE=[], FHV=[], FLV=[]
+            Bias=[],
+            RMSE=[],
+            ubRMSE=[],
+            Corr=[],
+            R2=[],
+            NSE=[],
+            KGE=[],
+            FHV=[],
+            FLV=[],
         )
     if fill_nan == "sum":
         for i in range(target.shape[0]):
@@ -303,9 +333,6 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
             out_dict["FLV"].append(dict_i["FLV"])
         return out_dict
     elif fill_nan == "mean":
-        hydro_logger.debug(
-            "calculate mean value in an interval between two non-nan value"
-        )
         for i in range(target.shape[0]):
             tmp = target[i]
             # non_nan_idx = each_non_nan_idx[i]
@@ -380,7 +407,11 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
             hightarget = target_sort[indexhigh:]
             if np.sum(lowtarget) == 0:
                 num_lowtarget_zero = num_lowtarget_zero + 1
-            PBiaslow[k] = np.sum(lowpred - lowtarget) / np.sum(lowtarget) * 100
+            with warnings.catch_warnings():
+                # Sometimes the lowtarget is all 0, which will cause a warning
+                # but I know it is not an error, so I ignore it
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                PBiaslow[k] = np.sum(lowpred - lowtarget) / np.sum(lowtarget) * 100
             PBiashigh[k] = np.sum(highpred - hightarget) / np.sum(hightarget) * 100
     outDict = dict(
         Bias=Bias,
@@ -405,10 +436,12 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
 def cal_4_stat_inds(b):
     """
     Calculate four statistics indices: percentile 10 and 90, mean value, standard deviation
+
     Parameters
     ----------
     b
         input data
+
     Returns
     -------
     list
@@ -426,9 +459,11 @@ def cal_4_stat_inds(b):
 def cal_stat(x: np.array) -> list:
     """
     Get statistic values of x (Exclude the NaN values)
+
     Parameters
     ----------
     x: the array
+
     Returns
     -------
     list
@@ -445,12 +480,15 @@ def cal_stat(x: np.array) -> list:
 def cal_stat_gamma(x):
     """
     Try to transform a time series data to normal distribution
+
     Now only for daily streamflow, precipitation and evapotranspiration;
     When nan values exist, just ignore them.
+
     Parameters
     ----------
     x
         time series data
+
     Returns
     -------
     list
@@ -467,6 +505,7 @@ def cal_stat_gamma(x):
 def cal_stat_basin_norm(x, basinarea, meanprep):
     """
     normalized daily streamflow by basin area and precipitation with cal_stat_gamma
+
     Parameters
     ----------
     x
@@ -474,6 +513,7 @@ def cal_stat_basin_norm(x, basinarea, meanprep):
         basinarea = readAttr(gageDict['id'], ['area_gages2'])
     meanprep
         meanprep = readAttr(gageDict['id'], ['p_mean'])
+
     Returns
     -------
     list
@@ -483,7 +523,7 @@ def cal_stat_basin_norm(x, basinarea, meanprep):
     temparea = np.tile(basinarea, (1, x.shape[1]))
     tempprep = np.tile(meanprep, (1, x.shape[1]))
     flowua = (x * 0.0283168 * 3600 * 24) / (
-        (temparea * (10 ** 6)) * (tempprep * 10 ** (-3))
+        (temparea * (10**6)) * (tempprep * 10 ** (-3))
     )  # unit (m^3/day)/(m^3/day)
     return cal_stat_gamma(flowua)
 
@@ -491,12 +531,14 @@ def cal_stat_basin_norm(x, basinarea, meanprep):
 def cal_stat_prcp_norm(x, meanprep):
     """
     normalized daily evapotranspiration or soil moisture by precipitation with cal_stat_gamma
+
     Parameters
     ----------
     x
         data to be normalized
     meanprep
         meanprep = readAttr(gageDict['id'], ['p_mean'])
+
     Returns
     -------
     list
@@ -512,6 +554,7 @@ def cal_stat_prcp_norm(x, meanprep):
 def trans_norm(x, var_lst, stat_dict, *, to_norm):
     """
     normalization, including denormalization code
+
     Parameters
     ----------
     x
@@ -524,6 +567,7 @@ def trans_norm(x, var_lst, stat_dict, *, to_norm):
         a dict with statistics info
     to_norm
         if True, normalization; else denormalization
+
     Returns
     -------
     np.array
@@ -599,163 +643,44 @@ def cal_fdc(data: np.array, quantile_num=100):
     return fdc
 
 
-def subset_of_dict(dict, chosen_keys):
-    """make a new dict from key-values of chosen keys in a list"""
-    return {key: value for key, value in dict.items() if key in chosen_keys}
-
-
-def pair_comb(combine_attrs):
-    if len(combine_attrs) == 1:
-        values = list(combine_attrs[0].values())[0]
-        key = list(combine_attrs[0].keys())[0]
-        results = []
-        for value in values:
-            d = dict()
-            d[key] = value
-            results.append(d)
-        return results
-    items_all = list()
-    for dict_item in combine_attrs:
-        list_temp = list(dict_item.values())[0]
-        items_all = items_all + list_temp
-    all_combs = list(combinations(items_all, 2))
-
-    def is_in_same_item(item1, item2):
-        for dict_item in combine_attrs:
-            list_now = list(dict_item.values())[0]
-            if item1 in list_now and item2 in list_now:
-                return True
-        return False
-
-    def which_dict(item):
-        for dict_item in combine_attrs:
-            list_now = list(dict_item.values())[0]
-            if item in list_now:
-                return list(dict_item.keys())[0]
-
-    combs = [comb for comb in all_combs if not is_in_same_item(comb[0], comb[1])]
-    combs_dict = [
-        {which_dict(comb[0]): comb[0], which_dict(comb[1]): comb[1]} for comb in combs
-    ]
-    return combs_dict
-
-
-def flat_data(x):
-    xArrayTemp = x.flatten()
-    xArray = xArrayTemp[~np.isnan(xArrayTemp)]
-    xSort = np.sort(xArray)
-    return xSort
-
-
-def interpNan(x, mode="linear"):
-    if len(x.shape) == 1:
-        ngrid = 1
-        nt = x.shape[0]
-    else:
-        ngrid, nt = x.shape
-    for k in range(ngrid):
-        xx = x[k, :]
-        xx = interpNan1d(xx, mode)
-    return x
-
-
-def interpNan1d(x, mode="linear"):
-    i0 = np.where(np.isnan(x))[0]
-    i1 = np.where(~np.isnan(x))[0]
-    if len(i1) > 0:
-        if mode == "linear":
-            x[i0] = np.interp(i0, i1, x[i1])
-        if mode == "pre":
-            x0 = x[i1[0]]
-            for k in range(len(x)):
-                if k in i0:
-                    x[k] = x0
-                else:
-                    x0 = x[k]
-
-    return x
-
-
-def is_any_elem_in_a_lst(lst1, lst2, return_index=False, include=False):
-    do_exist = False
-    idx_lst = []
-    for j in range(len(lst1)):
-        if include:
-            for lst2_elem in lst2:
-                if lst1[j] in lst2_elem:
-                    idx_lst.append(j)
-                    do_exist = True
-        else:
-            if lst1[j] in lst2:
-                idx_lst.append(j)
-                do_exist = True
-    if return_index:
-        return do_exist, idx_lst
-    return do_exist
-
-
-def random_choice_no_return(arr, num_lst):
-    """sampling without replacement multi-times, and the num of each time is in num_lst"""
-    num_lst_arr = np.array(num_lst)
-    num_sum = num_lst_arr.sum()
-    if type(arr) == list:
-        arr = np.array(arr)
-    assert num_sum <= arr.size
-    results = []
-    arr_residue = np.arange(arr.size)
-    for num in num_lst_arr:
-        idx_chosen = np.random.choice(arr_residue.size, num, replace=False)
-        chosen_idx_in_arr = np.sort(arr_residue[idx_chosen])
-        results.append(arr[chosen_idx_in_arr])
-        arr_residue = np.delete(arr_residue, idx_chosen)
-    return results
-
-
-def find_integer_factors_close_to_square_root(integer):
-    start = int(np.sqrt(integer))
-    factor = integer / start
-    while not is_integer(factor):
-        start += 1
-        factor = integer / start
-    return int(factor), start
-
-
-def is_integer(number):
-    if int(number) == number:
-        return True
-    else:
-        return False
-
-
-def nanlog(x):
-    if x != x:
-        return np.nan
-    else:
-        return np.log(x)
-
-
-def random_index(
-    ngrid: int, nt: int, dim_subset: Union[tuple, list], warmup_length=0
-) -> tuple:
+def remove_abnormal_data(data, *, q1=0.00001, q2=0.99999):
     """
-    A similar function with PyTorch's Dataset's Sampler function -- random index
+    remove abnormal data
+
     Parameters
     ----------
-    ngrid
-        number of all basins/grids
-    nt
-        number of all periods
-    dim_subset
-        [batch_size, rho]
-    warmup_length
-        if warmup_length>0, it means we need some time-steps' calculation before model's formal forward.
-        This variable is manly for Physics-based models, which always need warmup to get proper initial state variables
+    data
+        data to be removed
+    q
+        lower quantile
+    q2
+        upper quantile
+
     Returns
     -------
-    tuple[np.array, np.array]
-        indices of grids and periods
+    np.array
+        data after removing abnormal data
     """
-    batch_size, rho = dim_subset
-    i_grid = np.random.randint(0, ngrid, [batch_size])
-    i_t = np.random.randint(0 + warmup_length, nt - rho, [batch_size])
-    return i_grid, i_t
+    # remove abnormal data
+    data[data < np.quantile(data, q1)] = np.nan
+    data[data > np.quantile(data, q2)] = np.nan
+    return data
+
+
+def month_stat_for_daily_df(df):
+    """
+    calculate monthly statistics for daily data
+
+    Parameters
+    ----------
+    df
+        daily data
+
+    Returns
+    -------
+    pd.DataFrame
+        monthly statistics for daily data
+    """
+    # guarantee the index is datetime
+    df.index = pd.to_datetime(df.index)
+    return df.resample("MS").mean()
