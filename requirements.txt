@@ -1,10 +1,9 @@
-pytest
-pytest-runner
 python
 numpy
 pandas
 matplotlib
 seaborn
+HydroErr
 tqdm
 black
-hydroerr
+pytest
