@@ -1,7 +1,7 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2023-07-27 19:14:26
+LastEditTime: 2023-07-28 09:04:03
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
 FilePath: \hydroutils\hydroutils\hydro_stat.py
@@ -497,35 +497,12 @@ def cal_stat_gamma(x):
     return cal_4_stat_inds(b)
 
 
-def cal_stat_basin_norm(x, basinarea, meanprep):
-    """
-    normalized daily streamflow by basin area and precipitation with cal_stat_gamma
-
-    Parameters
-    ----------
-    x
-    basinarea
-        basinarea = readAttr(gageDict['id'], ['area_gages2'])
-    meanprep
-        meanprep = readAttr(gageDict['id'], ['p_mean'])
-
-    Returns
-    -------
-    list
-        [p10, p90, mean, std]
-    """
-    # meanprep = readAttr(gageDict['id'], ['q_mean'])
-    temparea = np.tile(basinarea, (1, x.shape[1]))
-    tempprep = np.tile(meanprep, (1, x.shape[1]))
-    flowua = (x * 0.0283168 * 3600 * 24) / (
-        (temparea * (10**6)) * (tempprep * 10 ** (-3))
-    )  # unit (m^3/day)/(m^3/day)
-    return cal_stat_gamma(flowua)
-
-
 def cal_stat_prcp_norm(x, meanprep):
     """
-    normalized daily evapotranspiration or soil moisture by precipitation with cal_stat_gamma
+    normalized variable by precipitation with cal_stat_gamma
+
+    dividing a var with prcp means we can get a normalized var without rainfall's magnitude's influence,
+    so that we don't have bias for dry and wet basins
 
     Parameters
     ----------
