@@ -1,5 +1,14 @@
+from collections import OrderedDict
+import os
+import json
 import logging
+import pickle
+import re
 import zipfile
+from urllib import parse
+import urllib
+import numpy as np
+import requests
 
 
 def unzip_file(data_zip, path_unzip):
@@ -26,12 +35,12 @@ def unzip_nested_zip(dataset_zip, path_unzip):
             logging.warning(
                 "Please check the unzipped files manually. There may be some missed important files."
             )
-            logging.warning("The directory is: " + path_unzip)
+            logging.warning(f"The directory is: {path_unzip}")
     for root, dirs, files in os.walk(path_unzip):
         for filename in files:
             if re.search(r"\.zip$", filename):
                 file_spec = os.path.join(root, filename)
-                new_dir = os.path.join(root, filename[0:-4])
+                new_dir = os.path.join(root, filename[:-4])
                 unzip_nested_zip(file_spec, new_dir)
 
 
@@ -39,7 +48,7 @@ def zip_file_name_from_url(data_url, data_dir):
     data_url_str = data_url.split("/")
     filename = parse.unquote(data_url_str[-1])
     zipfile_path = os.path.join(data_dir, filename)
-    unzip_dir = os.path.join(data_dir, filename[0:-4])
+    unzip_dir = os.path.join(data_dir, filename[:-4])
     return zipfile_path, unzip_dir
 
 
@@ -98,12 +107,12 @@ def download_excel(data_url, temp_file):
 
 def download_a_file_from_google_drive(drive, dir_id, download_dir):
     file_list = drive.ListFile(
-        {"q": "'" + dir_id + "' in parents and trashed=false"}
+        {"q": f"'{dir_id}' in parents and trashed=false"}
     ).GetList()
     for file in file_list:
-        print("title: %s, id: %s" % (file["title"], file["id"]))
+        print(f'title: {file["title"]}, id: {file["id"]}')
         file_dl = drive.CreateFile({"id": file["id"]})
-        print("mimetype is %s" % file_dl["mimeType"])
+        print(f'mimetype is {file_dl["mimeType"]}')
         if file_dl["mimeType"] == "application/vnd.google-apps.folder":
             download_dir_sub = os.path.join(download_dir, file_dl["title"])
             if not os.path.isdir(download_dir_sub):
@@ -138,15 +147,13 @@ def unserialize_json(my_file):
 
 
 def serialize_pickle(my_object, my_file):
-    f = open(my_file, "wb")
-    pickle.dump(my_object, f)
-    f.close()
+    with open(my_file, "wb") as f:
+        pickle.dump(my_object, f)
 
 
 def unserialize_pickle(my_file):
-    f = open(my_file, "rb")
-    my_object = pickle.load(f)
-    f.close()
+    with open(my_file, "rb") as f:
+        my_object = pickle.load(f)
     return my_object
 
 
@@ -155,5 +162,4 @@ def serialize_numpy(my_array, my_file):
 
 
 def unserialize_numpy(my_file):
-    y = np.load(my_file)
-    return y
+    return np.load(my_file)
