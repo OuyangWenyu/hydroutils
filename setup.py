@@ -2,10 +2,10 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2023-07-27 17:29:44
+LastEditTime: 2023-07-31 17:11:11
 LastEditors: Wenyu Ouyang
 Description: The setup script.
-FilePath: \hydroutils\setup.py
+FilePath: /hydroutils/setup.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
 
@@ -69,6 +69,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/OuyangWenyu/hydroutils",
-    version="0.0.1",
+    version='0.0.2',
     zip_safe=False,
 )
