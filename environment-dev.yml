@@ -11,6 +11,7 @@ dependencies:
   - tqdm
   - black
   - hydroerr
+  - async-retriever
 # for dev
   - pip
   - bump2version

@@ -1,15 +1,27 @@
 from collections import OrderedDict
 import fnmatch
+import io
 import os
 import json
 import logging
+from pathlib import Path
 import pickle
 import re
+import tempfile
 import zipfile
 from urllib import parse
 import urllib
 import numpy as np
 import requests
+import async_retriever as ar
+
+
+def zip_extract(the_dir) -> None:
+    """Extract the downloaded zip files in the_dir"""
+    for f in the_dir.glob("*.zip"):
+        with zipfile.ZipFile(f) as zf:
+            # extract files to a directory named by f.stem
+            zf.extractall(the_dir.joinpath(f.stem))
 
 
 def unzip_file(data_zip, path_unzip):
@@ -37,6 +49,7 @@ def unzip_nested_zip(dataset_zip, path_unzip):
                 "Please check the unzipped files manually. There may be some missed important files."
             )
             logging.warning(f"The directory is: {path_unzip}")
+            logging.warning(f"Error message: {e}")
     for root, dirs, files in os.walk(path_unzip):
         for filename in files:
             if re.search(r"\.zip$", filename):
@@ -81,6 +94,23 @@ def download_one_zip(data_url, data_dir):
                 if chunk:
                     py_file.write(chunk)
         unzip_nested_zip(zipfile_path, unzip_dir), download_small_file
+
+
+def download_zip_files(urls, the_dir: Path):
+    """Download multi-files from multi-urls
+
+    Parameters
+    ----------
+    urls : list
+        list of all urls
+    the_dir : Path
+        the directory containing all downloaded files
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        cache_names = tmpdir.joinpath(f"{the_dir.stem}.sqlite")
+        r = ar.retrieve(urls, "binary", cache_name=cache_names, ssl=False)
+        files = [the_dir.joinpath(url.split("/")[-1]) for url in urls]
+        [files[i].write_bytes(io.BytesIO(r[i]).getbuffer()) for i in range(len(files))]
 
 
 def download_small_zip(data_url, data_dir):

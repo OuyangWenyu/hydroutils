@@ -2,13 +2,12 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2023-07-27 11:24:30
+LastEditTime: 2023-10-15 14:18:53
 LastEditors: Wenyu Ouyang
 Description: Tests for `hydroutils` package
 FilePath: \hydroutils\tests\test_hydroutils.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
-import pytest
 from hydroutils import hydro_time
 from hydroutils import hydro_stat
 import numpy as np
@@ -33,5 +32,5 @@ def test_stat_func():
     pred = np.full((3, 6), 1)
     inds_sum = hydro_stat.stat_error(targ, pred, fill_nan="sum")
     inds_mean = hydro_stat.stat_error(targ, pred, fill_nan="mean")
-    assert inds_sum["Bias"][0] == - 0.5
+    assert inds_sum["Bias"][0] == -0.5
     assert inds_mean["RMSE"][0] == np.sqrt(1 / 2)
