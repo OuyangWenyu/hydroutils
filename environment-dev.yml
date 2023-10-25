@@ -12,6 +12,7 @@ dependencies:
   - black
   - hydroerr
   - async-retriever
+  - rich
 # for dev
   - pip
   - bump2version

@@ -7,8 +7,9 @@ coverage
 Sphinx
 twine
 grip
-
+black
 pytest
+
 numpy
 pandas
 matplotlib
@@ -16,4 +17,4 @@ seaborn
 HydroErr
 async-retriever
 tqdm
-black
+rich

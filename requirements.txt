@@ -5,5 +5,4 @@ seaborn
 HydroErr
 async-retriever
 tqdm
-black
-pytest
+rich
