@@ -10,8 +10,8 @@ Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 from minio import Minio
 
 
-def minio_upload_csv(client, bucket_name, object_name, file_path):
-    """upload csv to minio
+def minio_upload_file(client, bucket_name, object_name, file_path):
+    """upload a file to minio
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def minio_upload_csv(client, bucket_name, object_name, file_path):
     return [obj.object_name for obj in objects]
 
 
-def minio_download_csv(
+def minio_download_file(
     client: Minio, bucket_name, object_name, file_path: str, version_id=None
 ):
     """_summary_
@@ -63,8 +63,8 @@ def minio_download_csv(
         response.release_conn()
 
 
-def boto3_upload_csv(client, bucket_name, object_name, file_path):
-    """upload csv to minio
+def boto3_upload_file(client, bucket_name, object_name, file_path):
+    """upload a file to minio
 
     Parameters
     ----------
@@ -83,11 +83,8 @@ def boto3_upload_csv(client, bucket_name, object_name, file_path):
         client.create_bucket(Bucket=bucket_name)
     # Upload an object
     client.upload_file(file_path, bucket_name, object_name)
-    return [
-        dic["Key"]
-        for dic in client.list_objects(Bucket=bucket_name)["Contents"]
-    ]
+    return [dic["Key"] for dic in client.list_objects(Bucket=bucket_name)["Contents"]]
 
 
-def boto3_download_csv(client, bucket_name, object_name, file_path: str):
+def boto3_download_file(client, bucket_name, object_name, file_path: str):
     client.download_file(bucket_name, object_name, file_path)

@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2023-10-25 15:16:21
-LastEditTime: 2023-10-27 16:30:56
+LastEditTime: 2023-10-27 18:02:46
 LastEditors: Wenyu Ouyang
 Description: Tests for preprocess
 FilePath: /hydroutils/tests/test_s3.py
@@ -16,7 +16,7 @@ import boto3
 import numpy as np
 import pandas as pd
 import tempfile
-from hydroutils.hydro_s3 import boto3_download_csv, boto3_upload_csv, minio_upload_csv
+from hydroutils.hydro_s3 import boto3_download_file, boto3_upload_file, minio_upload_file
 
 
 @pytest.fixture()
@@ -84,16 +84,16 @@ def create_random_data(rows=100):
 def test_upload_csv(minio_paras, mc, s3):
     bucket_name = minio_paras["bucket_name"]
     local_file = create_random_data()
-    boto3_upload_csv(
+    boto3_upload_file(
         s3,
         bucket_name,
-        "test_hydroutils_boto3",
+        "test_hydroutils_boto3.csv",
         local_file,
     )
-    minio_upload_csv(
+    minio_upload_file(
         mc,
         bucket_name,
-        "test_hydroutils_minio",
+        "test_hydroutils_minio.csv",
         local_file,
     )
 
@@ -101,10 +101,10 @@ def test_upload_csv(minio_paras, mc, s3):
 def test_download_csv_boto3(minio_paras, s3):
     bucket_name = minio_paras["bucket_name"]
     local_file = create_random_data()
-    boto3_upload_csv(
+    boto3_upload_file(
         s3,
         bucket_name,
-        "test_hydroutils_boto3",
+        "test_hydroutils_boto3.csv",
         local_file,
     )
-    boto3_download_csv(s3, bucket_name, "test_hydroutils_boto3", local_file)
+    boto3_download_file(s3, bucket_name, "test_hydroutils_boto3.csv", local_file)
