@@ -16,7 +16,7 @@ dependencies:
   # for s3 access
   - boto3
   - minio
-  - s3fs
+  - s3fs=2022.05
   # for dev
   - pip
   - bump2version

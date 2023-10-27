@@ -20,4 +20,4 @@ tqdm
 rich
 boto3
 minio
-s3fs
+s3fs==2022.05
