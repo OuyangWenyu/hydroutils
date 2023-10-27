@@ -13,7 +13,11 @@ dependencies:
   - hydroerr
   - async-retriever
   - rich
-# for dev
+  # for s3 access
+  - boto3
+  - minio
+  - s3fs
+  # for dev
   - pip
   - bump2version
   - wheel

@@ -6,3 +6,6 @@ HydroErr
 async-retriever
 tqdm
 rich
+boto3
+minio
+s3fs

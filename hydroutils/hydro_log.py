@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2023-10-25 20:07:14
-LastEditTime: 2023-10-25 20:20:21
+LastEditTime: 2023-10-27 14:53:05
 LastEditors: Wenyu Ouyang
 Description: Use rich to log: https://rich.readthedocs.io/en/latest/
 FilePath: /hydroutils/hydroutils/hydro_logger.py
