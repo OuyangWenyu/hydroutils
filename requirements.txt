@@ -2,6 +2,7 @@ numpy
 pandas
 matplotlib
 seaborn
+cartopy
 HydroErr
 async-retriever
 tqdm

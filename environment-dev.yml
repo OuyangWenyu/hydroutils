@@ -8,6 +8,8 @@ dependencies:
   - pandas
   - matplotlib
   - seaborn
+  # for gis plotting
+  - cartopy
   - tqdm
   - black
   - hydroerr
