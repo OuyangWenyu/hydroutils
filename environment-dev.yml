@@ -16,9 +16,9 @@ dependencies:
   - async-retriever
   - rich
   # for s3 access
-  - boto3
+  - boto3=1.28.64
   - minio
-  - s3fs=2022.05
+  - s3fs=2023.10
   # for dev
   - pip
   - bump2version

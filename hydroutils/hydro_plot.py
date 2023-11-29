@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:59:30
-LastEditTime: 2023-11-29 14:25:21
+LastEditTime: 2023-11-29 14:42:07
 LastEditors: Wenyu Ouyang
 Description: Some common plots for hydrology
 FilePath: \hydroutils\hydroutils\hydro_plot.py
@@ -19,7 +19,7 @@ import matplotlib.lines as mlines
 import cartopy.crs as ccrs
 from cartopy.feature import NaturalEarthFeature
 
-from hydro_stat import ecdf
+from hydroutils.hydro_stat import ecdf
 
 
 def plot_scatter_with_11line(
