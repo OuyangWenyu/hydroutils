@@ -177,6 +177,18 @@ def unserialize_json(my_file):
     return my_object
 
 
+class NumpyArrayEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
+def serialize_json_np(my_dict, my_file):
+    with open(my_file, "w") as FP:
+        json.dump(my_dict, FP, cls=NumpyArrayEncoder)
+
+
 def serialize_pickle(my_object, my_file):
     with open(my_file, "wb") as f:
         pickle.dump(my_object, f)
