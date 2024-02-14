@@ -10,6 +10,6 @@ Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 
 __author__ = """Wenyu Ouyang"""
 __email__ = 'wenyuouyang@outlook.com'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 from .hydro_log import *
