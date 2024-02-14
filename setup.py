@@ -2,7 +2,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2024-02-14 12:37:03
+LastEditTime: 2024-02-14 12:42:19
 LastEditors: Wenyu Ouyang
 Description: The setup script.
 FilePath: \hydroutils\setup.py
@@ -12,6 +12,8 @@ Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 
 import io
 import pathlib
+import os
+import platform
 from os import path as op
 from setuptools import setup, find_packages
 from setuptools.command.install import install
@@ -37,15 +39,29 @@ test_requirements = [
 ]
 
 
+def get_cache_dir(app_name):
+    home = os.path.expanduser("~")
+    system = platform.system()
+
+    if system == "Windows":
+        cache_dir = os.path.join(home, "AppData", "Local", app_name, "Cache")
+    elif system == "Darwin":
+        cache_dir = os.path.join(home, "Library", "Caches", app_name)
+    else:
+        cache_dir = os.path.join(home, ".cache", app_name)
+
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+
+    return cache_dir
+
+
 class PostInstallCommand(install):
     def run(self):
         install.run(self)
         # Define cache and config paths
         setting_dir = pathlib.Path.home()
-        import appdirs
-        cache_dir = appdirs.user_cache_dir(".hydro")
-        if not cache_dir.is_dir():
-            cache_dir.mkdir(parents=True)
+        cache_dir = get_cache_dir(".hydro")
         setting_file = setting_dir.joinpath("hydro_setting.yml")
         if not setting_file.is_file():
             setting_file.touch(exist_ok=False)
