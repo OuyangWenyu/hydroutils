@@ -2,6 +2,7 @@ from collections import OrderedDict
 import fnmatch
 import io
 import os
+import platform
 import json
 import logging
 from pathlib import Path
@@ -245,3 +246,20 @@ def get_latest_file_in_a_lst(lst):
     lst_ctime = [os.path.getctime(file) for file in lst]
     sort_idx = np.argsort(lst_ctime)
     return lst[sort_idx[-1]]
+
+
+def get_cache_dir(app_name="hydro"):
+    home = os.path.expanduser("~")
+    system = platform.system()
+
+    if system == "Windows":
+        cache_dir = os.path.join(home, "AppData", "Local", app_name, "Cache")
+    elif system == "Darwin":
+        cache_dir = os.path.join(home, "Library", "Caches", app_name)
+    else:
+        cache_dir = os.path.join(home, ".cache", app_name)
+
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+
+    return cache_dir

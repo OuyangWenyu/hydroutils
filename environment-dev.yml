@@ -34,5 +34,3 @@ dependencies:
 
   # for pypi package
   - pip
-  - pip:
-    - appdirs

@@ -2,7 +2,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2024-02-14 12:42:19
+LastEditTime: 2024-02-14 14:50:39
 LastEditors: Wenyu Ouyang
 Description: The setup script.
 FilePath: \hydroutils\setup.py
@@ -61,7 +61,7 @@ class PostInstallCommand(install):
         install.run(self)
         # Define cache and config paths
         setting_dir = pathlib.Path.home()
-        cache_dir = get_cache_dir(".hydro")
+        get_cache_dir("hydro")
         setting_file = setting_dir.joinpath("hydro_setting.yml")
         if not setting_file.is_file():
             setting_file.touch(exist_ok=False)
