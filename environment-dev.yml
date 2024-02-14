@@ -20,7 +20,6 @@ dependencies:
   - minio
   - s3fs=2023.10
   # for dev
-  - pip
   - bump2version
   - wheel
   - watchdog
@@ -32,3 +31,8 @@ dependencies:
   - grip
   - pytest
   - pytest-runner
+
+  # for pypi package
+  - pip
+  - pip:
+    - appdirs
