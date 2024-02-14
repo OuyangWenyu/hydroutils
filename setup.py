@@ -2,7 +2,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2024-02-14 12:12:06
+LastEditTime: 2024-02-14 12:30:09
 LastEditors: Wenyu Ouyang
 Description: The setup script.
 FilePath: \hydroutils\setup.py
@@ -12,7 +12,6 @@ Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 
 import io
 import pathlib
-import appdirs
 from os import path as op
 from setuptools import setup, find_packages
 from setuptools.command.install import install
@@ -40,6 +39,8 @@ test_requirements = [
 
 class PostInstallCommand(install):
     def run(self):
+        import appdirs
+
         install.run(self)
         # Define cache and config paths
         setting_dir = pathlib.Path.home()
