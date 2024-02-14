@@ -1,21 +1,26 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:59:30
-LastEditTime: 2022-12-02 11:01:40
+LastEditTime: 2023-11-29 14:42:07
 LastEditors: Wenyu Ouyang
-Description: 
+Description: Some common plots for hydrology
 FilePath: \hydroutils\hydroutils\hydro_plot.py
 Copyright (c) 2021-2022 Wenyu Ouyang. All rights reserved.
 """
 from typing import Union
-import matplotlib
-import seaborn as sns
 import numpy as np
 import pandas as pd
+import matplotlib
+import seaborn as sns
 from matplotlib import gridspec, pyplot as plt
 from matplotlib.cm import ScalarMappable
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.lines as mlines
+import cartopy.crs as ccrs
+from cartopy.feature import NaturalEarthFeature
+
+from hydroutils.hydro_stat import ecdf
+
 
 def plot_scatter_with_11line(
     x: np.array,
@@ -71,6 +76,8 @@ def plot_scatter_with_11line(
     ax.spines["left"].set_visible(False)
     ax.spines["bottom"].set_visible(False)
     return fig, ax
+
+
 def plot_heat_map(
     data,
     mask=None,
@@ -130,7 +137,7 @@ def plot_boxes_matplotlib(
     median_line_color="black",
     median_font_size="small",
 ):
-    """Plot multiplt boxes for multiple indicators 
+    """Plot multiplt boxes for multiple indicators
     Parameters
     ----------
     data : list
@@ -182,7 +189,9 @@ def plot_boxes_matplotlib(
     else:
         axes = axin
 
-    for k in range(0, nc):
+    # the next few lines are for showing median values
+    decimal_places = "2"
+    for k in range(nc):
         ax = axes[k] if nc > 1 else axes
         temp = data[k]
         if type(temp) is list:
@@ -200,14 +209,12 @@ def plot_boxes_matplotlib(
         )
         for median in bp["medians"]:
             median.set_color(median_line_color)
-        # the next few lines are for showing median values
-        decimal_places = "2"
         medians_value = [np.median(tmp) for tmp in temp]
         percent25value = [np.percentile(tmp, 25) for tmp in temp]
         percent75value = [np.percentile(tmp, 75) for tmp in temp]
         per25min = np.min(percent25value)
         per75max = np.max(percent75value)
-        median_labels = [format(s, "." + decimal_places + "f") for s in medians_value]
+        median_labels = [format(s, f".{decimal_places}f") for s in medians_value]
         pos = range(len(medians_value))
         if show_median:
             for tick, label in zip(pos, ax.get_xticklabels()):
@@ -222,7 +229,7 @@ def plot_boxes_matplotlib(
                     weight="semibold",
                     color=median_line_color,
                 )
-        for kk in range(0, len(bp["boxes"])):
+        for kk in range(len(bp["boxes"])):
             plt.setp(bp["boxes"][kk], facecolor=colorlst[kk])
 
         if label1 is not None:
@@ -255,10 +262,7 @@ def plot_boxes_matplotlib(
         ax.set_title(title)
     plt.tight_layout()
     plt.subplots_adjust(wspace=subplots_adjust_wspace)
-    if axin is None:
-        return fig
-    else:
-        return ax, bp
+    return fig if axin is None else (ax, bp)
 
 
 def swarmplot_without_legend(x, y, hue, vmin, vmax, cmap, **kwargs):
@@ -321,60 +325,55 @@ def plot_scatter_xyc(
             )
         ax.legend()
 
+    elif c is None:
+        df = pd.DataFrame({x_label: x, y_label: y})
+        points = plt.scatter(df[x_label], df[y_label], s=size)
+        if quadrant is not None:
+            plt.axvline(quadrant[0], c="grey", lw=1, linestyle="--")
+            plt.axhline(quadrant[1], c="grey", lw=1, linestyle="--")
+            q2 = df[(df[x_label] < 0) & (df[y_label] > 0)].shape[0]
+            q3 = df[(df[x_label] < 0) & (df[y_label] < 0)].shape[0]
+            q4 = df[(df[x_label] > 0) & (df[y_label] < 0)].shape[0]
+            q5 = df[(df[x_label] == 0) & (df[y_label] == 0)].shape[0]
+            q1 = df[(df[x_label] > 0) & (df[y_label] > 0)].shape[0]
+            q = q1 + q2 + q3 + q4 + q5
+            r1 = int(round(q1 / q, 2) * 100)
+            r2 = int(round(q2 / q, 2) * 100)
+            r3 = int(round(q3 / q, 2) * 100)
+            r4 = int(round(q4 / q, 2) * 100)
+            r5 = 100 - r1 - r2 - r3 - r4
+            plt.text(
+                xlim[1] - (xlim[1] - xlim[0]) * 0.1,
+                ylim[1] - (ylim[1] - ylim[0]) * 0.1,
+                f"{r1}%",
+                fontsize=16,
+            )
+            plt.text(
+                xlim[0] + (xlim[1] - xlim[0]) * 0.1,
+                ylim[1] - (ylim[1] - ylim[0]) * 0.1,
+                f"{r2}%",
+                fontsize=16,
+            )
+            plt.text(
+                xlim[0] + (xlim[1] - xlim[0]) * 0.1,
+                ylim[0] + (ylim[1] - ylim[0]) * 0.1,
+                f"{r3}%",
+                fontsize=16,
+            )
+            plt.text(
+                xlim[1] - (xlim[1] - xlim[0]) * 0.1,
+                ylim[0] + (ylim[1] - ylim[0]) * 0.1,
+                f"{r4}%",
+                fontsize=16,
+            )
+            plt.text(0.2, 0.02, f"{str(r5)}%", fontsize=16)
     else:
-        if c is None:
-            df = pd.DataFrame({x_label: x, y_label: y})
-            points = plt.scatter(df[x_label], df[y_label], s=size)
-            if quadrant is not None:
-                plt.axvline(quadrant[0], c="grey", lw=1, linestyle="--")
-                plt.axhline(quadrant[1], c="grey", lw=1, linestyle="--")
-                # text for 4 quandrants
-                q1 = df[(df[x_label] > 0) & (df[y_label] > 0)].shape[0]
-                q2 = df[(df[x_label] < 0) & (df[y_label] > 0)].shape[0]
-                q3 = df[(df[x_label] < 0) & (df[y_label] < 0)].shape[0]
-                q4 = df[(df[x_label] > 0) & (df[y_label] < 0)].shape[0]
-                # df[x_label] == 0 and df[y_label] == 0 exists at the same time
-                q5 = df[(df[x_label] == 0) & (df[y_label] == 0)].shape[0]
-                q = q1 + q2 + q3 + q4 + q5
-                r1 = int(round(q1 / q, 2) * 100)
-                r2 = int(round(q2 / q, 2) * 100)
-                r3 = int(round(q3 / q, 2) * 100)
-                r4 = int(round(q4 / q, 2) * 100)
-                r5 = 100 - r1 - r2 - r3 - r4
-                plt.text(
-                    xlim[1] - (xlim[1] - xlim[0]) * 0.1,
-                    ylim[1] - (ylim[1] - ylim[0]) * 0.1,
-                    str(r1) + "%",
-                    fontsize=16,
-                )
-                plt.text(
-                    xlim[0] + (xlim[1] - xlim[0]) * 0.1,
-                    ylim[1] - (ylim[1] - ylim[0]) * 0.1,
-                    str(r2) + "%",
-                    fontsize=16,
-                )
-                plt.text(
-                    xlim[0] + (xlim[1] - xlim[0]) * 0.1,
-                    ylim[0] + (ylim[1] - ylim[0]) * 0.1,
-                    str(r3) + "%",
-                    fontsize=16,
-                )
-                plt.text(
-                    xlim[1] - (xlim[1] - xlim[0]) * 0.1,
-                    ylim[0] + (ylim[1] - ylim[0]) * 0.1,
-                    str(r4) + "%",
-                    fontsize=16,
-                )
-                plt.text(
-                    0.2, 0.02, str(r5) + "%", fontsize=16,
-                )
-        else:
-            df = pd.DataFrame({x_label: x, y_label: y, c_label: c})
-            points = plt.scatter(
-                df[x_label], df[y_label], c=df[c_label], s=size, cmap="Spectral"
-            )  # set style options
-            # add a color bar
-            plt.colorbar(points)
+        df = pd.DataFrame({x_label: x, y_label: y, c_label: c})
+        points = plt.scatter(
+            df[x_label], df[y_label], c=df[c_label], s=size, cmap="Spectral"
+        )  # set style options
+        # add a color bar
+        plt.colorbar(points)
 
     # set limits
     if xlim is not None:
@@ -404,7 +403,7 @@ def plot_quiver(
     y_label,
 ):
     fig, ax = plt.subplots()
-    color = np.sqrt(q_diff_show ** 2 + ssm_diff_show ** 2)
+    color = np.sqrt(q_diff_show**2 + ssm_diff_show**2)
     # normalize to get same length arrows
     r = np.power(np.add(np.power(q_diff_show, 2), np.power(ssm_diff_show, 2)), 0.5)
     plt.quiver(
@@ -452,13 +451,11 @@ def swarmplot_with_cbar(cmap_str, cbar_label, ylim, *args, **kwargs):
     ax.legend().remove()
     # create colorbar
     cmap = plt.get_cmap(cmap_str)
-    for key in kwargs:
+    for key, df in kwargs.items():
         # if any criteria is not matched, we can filter this site
         if key == "hue":
             hue_name = kwargs[key]
-        if key == "data":
-            df = kwargs[key]
-        if key == "palette":
+        elif key == "palette":
             color_str = kwargs[key]
     assert color_str == cmap_str
     norm = plt.Normalize(df[hue_name].min(), df[hue_name].max())
@@ -536,56 +533,50 @@ def plot_boxs(
             x=x_name, y=y_name, data=data, showfliers=False, order=order
         )
     if swarm_plot:
-        if hue is not None:
-            if colormap:
-                # Create a matplotlib colormap from the sns seagreen color palette
-                cmap = sns.light_palette("seagreen", reverse=False, as_cmap=True)
-                # Normalize to the range of possible values from df["c"]
-                norm = matplotlib.colors.Normalize(
-                    vmin=data[hue].min(), vmax=data[hue].max()
-                )
-                # create a color dictionary (value in c : color from colormap)
-                colors = {}
-                for cval in data[hue]:
-                    colors.update({cval: cmap(norm(cval))})
-
-                # plot the swarmplot with the colors dictionary as palette, s=2 means size is 2
-                sns_box = sns.swarmplot(
-                    x=x_name,
-                    y=y_name,
-                    hue=hue,
-                    s=2,
-                    data=data,
-                    palette=colors,
-                    order=order,
-                )
-                # remove the legend, because we want to set a colorbar instead
-                plt.gca().legend_.remove()
-                # create colorbar
-                divider = make_axes_locatable(plt.gca())
-                ax_cb = divider.new_horizontal(size="5%", pad=0.05)
-                fig = sns_box.get_figure()
-                fig.add_axes(ax_cb)
-                cb1 = matplotlib.colorbar.ColorbarBase(
-                    ax_cb, cmap=cmap, norm=norm, orientation="vertical"
-                )
-                cb1.set_label("Some Units")
-            else:
-                palette = sns.light_palette("seagreen", reverse=False, n_colors=10)
-                sns_box = sns.swarmplot(
-                    x=x_name,
-                    y=y_name,
-                    hue=hue,
-                    s=2,
-                    data=data,
-                    palette=palette,
-                    order=order,
-                )
-        else:
+        if hue is None:
             sns_box = sns.swarmplot(
                 x=x_name, y=y_name, data=data, color=".2", order=order
             )
-
+        elif colormap:
+            # Create a matplotlib colormap from the sns seagreen color palette
+            cmap = sns.light_palette("seagreen", reverse=False, as_cmap=True)
+            # Normalize to the range of possible values from df["c"]
+            norm = matplotlib.colors.Normalize(
+                vmin=data[hue].min(), vmax=data[hue].max()
+            )
+            colors = {cval: cmap(norm(cval)) for cval in data[hue]}
+            # plot the swarmplot with the colors dictionary as palette, s=2 means size is 2
+            sns_box = sns.swarmplot(
+                x=x_name,
+                y=y_name,
+                hue=hue,
+                s=2,
+                data=data,
+                palette=colors,
+                order=order,
+            )
+            # remove the legend, because we want to set a colorbar instead
+            plt.gca().legend_.remove()
+            # create colorbar
+            divider = make_axes_locatable(plt.gca())
+            ax_cb = divider.new_horizontal(size="5%", pad=0.05)
+            fig = sns_box.get_figure()
+            fig.add_axes(ax_cb)
+            cb1 = matplotlib.colorbar.ColorbarBase(
+                ax_cb, cmap=cmap, norm=norm, orientation="vertical"
+            )
+            cb1.set_label("Some Units")
+        else:
+            palette = sns.light_palette("seagreen", reverse=False, n_colors=10)
+            sns_box = sns.swarmplot(
+                x=x_name,
+                y=y_name,
+                hue=hue,
+                s=2,
+                data=data,
+                palette=palette,
+                order=order,
+            )
     if xlim is not None:
         plt.xlim(xlim[0], xlim[1])
     if ylim is not None:
@@ -603,7 +594,7 @@ def plot_boxs(
 def create_median_labels(
     ax, medians_value, percent25value=None, percent75value=None, size="small"
 ):
-    """"create median labels for boxes in a boxplot
+    """ "create median labels for boxes in a boxplot
     Parameters
     ----------
     ax : plt.AxesSubplot
@@ -624,7 +615,7 @@ def create_median_labels(
         per25min = np.min(percent25value)
         per75max = np.max(percent75value)
         vertical_offset = (per75max - per25min) * 0.01
-    median_labels = [format(s, "." + decimal_places + "f") for s in medians_value]
+    median_labels = [format(s, f".{decimal_places}f") for s in medians_value]
     pos = range(len(medians_value))
     for xtick in ax.get_xticks():
         ax.text(
@@ -651,12 +642,9 @@ def plot_diff_boxes(
 ):
     """plot boxplots in rows and cols"""
     # matplotlib.use('TkAgg')
-    if type(data) != pd.DataFrame:
+    if type(data) is not pd.DataFrame:
         data = pd.DataFrame(data)
-    if y_col is None:
-        subplot_num = data.shape[1]
-    else:
-        subplot_num = len(y_col)
+    subplot_num = data.shape[1] if y_col is None else len(y_col)
     if row_and_col is None:
         row_num = 1
         col_num = subplot_num
@@ -717,7 +705,7 @@ def plot_diff_boxes(
 
 
 def plot_ts(
-    t: list,
+    t: Union[list, np.array],
     y: Union[list, np.array],
     ax=None,
     t_bar=None,
@@ -730,11 +718,14 @@ def plot_ts(
     marker_lst=None,
     linewidth=2,
     linespec=None,
+    dash_lines=None,
+    alpha=1,
 ):
     """Plot time series for multi arrays with matplotlib
+
     Parameters
     ----------
-    t : list
+    t : Union[list, np.array]
         time series but not just date; it can also be numbers like 1, 2, 3, ...
     y : Union[list, np.array]
         shown data series; the len of y should be equal to t's
@@ -760,6 +751,9 @@ def plot_ts(
         _description_, by default 2
     linespec : _type_, optional
         _description_, by default None
+    dash_lines : _type_, optional
+        if dash_line, then we will plot dashed line, by default None
+
     Returns
     -------
     _type_
@@ -770,9 +764,17 @@ def plot_ts(
         fig = plt.figure(figsize=fig_size)
         ax = fig.subplots()
         is_new_fig = True
-
+    if dash_lines is not None:
+        assert isinstance(dash_lines, list)
+    else:
+        dash_lines = np.full(len(t), False).tolist()
+        # dash_lines[-1] = True
     if type(y) is np.ndarray:
         y = [y]
+    if type(linewidth) is not list:
+        linewidth = [linewidth] * len(y)
+    if type(alpha) is not list:
+        alpha = [alpha] * len(y)
     for k in range(len(y)):
         tt = t[k] if type(t) is list else t
         yy = y[k]
@@ -780,25 +782,50 @@ def plot_ts(
         if leg_lst is not None:
             leg_str = leg_lst[k]
         if marker_lst is None:
-            if True in np.isnan(yy):
-                ax.plot(tt, yy, "*", color=c_lst[k], label=leg_str)
+            (line_i,) = (
+                ax.plot(tt, yy, "*", color=c_lst[k], label=leg_str, alpha=alpha[k])
+                if True in np.isnan(yy)
+                else ax.plot(
+                    tt,
+                    yy,
+                    color=c_lst[k],
+                    label=leg_str,
+                    linewidth=linewidth[k],
+                    alpha=alpha[k],
+                )
+            )
+        elif marker_lst[k] == "-":
+            if linespec is not None:
+                (line_i,) = ax.plot(
+                    tt,
+                    yy,
+                    color=c_lst[k],
+                    label=leg_str,
+                    linestyle=linespec[k],
+                    lw=linewidth[k],
+                    alpha=alpha[k],
+                )
             else:
-                ax.plot(tt, yy, color=c_lst[k], label=leg_str, linewidth=linewidth)
+                (line_i,) = ax.plot(
+                    tt,
+                    yy,
+                    color=c_lst[k],
+                    label=leg_str,
+                    lw=linewidth[k],
+                    alpha=alpha[k],
+                )
         else:
-            if marker_lst[k] == "-":
-                if linespec is not None:
-                    ax.plot(
-                        tt,
-                        yy,
-                        color=c_lst[k],
-                        label=leg_str,
-                        linestyle=linespec[k],
-                        lw=1.5,
-                    )
-                else:
-                    ax.plot(tt, yy, color=c_lst[k], label=leg_str, lw=1.5)
-            else:
-                ax.plot(tt, yy, color=c_lst[k], label=leg_str, marker=marker_lst[k])
+            (line_i,) = ax.plot(
+                tt,
+                yy,
+                color=c_lst[k],
+                label=leg_str,
+                marker=marker_lst[k],
+                lw=linewidth[k],
+                alpha=alpha[k],
+            )
+        if dash_lines[k]:
+            line_i.set_dashes([2, 2, 10, 2])
         if ylabel is not None:
             ax.set_ylabel(ylabel, fontsize=18)
         if xlabel is not None:
@@ -811,9 +838,9 @@ def plot_ts(
 
     if leg_lst is not None:
         ax.legend(loc="upper right", frameon=False)
+        plt.legend(prop={"size": 16})
     if title is not None:
         ax.set_title(title, loc="center", fontdict={"fontsize": 17})
-    plt.legend(prop={"size": 16})
     # plot the grid of the figure
     plt.grid()
     plt.xticks(fontsize=16)
@@ -822,10 +849,7 @@ def plot_ts(
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
     plt.tight_layout()
-    if is_new_fig:
-        return fig, ax
-    else:
-        return ax
+    return (fig, ax) if is_new_fig else ax
 
 
 def plot_ecdfs(
@@ -841,27 +865,25 @@ def plot_ecdfs(
     interval=0.1,
 ):
     """Empirical cumulative distribution function"""
-    assert type(xs) == type(ys) == list
+    assert isinstance(xs, list) and isinstance(ys, list)
     assert len(xs) == len(ys)
     if legends is not None:
-        assert type(legends) == list
+        assert isinstance(legends, list)
         assert len(ys) == len(legends)
     if style is not None:
-        assert type(style) == list
+        assert isinstance(style, list)
         assert len(ys) == len(style)
     for y in ys:
         assert all(xi < yi for xi, yi in zip(y, y[1:]))
     frames = []
     for i in range(len(xs)):
-        df_dict_i = {}
-        if legends is None:
-            str_i = x_str + str(i)
-        else:
-            str_i = legends[i]
+        str_i = x_str + str(i) if legends is None else legends[i]
         assert all(xi < yi for xi, yi in zip(xs[i], xs[i][1:]))
-        df_dict_i[x_str] = xs[i]
-        df_dict_i[y_str] = ys[i]
-        df_dict_i[case_str] = np.full([xs[i].size], str_i)
+        df_dict_i = {
+            x_str: xs[i],
+            y_str: ys[i],
+            case_str: np.full([xs[i].size], str_i),
+        }
         if style is not None:
             df_dict_i[event_str] = np.full([xs[i].size], style[i])
         df_i = pd.DataFrame(df_dict_i)
@@ -869,16 +891,14 @@ def plot_ecdfs(
     df = pd.concat(frames)
     sns.set_style("ticks", {"axes.grid": True})
     if style is None:
-        if ax_as_subplot is None:
-            ecdfplt = sns.lineplot(
-                x=x_str, y=y_str, hue=case_str, data=df, estimator=None
-            ).set(
+        return (
+            sns.lineplot(x=x_str, y=y_str, hue=case_str, data=df, estimator=None).set(
                 xlim=(0, 1),
                 xticks=np.arange(0, 1, interval),
                 yticks=np.arange(0, 1, interval),
             )
-        else:
-            ecdfplt = sns.lineplot(
+            if ax_as_subplot is None
+            else sns.lineplot(
                 ax=ax_as_subplot,
                 x=x_str,
                 y=y_str,
@@ -890,31 +910,34 @@ def plot_ecdfs(
                 xticks=np.arange(0, 1, interval),
                 yticks=np.arange(0, 1, interval),
             )
-
+        )
+    elif ax_as_subplot is None:
+        return sns.lineplot(
+            x=x_str,
+            y=y_str,
+            hue=case_str,
+            style=event_str,
+            data=df,
+            estimator=None,
+        ).set(
+            xlim=(0, 1),
+            xticks=np.arange(0, 1, interval),
+            yticks=np.arange(0, 1, interval),
+        )
     else:
-        if ax_as_subplot is None:
-            ecdfplt = sns.lineplot(
-                x=x_str, y=y_str, hue=case_str, style=event_str, data=df, estimator=None
-            ).set(
-                xlim=(0, 1),
-                xticks=np.arange(0, 1, interval),
-                yticks=np.arange(0, 1, interval),
-            )
-        else:
-            ecdfplt = sns.lineplot(
-                ax=ax_as_subplot,
-                x=x_str,
-                y=y_str,
-                hue=case_str,
-                style=event_str,
-                data=df,
-                estimator=None,
-            ).set(
-                xlim=(0, 1),
-                xticks=np.arange(0, 1, interval),
-                yticks=np.arange(0, 1, interval),
-            )
-    return ecdfplt
+        return sns.lineplot(
+            ax=ax_as_subplot,
+            x=x_str,
+            y=y_str,
+            hue=case_str,
+            style=event_str,
+            data=df,
+            estimator=None,
+        ).set(
+            xlim=(0, 1),
+            xticks=np.arange(0, 1, interval),
+            yticks=np.arange(0, 1, interval),
+        )
 
 
 def plot_ecdf(mydataframe, mycolumn, save_file=None):
@@ -982,13 +1005,12 @@ def plot_ecdfs_matplot(
     _type_
         _description_
     """
-    assert type(xs) == type(ys) == list
+    assert isinstance(xs, list) and isinstance(ys, list)
     assert len(xs) == len(ys)
     if legends is not None:
-        assert type(legends) == list
-        assert len(ys) == len(legends)
+        assert isinstance(legends, list) and len(ys) == len(legends)
     if dash_lines is not None:
-        assert type(dash_lines) == list
+        assert isinstance(dash_lines, list)
     else:
         dash_lines = np.full(len(xs), False).tolist()
     for y in ys:
@@ -1054,9 +1076,10 @@ def plot_pdf_cdf(mydataframe, mycolumn):
     ).set(xlim=(0, 1), ylim=(0, 1))
     plt.show()
 
+
 def plot_ts_matplot(t, y, color="r", ax=None, title=None):
-    assert type(t) == list
-    assert type(y) == list
+    assert isinstance(t, list)
+    assert isinstance(y, list)
     if ax is None:
         fig = plt.figure()
         ax = fig.subplots()
@@ -1065,17 +1088,188 @@ def plot_ts_matplot(t, y, color="r", ax=None, title=None):
     ax.legend()
     if title is not None:
         ax.set_title(title, loc="center")
-    if ax is None:
-        return fig, ax
+    return (fig, ax) if ax is None else ax
+
+
+def plot_map_carto(
+    data,
+    lat,
+    lon,
+    fig=None,
+    ax=None,
+    pertile_range=None,
+    value_range=None,
+    fig_size=(8, 8),
+    need_colorbar=True,
+    colorbar_size=[0.91, 0.318, 0.02, 0.354],
+    cmap_str="jet",
+    idx_lst=None,
+    markers=None,
+    marker_size=20,
+    is_discrete=False,
+    colors="rbkgcmywrbkgcmyw",
+    category_names=None,
+    legend_font_size=None,
+    colorbar_font_size=None,
+):
+    """_summary_
+
+    Parameters
+    ----------
+    data : np.array
+        data shown in the map, 1-d array, one value for one point
+    lat : np.array
+        1-d array, latitude of each point
+    lon : np.array
+        1-d array, longitude of each point
+    fig : _type_, optional
+        _description_, by default None
+    ax : _type_, optional
+        _description_, by default None
+    pertile_range : list, optional
+        value's range shown in the map, by default None
+        for example, [0, 100] means all data; [23, 75] means 25-quantile to 75-quantile values
+    value_range: list, optinal
+        if value_range is not None, its values are used rather than percential_range
+    fig_size : tuple, optional
+        _description_, by default (8, 8)
+    need_colorbar : bool, optional
+        _description_, by default True
+    colorbar_size : list, optional
+        size of colorbar, by default [0.91, 0.318, 0.02, 0.354]
+    cmap_str : str, optional
+        _description_, by default "jet"
+    idx_lst : _type_, optional
+        for scatter plot, it is better to use idx_lst to plot multiple-type points, by default None
+    markers : list, optional
+        the marker shown in the map, by default None
+    marker_size : int, optional
+        _description_, by default 20
+    is_discrete : bool, optional
+        if True, legend is used, else colorbar is used, by default False
+    colors : str, optional
+        colors for different parts, by default "rbkgcmywrbkgcmyw"
+    category_names : list, optional
+        shown in the legend when using discrete values, by default None
+    legend_font_size : _type_, optional
+        _description_, by default None
+    colorbar_font_size : float, optional
+        font size of colorbar, by default None
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    if value_range is not None:
+        vmin = value_range[0]
+        vmax = value_range[1]
+    elif pertile_range is None:
+        # https://blog.csdn.net/chenirene510/article/details/111318539
+        mask_data = np.ma.masked_invalid(data)
+        vmin = np.min(mask_data)
+        vmax = np.max(mask_data)
     else:
-        return ax
+        assert 0 <= pertile_range[0] < pertile_range[1] <= 100
+        vmin = np.nanpercentile(data, pertile_range[0])
+        vmax = np.nanpercentile(data, pertile_range[1])
+    llcrnrlat = (np.min(lat),)
+    urcrnrlat = (np.max(lat),)
+    llcrnrlon = (np.min(lon),)
+    urcrnrlon = (np.max(lon),)
+    extent = [llcrnrlon[0], urcrnrlon[0], llcrnrlat[0], urcrnrlat[0]]
+    # Figure
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(
+            1, 1, figsize=fig_size, subplot_kw={"projection": ccrs.PlateCarree()}
+        )
+    ax.set_extent(extent)
+    states = NaturalEarthFeature(
+        category="cultural",
+        scale="50m",
+        facecolor="none",
+        name="admin_1_states_provinces_shp",
+    )
+    ax.add_feature(states, linewidth=0.5, edgecolor="black")
+    ax.coastlines("50m", linewidth=0.8)
+    if idx_lst is not None:
+        if isinstance(marker_size, list):
+            assert len(marker_size) == len(idx_lst)
+        else:
+            marker_size = np.full(len(idx_lst), marker_size).tolist()
+        if not isinstance(marker_size, list):
+            markers = np.full(len(idx_lst), markers).tolist()
+        else:
+            assert len(markers) == len(idx_lst)
+        if not isinstance(cmap_str, list):
+            cmap_str = np.full(len(idx_lst), cmap_str).tolist()
+        else:
+            assert len(cmap_str) == len(idx_lst)
+        if is_discrete:
+            for i in range(len(idx_lst)):
+                ax.plot(
+                    lon[idx_lst[i]],
+                    lat[idx_lst[i]],
+                    marker=markers[i],
+                    ms=marker_size[i],
+                    label=category_names[i],
+                    c=colors[i],
+                    linestyle="",
+                )
+                ax.legend(prop=dict(size=legend_font_size))
+        else:
+            scatter = []
+            for i in range(len(idx_lst)):
+                scat = ax.scatter(
+                    lon[idx_lst[i]],
+                    lat[idx_lst[i]],
+                    c=data[idx_lst[i]],
+                    marker=markers[i],
+                    s=marker_size[i],
+                    cmap=cmap_str[i],
+                    vmin=vmin,
+                    vmax=vmax,
+                )
+                scatter.append(scat)
+            if need_colorbar:
+                if colorbar_size is not None:
+                    cbar_ax = fig.add_axes(colorbar_size)
+                    cbar = fig.colorbar(scat, cax=cbar_ax, orientation="vertical")
+                else:
+                    cbar = fig.colorbar(scat, ax=ax, pad=0.01)
+                if colorbar_font_size is not None:
+                    cbar.ax.tick_params(labelsize=colorbar_font_size)
+            if category_names is not None:
+                ax.legend(
+                    scatter, category_names, prop=dict(size=legend_font_size), ncol=2
+                )
+    elif is_discrete:
+        scatter = ax.scatter(lon, lat, c=data, s=marker_size)
+        # produce a legend with the unique colors from the scatter
+        legend1 = ax.legend(
+            *scatter.legend_elements(), loc="lower left", title="Classes"
+        )
+        ax.add_artist(legend1)
+    else:
+        scat = plt.scatter(
+            lon, lat, c=data, s=marker_size, cmap=cmap_str, vmin=vmin, vmax=vmax
+        )
+        if need_colorbar:
+            if colorbar_size is not None:
+                cbar_ax = fig.add_axes(colorbar_size)
+                cbar = fig.colorbar(scat, cax=cbar_ax, orientation="vertical")
+            else:
+                cbar = fig.colorbar(scat, ax=ax, pad=0.01)
+            if colorbar_font_size is not None:
+                cbar.ax.tick_params(labelsize=colorbar_font_size)
+    return ax
 
 
 def plot_ts_map(dataMap, dataTs, lat, lon, t, sites_id, pertile_range=None):
     # show the map in a pop-up window
     matplotlib.use("TkAgg")
-    assert type(dataMap) == list
-    assert type(dataTs) == list
+    assert isinstance(dataMap, list)
+    assert isinstance(dataTs, list)
     # setup axes
     fig = plt.figure(figsize=(8, 8), dpi=100)
     gs = gridspec.GridSpec(2, 1)
@@ -1127,7 +1321,7 @@ def plot_rainfall_runoff(
 ):
     fig, ax = plt.subplots(figsize=fig_size)
     if dash_lines is not None:
-        assert type(dash_lines) == list
+        assert isinstance(dash_lines, list)
     else:
         dash_lines = np.full(len(qs), False).tolist()
     for k in range(len(qs)):
@@ -1159,7 +1353,7 @@ def plot_rainfall_runoff(
         ax.set_ylabel(ylabel, fontsize=18)
     if xlabel is not None:
         ax.set_xlabel(xlabel, fontsize=18)
-    ax2.set_ylabel("降水（mm/day）", fontsize=8, loc='top')
+    ax2.set_ylabel("prcp(mm/day)", fontsize=8, loc="top")
     # ax2.set_ylabel("precipitation (mm/day)", fontsize=12, loc='top')
     # https://github.com/matplotlib/matplotlib/issues/12318
     ax.tick_params(axis="x", labelsize=16)
