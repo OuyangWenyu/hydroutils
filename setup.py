@@ -2,7 +2,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2024-02-14 12:30:09
+LastEditTime: 2024-02-14 12:37:03
 LastEditors: Wenyu Ouyang
 Description: The setup script.
 FilePath: \hydroutils\setup.py
@@ -39,11 +39,10 @@ test_requirements = [
 
 class PostInstallCommand(install):
     def run(self):
-        import appdirs
-
         install.run(self)
         # Define cache and config paths
         setting_dir = pathlib.Path.home()
+        import appdirs
         cache_dir = appdirs.user_cache_dir(".hydro")
         if not cache_dir.is_dir():
             cache_dir.mkdir(parents=True)
