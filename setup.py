@@ -2,7 +2,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2024-02-14 14:50:39
+LastEditTime: 2024-02-19 19:59:18
 LastEditors: Wenyu Ouyang
 Description: The setup script.
 FilePath: \hydroutils\setup.py
@@ -99,7 +99,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/OuyangWenyu/hydroutils",
-    version="0.0.7",
+    version='0.0.7',
     zip_safe=False,
     cmdclass={
         "install": PostInstallCommand,
