@@ -7,6 +7,6 @@ HydroErr
 async-retriever
 tqdm
 rich
-boto3~=1.28.64
+boto3~=1.34.34
 minio
-s3fs~=2023.10
+s3fs~=2024.2
