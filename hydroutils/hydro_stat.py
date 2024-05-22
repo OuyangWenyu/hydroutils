@@ -277,16 +277,9 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
         Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
     """
     if len(target.shape) == 3:
-        dict_list = []
-        '''
         assert type(fill_nan) in [list, tuple, np.ndarray] 
         if type(fill_nan) is not list or len(fill_nan) != target.shape[-1]:
             raise RuntimeError("Please give more fill_nan choices")
-        '''
-        for k in range(target.shape[0]):
-            k_dict = stat_error(target[k, :, :], pred[k, :, :], fill_nan=fill_nan)
-            dict_list.append(k_dict)
-        return dict_list
     if len(target.shape) == 2 and (type(fill_nan) is list or type(fill_nan) is tuple):
         fill_nan = fill_nan[0]
     assert type(fill_nan) is str
