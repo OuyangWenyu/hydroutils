@@ -7,9 +7,13 @@ Description:
 FilePath: \hydroutils\hydroutils\hydro_time.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
+
 import datetime
 from typing import Union
 import numpy as np
+import pytz
+import tzfpy
+import geopandas as gpd
 
 
 def t2str(t_: Union[str, datetime.datetime]):
@@ -127,3 +131,70 @@ def t_range_to_julian(t_range):
     t_array = t_range_days(t_range)
     t_array_str = np.datetime_as_string(t_array)
     return [date_to_julian(a_time[:10]) for a_time in t_array_str]
+
+
+def calculate_utc_offset(lat, lng, date=None):
+    """
+    Calculate the UTC offset for a given latitude and longitude using tzfpy.
+
+    Parameters
+    ----------
+    lat : float
+        Latitude.
+    lng : float
+        Longitude.
+    date : datetime, optional
+        The date to consider for the UTC offset. If not provided, uses the current date.
+
+    Returns
+    -------
+    int
+        UTC offset in hours.
+    """
+    if date is None:
+        date = datetime.datetime.utcnow()
+
+    # Get the timezone string using tzfpy
+    timezone_str = tzfpy.get_tz(lng, lat)
+    if timezone_str:
+        # Get the timezone object using pytz
+        tz = pytz.timezone(timezone_str)
+        # Get the UTC offset for the specified date
+        offset = tz.utcoffset(date)
+        if offset is not None:
+            return int(offset.total_seconds() / 3600)
+    return None
+
+
+def calculate_basin_offsets(shp_file):
+    """
+    Calculate the UTC offset for each basin based on the outlet shapefile.
+
+    Parameters:
+        shp_file (str): The path to the basin outlet shapefile.
+
+    Returns:
+        dict: A dictionary where the keys are the BASIN_ID and the values are the corresponding UTC offsets.
+    """
+    # read shapefile
+    gdf = gpd.read_file(shp_file)
+
+    # create an empty dictionary
+    basin_offset_dict = {}
+
+    for index, row in gdf.iterrows():
+        outlet = row["geometry"]
+        offset = calculate_utc_offset(outlet.y, outlet.x)
+        basin_id = row.get(
+            "BASIN_ID", index
+        )  # Use the index as the default value if "BASIN_ID" is not found
+        basin_offset_dict[basin_id] = offset
+
+    return basin_offset_dict
+
+
+if __name__ == "main":
+    offset_dict = calculate_basin_offsets(
+        "/ftproot/basins-interim/shapes/basinoutlets.shp"
+    )
+    print(offset_dict)
