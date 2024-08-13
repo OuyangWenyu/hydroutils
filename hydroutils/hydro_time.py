@@ -8,12 +8,16 @@ FilePath: \hydroutils\hydroutils\hydro_time.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
 
+import contextlib
 import datetime
+import tempfile
 from typing import Union
 import numpy as np
 import pytz
 import tzfpy
 import geopandas as gpd
+
+from hydroutils.hydro_configs import FS
 
 
 def t2str(t_: Union[str, datetime.datetime]):
@@ -154,9 +158,7 @@ def calculate_utc_offset(lat, lng, date=None):
     if date is None:
         date = datetime.datetime.utcnow()
 
-    # Get the timezone string using tzfpy
-    timezone_str = tzfpy.get_tz(lng, lat)
-    if timezone_str:
+    if timezone_str := tzfpy.get_tz(lng, lat):
         # Get the timezone object using pytz
         tz = pytz.timezone(timezone_str)
         # Get the UTC offset for the specified date
@@ -166,7 +168,7 @@ def calculate_utc_offset(lat, lng, date=None):
     return None
 
 
-def calculate_basin_offsets(shp_file):
+def calculate_basin_offsets(shp_file_path):
     """
     Calculate the UTC offset for each basin based on the outlet shapefile.
 
@@ -177,7 +179,26 @@ def calculate_basin_offsets(shp_file):
         dict: A dictionary where the keys are the BASIN_ID and the values are the corresponding UTC offsets.
     """
     # read shapefile
-    gdf = gpd.read_file(shp_file)
+    if "s3://" in shp_file_path:
+        # related list
+        extensions = [".shp", ".shx", ".dbf", ".prj"]
+
+        # create a temporary directory
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # download all related files to the temporary directory
+            base_name = shp_file_path.rsplit(".", 1)[0]
+            extensions = [".shp", ".shx", ".dbf", ".prj"]
+
+            for ext in extensions:
+                remote_file = f"{base_name}{ext}"
+                local_file = f"{tmpdir}/shp_file{ext}"
+                with contextlib.suppress(FileNotFoundError):
+                    FS.get(remote_file, local_file)
+            gdf = gpd.read_file(f"{tmpdir}/shp_file.shp")
+
+    else:
+        # If the file is not on S3 (MinIO), read it directly
+        gdf = gpd.read_file(shp_file_path)
 
     # create an empty dictionary
     basin_offset_dict = {}
@@ -191,10 +212,3 @@ def calculate_basin_offsets(shp_file):
         basin_offset_dict[basin_id] = offset
 
     return basin_offset_dict
-
-
-if __name__ == "main":
-    offset_dict = calculate_basin_offsets(
-        "/ftproot/basins-interim/shapes/basinoutlets.shp"
-    )
-    print(offset_dict)
