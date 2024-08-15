@@ -6,6 +6,8 @@ dependencies:
   - python=3.10
   - numpy
   - pandas
+  - tzfpy
+  # for plotting
   - matplotlib
   - seaborn
   # for gis plotting
@@ -31,8 +33,5 @@ dependencies:
   - grip
   - pytest
   - pytest-runner
-  - tzfpy
-  - geopandas
-
   # for pypi package
   - pip
