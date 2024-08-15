@@ -16,7 +16,13 @@
 
 ## Features
 
--   TODO
+This is a very basic package that contains some commonly used functions in hydrological modeling. The functions are organized into several modules, including:
+
+- hydro_arithmetic: Arithmetic operations for hydrological variables
+- hydro_file: File operations for hydrological variables
+- hydro_plot: Plotting functions for hydrological variables
+- hydro_stat: Statistical functions for hydrological variables
+- hydro_time: Time series operations for hydrological variables
 
 ## Credits
 
