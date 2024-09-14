@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 11:03:04
-LastEditTime: 2024-08-15 11:21:53
+LastEditTime: 2024-09-14 13:57:36
 LastEditors: Wenyu Ouyang
 Description: some functions to deal with time
 FilePath: \hydroutils\hydroutils\hydro_time.py
@@ -11,9 +11,9 @@ Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 import datetime
 from typing import Union
 import numpy as np
+import pandas as pd
 import pytz
 import tzfpy
-
 
 
 def t2str(t_: Union[str, datetime.datetime]):
@@ -162,3 +162,44 @@ def calculate_utc_offset(lat, lng, date=None):
         if offset is not None:
             return int(offset.total_seconds() / 3600)
     return None
+
+
+def generate_start0101_time_range(start_time, end_time, freq="8D"):
+    """Generate a time range with a flexible start date and each year starting from 01-01.
+
+    Parameters
+    ----------
+    start_time : str or pd.Timestamp
+        The start time for the range (could be any date, string or Timestamp).
+    end_time : str or pd.Timestamp
+        The end time for the range (could be any date, string or Timestamp).
+    freq : str, optional
+        Time frequency for intervals, by default '8D'. Could be '7D', '10D', etc.
+
+    Returns
+    -------
+    pd.DatetimeIndex
+        A time range index with custom intervals and annual reset at 01-01.
+    """
+    all_dates = []
+
+    # Ensure the start and end times are of type pd.Timestamp
+    current_time = pd.Timestamp(start_time)
+    end_time = pd.Timestamp(end_time)
+
+    # Parse the frequency interval correctly
+    interval_days = pd.Timedelta(freq)  # Ensure it's a Timedelta
+
+    while current_time <= end_time:
+        all_dates.append(current_time)
+
+        # Calculate next date with the specified interval
+        next_time = current_time + interval_days
+
+        # If next_time crosses into a new year, reset to 01-01 of the new year
+        if next_time.year > current_time.year:
+            next_time = pd.Timestamp(f"{next_time.year}-01-01")
+
+        current_time = next_time
+
+    return pd.to_datetime(all_dates)
