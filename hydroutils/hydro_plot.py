@@ -1,12 +1,13 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:59:30
-LastEditTime: 2023-11-29 14:42:07
+LastEditTime: 2024-09-28 09:50:42
 LastEditors: Wenyu Ouyang
 Description: Some common plots for hydrology
 FilePath: \hydroutils\hydroutils\hydro_plot.py
 Copyright (c) 2021-2022 Wenyu Ouyang. All rights reserved.
 """
+
 from typing import Union
 import numpy as np
 import pandas as pd
@@ -1318,7 +1319,37 @@ def plot_rainfall_runoff(
     xlabel=None,
     ylabel=None,
     linewidth=1,
+    prcp_interval=20,
 ):
+    """Plot rainfall and runoff in one figure
+
+    Parameters
+    ----------
+    t : a np.array or a list of some np.array and the length of the list is same as the length of qs
+        time series, better to be a list with the same length of qs
+    p : np.array
+        precipitation, a time series
+    qs : a np.array or a list of some np.array
+        streamflow, a list with multiple time series
+    fig_size : tuple, optional
+        figure size, by default (8, 6)
+    c_lst : str, optional
+        colors, by default "rbkgcmy"
+    leg_lst : list, optional
+        legends, by default None
+    dash_lines : list, optional
+        if a line is dash line, by default None
+    title : str, optional
+        the title of the figure, by default None
+    xlabel : str, optional
+        label of x axis, by default None
+    ylabel : str, optional
+        label of y axis, by default None
+    linewidth : int, optional
+        the width of lines, by default 1
+    prcp_interval : int, optional
+        the interval of precipitation, by default 20
+    """
     fig, ax = plt.subplots(figsize=fig_size)
     if dash_lines is not None:
         assert isinstance(dash_lines, list)
@@ -1342,7 +1373,7 @@ def plot_rainfall_runoff(
     # Now need to fix the axis labels
     max_pre = max(p)
     ax2.set_ylim(-max_pre * 5, 0)
-    y2_ticks = np.arange(0, max_pre, 20)
+    y2_ticks = np.arange(0, max_pre, prcp_interval)
     y2_ticklabels = [str(i) for i in y2_ticks]
     ax2.set_yticks(-1 * y2_ticks)
     ax2.set_yticklabels(y2_ticklabels, fontsize=16)
@@ -1360,3 +1391,4 @@ def plot_rainfall_runoff(
     ax.tick_params(axis="y", labelsize=16)
     ax.legend(bbox_to_anchor=(0.01, 0.9), loc="upper left", fontsize=16)
     ax.grid()
+    return fig, ax
