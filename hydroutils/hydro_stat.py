@@ -1,7 +1,7 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2023-07-28 09:04:03
+LastEditTime: 2025-01-06 19:47:33
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
 FilePath: \hydroutils\hydroutils\hydro_stat.py
@@ -203,7 +203,7 @@ def KGE(xs, xo):
 
 
 def stat_error_i(targ_i, pred_i):
-    """statistics for one"""
+    """statistics for one dimensional array"""
     ind = np.where(np.logical_and(~np.isnan(pred_i), ~np.isnan(targ_i)))[0]
     # Theoretically at least two points for correlation
     if ind.shape[0] > 1:
@@ -254,16 +254,16 @@ def stat_error_i(targ_i, pred_i):
         )
 
 
-def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
+def stat_error(target: np.ndarray, pred: np.ndarray, fill_nan: str = "no") -> dict:
     """
     Statistics indicators include: Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
 
     Parameters
     ----------
     target
-        observations, typically 2-dim, when it is 3-dim, set a loop for final dim
+        observations, 2-dim array [basin, sequence]
     pred
-        predictions
+        predictions, same dim with observations
     fill_nan
         "no" means ignoring the NaN value, and it is the default setting;
         "sum" means calculate the sum of the following values in the NaN locations.
@@ -277,15 +277,16 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
         Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
     """
     if len(target.shape) == 3:
-        assert type(fill_nan) in [list, tuple, np.ndarray] 
-        if type(fill_nan) is not list or len(fill_nan) != target.shape[-1]:
-            raise RuntimeError("Please give more fill_nan choices")
-    if len(target.shape) == 2 and (type(fill_nan) is list or type(fill_nan) is tuple):
-        fill_nan = fill_nan[0]
-    assert type(fill_nan) is str
+        raise ValueError(
+            "The input data should be 2-dim, not 3-dim. If you want to calculate metrics for 3-d arrays, please use stat_errors function."
+        )
+    if type(fill_nan) is not str:
+        raise ValueError("fill_nan should be a string.")
+    if target.shape != pred.shape:
+        raise ValueError("The shape of target and pred should be the same.")
     if fill_nan != "no":
         each_non_nan_idx = []
-        all_non_nan_idx = []
+        all_non_nan_idx: list[int] = []
         for i in range(target.shape[0]):
             tmp = target[i]
             non_nan_idx_tmp = [j for j in range(tmp.size) if not np.isnan(tmp[j])]
@@ -348,7 +349,6 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
             out_dict["FHV"].append(dict_i["FHV"])
             out_dict["FLV"].append(dict_i["FLV"])
         return out_dict
-    # TODO: refactor Dapeng's code
     ngrid, nt = pred.shape
     # Bias
     Bias = np.nanmean(pred - target, axis=1)
@@ -421,6 +421,43 @@ def stat_error(target: np.array, pred: np.array, fill_nan: str = "no") -> dict:
     # "30% low flow interval, the percent bias can be infinite\n"
     # "The number of these cases is " + str(num_lowtarget_zero)
     return outDict
+
+
+def stat_errors(target: np.ndarray, pred: np.ndarray, fill_nan: list = None) -> list:
+    """Calculate statistics for 3-dim arrays
+
+    Parameters
+    ----------
+    target : np.ndarray
+        the observed data
+    pred : np.ndarray
+        the predicted data
+    fill_nan : list, optional
+        a list of strings, each string is "no", "sum" or "mean", by default None
+
+    Returns
+    -------
+    list
+        A list of dictionaries, each dictionary contains Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
+    """
+    if fill_nan is None:
+        fill_nan = ["no"]
+    if len(target.shape) != 3:
+        raise ValueError(
+            "The input data should be 3-dim, not 2-dim. If you want to calculate "
+            "metrics for 2-d arrays, please use stat_error function."
+        )
+    if target.shape != pred.shape:
+        raise ValueError("The shape of target and pred should be the same.")
+    if type(fill_nan) is not list or len(fill_nan) != target.shape[-1]:
+        raise ValueError(
+            "Please give same length of fill_nan as the number of variables."
+        )
+    dict_list = []
+    for k in range(target.shape[-1]):
+        k_dict = stat_error(target[:, :, k], pred[:, :, k], fill_nan=fill_nan[k])
+        dict_list.append(k_dict)
+    return dict_list
 
 
 def cal_4_stat_inds(b):
