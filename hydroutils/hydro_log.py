@@ -1,22 +1,15 @@
 """
 Author: Wenyu Ouyang
 Date: 2023-10-25 20:07:14
-LastEditTime: 2023-10-27 14:53:05
+LastEditTime: 2025-01-14 08:47:41
 LastEditors: Wenyu Ouyang
 Description: Use rich to log: https://rich.readthedocs.io/en/latest/
-FilePath: /hydroutils/hydroutils/hydro_logger.py
+FilePath: \hydroutils\hydroutils\hydro_log.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
-from rich.logging import RichHandler
-import logging
+
 from rich.console import Console
 from rich.text import Text
-
-logging.basicConfig(
-    level="DEBUG", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
-)
-
-hydro_logger = logging.getLogger("rich")
 
 
 class HydroWarning:
@@ -41,6 +34,3 @@ class HydroWarning:
         if message is None:
             message = Text(f"Operation Success: {operation_detail}", style="bold green")
         self.console.print(message)
-
-
-hydro_warning = HydroWarning()

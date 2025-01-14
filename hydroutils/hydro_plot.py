@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:59:30
-LastEditTime: 2024-09-28 09:50:42
+LastEditTime: 2025-01-14 09:06:45
 LastEditors: Wenyu Ouyang
 Description: Some common plots for hydrology
 FilePath: \hydroutils\hydroutils\hydro_plot.py
@@ -1318,6 +1318,7 @@ def plot_rainfall_runoff(
     title=None,
     xlabel=None,
     ylabel=None,
+    prcp_ylabel="prcp(mm/day)",
     linewidth=1,
     prcp_interval=20,
 ):
@@ -1384,7 +1385,7 @@ def plot_rainfall_runoff(
         ax.set_ylabel(ylabel, fontsize=18)
     if xlabel is not None:
         ax.set_xlabel(xlabel, fontsize=18)
-    ax2.set_ylabel("prcp(mm/day)", fontsize=8, loc="top")
+    ax2.set_ylabel(prcp_ylabel, fontsize=8, loc="top")
     # ax2.set_ylabel("precipitation (mm/day)", fontsize=12, loc='top')
     # https://github.com/matplotlib/matplotlib/issues/12318
     ax.tick_params(axis="x", labelsize=16)
@@ -1392,3 +1393,50 @@ def plot_rainfall_runoff(
     ax.legend(bbox_to_anchor=(0.01, 0.9), loc="upper left", fontsize=16)
     ax.grid()
     return fig, ax
+
+
+def plot_rainfall_runoff_xu(
+    t,
+    p,
+    qs,
+    fig_size=(10, 6),
+    title="prcp-streamflow",
+    leg_lst=None,
+    ylabel="streamflow(m^3/s)",
+    prcp_ylabel="prcp(mm/day)",
+):
+    obs, pred = qs
+
+    fig, ax1 = plt.subplots(figsize=fig_size)
+
+    ax1.bar(t, p, width=0.1, color="blue", alpha=0.6, label="Precipitation")
+    ax1.set_ylabel(prcp_ylabel, color="blue")
+    ax1.tick_params(axis="y", labelcolor="blue")
+
+    ax1.set_ylim(0, p.max() * 5)
+    ax1.invert_yaxis()
+
+    ax2 = ax1.twinx()
+
+    # transform the unit of obs and pred
+    ax2.plot(
+        t,
+        obs,
+        color="green",
+        linestyle="-",
+        label="observed value",
+    )
+    ax2.plot(
+        t,
+        pred,
+        color="red",
+        linestyle="--",
+        label="predicted value",
+    )
+
+    ax2.set_ylabel(ylabel, color="red")
+    ax2.tick_params(axis="y", labelcolor="red")
+
+    plt.title(title)
+
+    plt.legend(loc="upper left")
