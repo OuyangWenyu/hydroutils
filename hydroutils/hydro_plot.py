@@ -1370,8 +1370,8 @@ def plot_rainfall_runoff(
     # Create second axes, in order to get the bars from the top you can multiply by -1
     ax2 = ax.twinx()
     # ax2.bar(tt, -p, color="b")
-    # ax2.fill_between(tt, 0, -p, step="mid", color="b", alpha=0.5)
-    ax2.plot(tt, -p, color="b", alpha=0.7, linewidth=1.5)
+    ax2.fill_between(tt, 0, -p, step="mid", color="b", alpha=0.5)
+    # ax2.plot(tt, -p, color="b", alpha=0.7, linewidth=1.5)
 
     # Now need to fix the axis labels
     # max_pre = max(p)
