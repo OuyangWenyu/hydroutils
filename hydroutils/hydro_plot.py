@@ -1369,10 +1369,13 @@ def plot_rainfall_runoff(
     ax.set_ylim(ax.get_ylim()[0], ax.get_ylim()[1] * 1.2)
     # Create second axes, in order to get the bars from the top you can multiply by -1
     ax2 = ax.twinx()
-    ax2.bar(tt, -p, color="b")
+    # ax2.bar(tt, -p, color="b")
+    # ax2.fill_between(tt, 0, -p, step="mid", color="b", alpha=0.5)
+    ax2.plot(tt, -p, color="b", alpha=0.7, linewidth=1.5)
 
     # Now need to fix the axis labels
-    max_pre = max(p)
+    # max_pre = max(p)
+    max_pre = p.max().item()
     ax2.set_ylim(-max_pre * 5, 0)
     y2_ticks = np.arange(0, max_pre, prcp_interval)
     y2_ticklabels = [str(i) for i in y2_ticks]
@@ -1390,7 +1393,7 @@ def plot_rainfall_runoff(
     # https://github.com/matplotlib/matplotlib/issues/12318
     ax.tick_params(axis="x", labelsize=16)
     ax.tick_params(axis="y", labelsize=16)
-    ax.legend(bbox_to_anchor=(0.01, 0.9), loc="upper left", fontsize=16)
+    ax.legend(bbox_to_anchor=(0.01, 0.85), loc="upper left", fontsize=16)
     ax.grid()
     return fig, ax
 
