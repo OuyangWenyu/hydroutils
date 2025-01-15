@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:59:30
-LastEditTime: 2025-01-14 09:06:45
+LastEditTime: 2025-01-15 16:55:43
 LastEditors: Wenyu Ouyang
 Description: Some common plots for hydrology
 FilePath: \hydroutils\hydroutils\hydro_plot.py
@@ -1440,3 +1440,57 @@ def plot_rainfall_runoff_xu(
     plt.title(title)
 
     plt.legend(loc="upper left")
+
+
+def plot_rainfall_runoff_chai(
+    t,
+    ps,
+    qs,
+    c_lst="rbkgcmy",
+    title="Observation of Precipitation and Streamflow",
+    alpha_lst=None,
+    p_labels=None,
+    q_labels=None,
+):
+    if alpha_lst is None:
+        alpha_lst = [0.5, 0.5]
+    if p_labels is None:
+        p_labels = ["era5land", "gauge"]
+    if q_labels is None:
+        q_labels = ["observation", "simulation"]
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(20, 8))
+    fig.suptitle(title, fontsize=16)
+    for i, p in enumerate(ps):
+        ax1.bar(
+            t,
+            p,
+            color=c_lst[i],
+            label=p_labels[i],
+            width=0.9,
+            alpha=alpha_lst[i],
+        )
+    ax1.set_xlabel("Time")
+    ax1.set_ylabel("Precipitation (mm/d)", color="b")
+    ax1.invert_yaxis()
+    ax1.tick_params(axis="y", labelcolor="b")
+    ax1.legend()
+
+    for j, q in enumerate(qs):
+        ax2.plot(t, q, color=c_lst[j], label=q_labels[j])
+    ax2.set_xlabel("Time")
+    ax2.set_ylabel("Streamflow (m$^3$/s)", color="r")
+    ax2.tick_params(axis="y", labelcolor="r")
+    ax2.set_xlim(ax1.get_xlim())
+    ax2.text(
+        0.05,
+        0.95,
+        "Streamflow",
+        transform=ax2.transAxes,
+        fontsize=12,
+        verticalalignment="top",
+        bbox=dict(facecolor="white", alpha=0.5),
+    )
+    ax2.legend()
+
+    fig.tight_layout()
+    return fig, ax2

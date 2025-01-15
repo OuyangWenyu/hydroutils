@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
 from hydroutils.hydro_time import generate_start0101_time_range
+from hydroutils.hydro_time import assign_time_start_end
 
 
 def test_generate_start0101_time_range_basic():
@@ -98,3 +99,37 @@ def test_generate_start0101_time_range_single_day():
 def test_generate_start0101_time_range_invalid_dates():
     with pytest.raises(ValueError):
         generate_start0101_time_range("invalid-date", "2024-01-10", freq="8D")
+
+
+def test_assign_time_start_end_intersection():
+    time_ranges = [["2023-01-01", "2023-12-31"], ["2023-06-01", "2023-12-01"]]
+    expected = ("2023-06-01", "2023-12-01")
+    result = assign_time_start_end(time_ranges, assign_way="intersection")
+    assert result == expected
+
+
+def test_assign_time_start_end_union():
+    time_ranges = [["2023-01-01", "2023-12-31"], ["2023-06-01", "2023-12-01"]]
+    expected = ("2023-01-01", "2023-12-31")
+    result = assign_time_start_end(time_ranges, assign_way="union")
+    assert result == expected
+
+
+def test_assign_time_start_end_single_range():
+    time_ranges = [["2023-01-01", "2023-12-31"]]
+    expected = ("2023-01-01", "2023-12-31")
+    result = assign_time_start_end(time_ranges, assign_way="intersection")
+    assert result == expected
+
+
+def test_assign_time_start_end_no_overlap():
+    time_ranges = [["2023-01-01", "2023-06-01"], ["2023-07-01", "2023-12-01"]]
+    expected = ("2023-07-01", "2023-06-01")
+    result = assign_time_start_end(time_ranges, assign_way="intersection")
+    assert result == expected
+
+
+def test_assign_time_start_end_invalid_assign_way():
+    time_ranges = [["2023-01-01", "2023-12-31"], ["2023-06-01", "2023-12-01"]]
+    with pytest.raises(NotImplementedError):
+        assign_time_start_end(time_ranges, assign_way="invalid")

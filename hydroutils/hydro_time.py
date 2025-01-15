@@ -203,3 +203,16 @@ def generate_start0101_time_range(start_time, end_time, freq="8D"):
         current_time = next_time
 
     return pd.to_datetime(all_dates)
+
+
+def assign_time_start_end(time_ranges, assign_way="intersection"):
+    # chose all time start from time_ranges:[[start1, end1], [start2, end2], ...]
+    if assign_way == "intersection":
+        time_start = max(t[0] for t in time_ranges)
+        time_end = min(t[1] for t in time_ranges)
+    elif assign_way == "union":
+        time_start = min(t[0] for t in time_ranges)
+        time_end = max(t[1] for t in time_ranges)
+    else:
+        raise NotImplementedError("We don't support this assign_way yet")
+    return time_start, time_end
