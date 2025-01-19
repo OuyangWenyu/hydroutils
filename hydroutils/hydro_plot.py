@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:59:30
-LastEditTime: 2025-01-15 16:55:43
+LastEditTime: 2025-01-17 17:30:55
 LastEditors: Wenyu Ouyang
 Description: Some common plots for hydrology
 FilePath: \hydroutils\hydroutils\hydro_plot.py
@@ -198,7 +198,7 @@ def plot_boxes_matplotlib(
         if type(temp) is list:
             for kk in range(len(temp)):
                 tt = temp[kk]
-                if tt is not None and tt != []:
+                if tt is not None and len(tt) > 0:
                     tt = tt[~np.isnan(tt)]
                     temp[kk] = tt
                 else:
@@ -1479,7 +1479,7 @@ def plot_rainfall_runoff_chai(
     ax1.legend()
 
     for j, q in enumerate(qs):
-        ax2.plot(t, q, color=c_lst[j], label=q_labels[j])
+        ax2.plot(t, q, color=c_lst[j], label=q_labels[j], alpha=alpha_lst[j])
     ax2.set_xlabel("Time")
     ax2.set_ylabel("Streamflow (m$^3$/s)", color="r")
     ax2.tick_params(axis="y", labelcolor="r")
