@@ -1,3 +1,13 @@
+"""
+Author: Wenyu Ouyang
+Date: 2024-08-15 10:08:59
+LastEditTime: 2025-02-01 21:59:31
+LastEditors: Wenyu Ouyang
+Description: some methods for file operations
+FilePath: \hydroutils\hydroutils\hydro_file.py
+Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
+"""
+
 from collections import OrderedDict
 import fnmatch
 import io
@@ -181,8 +191,22 @@ def unserialize_json(my_file):
 class NumpyArrayEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
-            return obj.tolist()
+            return self.convert_ndarray(obj)
+        elif isinstance(obj, (np.integer, np.floating)):
+            return obj.item()
         return json.JSONEncoder.default(self, obj)
+
+    def convert_ndarray(self, array):
+        if array.ndim == 0:
+            return array.item()
+        return [
+            (
+                self.convert_ndarray(element)
+                if isinstance(element, np.ndarray)
+                else element
+            )
+            for element in array
+        ]
 
 
 def serialize_json_np(my_dict, my_file):
