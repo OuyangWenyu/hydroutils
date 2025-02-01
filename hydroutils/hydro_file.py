@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2024-08-15 10:08:59
-LastEditTime: 2025-02-01 21:59:31
+LastEditTime: 2025-02-02 06:27:44
 LastEditors: Wenyu Ouyang
 Description: some methods for file operations
 FilePath: \hydroutils\hydroutils\hydro_file.py
@@ -170,9 +170,9 @@ def download_a_file_from_google_drive(drive, dir_id, download_dir):
             print("Downloading file finished")
 
 
-def serialize_json(my_dict, my_file):
-    with open(my_file, "w") as FP:
-        json.dump(my_dict, FP, indent=4)
+def serialize_json(my_dict, my_file, encoding="utf-8", ensure_ascii=True):
+    with open(my_file, "w", encoding=encoding) as FP:
+        json.dump(my_dict, FP, ensure_ascii=ensure_ascii, indent=4)
 
 
 def unserialize_json_ordered(my_file):
