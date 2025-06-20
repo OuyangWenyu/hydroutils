@@ -3,9 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - numpy
   - pandas
+  - xarray
+  - numba
   - tzfpy
   # for plotting
   - matplotlib
@@ -13,15 +15,15 @@ dependencies:
   # for gis plotting
   - cartopy
   - tqdm
-  - black
   - hydroerr
   - async-retriever
   - rich
   # for s3 access
-  - boto3=1.34.34
+  - boto3
   - minio
-  - s3fs=2024.2
+  - s3fs
   # for dev
+  - black
   - bump2version
   - wheel
   - watchdog
