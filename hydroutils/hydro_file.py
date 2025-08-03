@@ -4,7 +4,7 @@ Date: 2024-08-15 10:08:59
 LastEditTime: 2025-02-02 06:27:44
 LastEditors: Wenyu Ouyang
 Description: some methods for file operations
-FilePath: \hydroutils\hydroutils\hydro_file.py
+FilePath: \\hydroutils\\hydroutils\\hydro_file.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
 

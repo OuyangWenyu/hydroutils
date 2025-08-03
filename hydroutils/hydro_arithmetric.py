@@ -4,7 +4,7 @@ Date: 2023-07-29 14:07:03
 LastEditTime: 2023-07-29 14:08:22
 LastEditors: Wenyu Ouyang
 Description: some common arithmetric calculations
-FilePath: \hydroutils\hydroutils\hydro_arithmetric.py
+FilePath: \\hydroutils\\hydroutils\\hydro_arithmetric.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
 import numpy as np

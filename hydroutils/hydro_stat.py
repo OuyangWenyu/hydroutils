@@ -1,10 +1,10 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2025-01-06 19:47:33
+LastEditTime: 2025-08-03 09:33:13
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
-FilePath: \hydroutils\hydroutils\hydro_stat.py
+FilePath: \\hydroutils\\hydroutils\\hydro_stat.py
 Copyright (c) 2021-2022 MHPI group, Wenyu Ouyang. All rights reserved.
 """
 
@@ -200,6 +200,121 @@ def KGE(xs, xo):
     alpha = np.std(xs) / np.std(xo)
     beta = np.mean(xs) / np.mean(xo)
     return 1 - np.sqrt((r - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+
+
+# 定义指标函数映射字典，方便添加新指标
+HYDRO_METRICS = {
+    "nse": ("nse", "Nash-Sutcliffe Efficiency"),
+    "rmse": ("rmse", "Root Mean Square Error"),
+    "mae": ("me", "Mean Absolute Error"),
+    "bias": ("me", "Mean Error (Bias)"),
+    "pearson_r": ("pearson_r", "Pearson correlation coefficient"),
+    "r_squared": ("r_squared", "Coefficient of determination (R²)"),
+    "kge": ("kge_2009", "Kling-Gupta Efficiency"),
+    "mse": ("mse", "Mean Square Error"),
+    "ve": ("ve", "Volumetric Efficiency"),
+    "sa": ("sa", "Spectral Angle"),
+    "sc": ("sc", "Spectral Correlation"),
+    "sid": ("sid", "Spectral Information Divergence"),
+    "sga": ("sga", "Spectral Gradient Angle"),
+}
+
+
+def _create_metric_function(he_func_name, description):
+    """工厂函数：动态创建指标计算函数"""
+
+    def metric_func(observed, simulated, **kwargs):
+        """
+        {description}
+
+        Parameters
+        ----------
+        observed : array-like
+            Observed values
+        simulated : array-like
+            Simulated values
+        **kwargs : dict
+            Additional keyword arguments passed to the HydroErr function
+
+        Returns
+        -------
+        float
+            Calculated metric value
+        """
+        he_func = getattr(he, he_func_name)
+        return he_func(observed, simulated, **kwargs)
+
+    # 更新函数的文档字符串
+    metric_func.__doc__ = metric_func.__doc__.format(description=description)
+    metric_func.__name__ = he_func_name
+
+    return metric_func
+
+
+# 动态生成所有指标函数并添加到当前模块
+import sys
+
+current_module = sys.modules[__name__]
+
+for func_name, (he_func_name, description) in HYDRO_METRICS.items():
+    # 检查HydroErr中是否存在该函数
+    if hasattr(he, he_func_name):
+        # 创建包装函数
+        metric_func = _create_metric_function(he_func_name, description)
+        # 将函数添加到当前模块
+        setattr(current_module, func_name, metric_func)
+
+
+def pbias(observed, simulated):
+    """
+    Calculate Percent Bias (PBIAS)
+    
+    Parameters
+    ----------
+    observed : array-like
+        Observed values
+    simulated : array-like
+        Simulated values
+    
+    Returns
+    -------
+    float
+        Percent bias value
+    """
+    observed = np.asarray(observed)
+    simulated = np.asarray(simulated)
+    
+    # Remove NaN values
+    mask = ~(np.isnan(observed) | np.isnan(simulated))
+    observed = observed[mask]
+    simulated = simulated[mask]
+    
+    if len(observed) == 0:
+        return np.nan
+        
+    return np.sum(simulated - observed) / np.sum(observed) * 100
+
+
+def add_metric(func_name, he_func_name, description):
+    """
+    添加新的指标函数
+
+    Parameters
+    ----------
+    func_name : str
+        新函数的名称
+    he_func_name : str
+        HydroErr中对应函数的名称
+    description : str
+        函数描述
+    """
+    if hasattr(he, he_func_name):
+        metric_func = _create_metric_function(he_func_name, description)
+        setattr(current_module, func_name, metric_func)
+        HYDRO_METRICS[func_name] = (he_func_name, description)
+        print(f"已添加指标函数: {func_name}")
+    else:
+        print(f"警告: HydroErr中不存在函数 {he_func_name}")
 
 
 def stat_error_i(targ_i, pred_i):

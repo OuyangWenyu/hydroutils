@@ -4,7 +4,7 @@ Date: 2022-12-02 10:59:30
 LastEditTime: 2025-08-02 11:58:30
 LastEditors: Wenyu Ouyang
 Description: Some common plots for hydrology
-FilePath: \hydroutils\hydroutils\hydro_plot.py
+FilePath: \\hydroutils\\hydroutils\\hydro_plot.py
 Copyright (c) 2021-2022 Wenyu Ouyang. All rights reserved.
 """
 

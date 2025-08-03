@@ -4,7 +4,7 @@ Date: 2023-10-25 20:07:14
 LastEditTime: 2025-01-15 11:55:24
 LastEditors: Wenyu Ouyang
 Description: Use rich to log: https://rich.readthedocs.io/en/latest/
-FilePath: \hydroutils\hydroutils\hydro_log.py
+FilePath: \\hydroutils\\hydroutils\\hydro_log.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
 

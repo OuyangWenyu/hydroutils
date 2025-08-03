@@ -1,30 +1,163 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+# This workflow will upload a Python Package using modern tools when a release is created
+# Supports both manual dispatch and automatic release publishing
 
 name: pypi
 
 on:
     release:
-        types: [created]
+        types: [published]
+    workflow_dispatch:
+        inputs:
+            test_pypi:
+                description: 'Upload to Test PyPI instead of PyPI'
+                required: false
+                default: false
+                type: boolean
+
+permissions:
+    contents: read
+    id-token: write  # For trusted publishing
 
 jobs:
-    deploy:
+    build:
+        name: Build distribution
         runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v3
+              with:
+                  version: "latest"
+
+            - name: Set up Python
+              run: uv python install 3.11
+
+            - name: Install build dependencies
+              run: uv sync --extra release
+
+            - name: Build package
+              run: |
+                  uv run python -m build
+
+            - name: Check build artifacts
+              run: |
+                  uv run twine check dist/*
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: dist
+                  path: dist/
+
+    test-built-package:
+        name: Test built package
+        needs: build
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macOS-latest]
+                python-version: ["3.9", "3.10", "3.11", "3.12"]
 
         steps:
-            - uses: actions/checkout@v3
-            - name: Set up Python
-              uses: actions/setup-python@v4
+            - name: Download build artifacts
+              uses: actions/download-artifact@v3
               with:
-                  python-version: "3.10"
-            - name: Install dependencies
+                  name: dist
+                  path: dist/
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v3
+              with:
+                  version: "latest"
+
+            - name: Set up Python ${{ matrix.python-version }}
+              run: uv python install ${{ matrix.python-version }}
+
+            - name: Test wheel installation
               run: |
-                  python -m pip install --upgrade pip
-                  pip install setuptools wheel twine
-            - name: Build and publish
-              env:
-                  TWINE_USERNAME: ${{ secrets.PYPI_USERS }}
-                  TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-              run: |
-                  python setup.py sdist bdist_wheel
-                  twine upload dist/*
+                  uv pip install dist/*.whl --force-reinstall
+                  uv run python -c "import hydroutils; print(hydroutils.__version__)"
+
+    publish-testpypi:
+        name: Publish to Test PyPI
+        needs: [build, test-built-package]
+        runs-on: ubuntu-latest
+        if: github.event.inputs.test_pypi == 'true'
+        environment:
+            name: testpypi
+            url: https://test.pypi.org/p/hydroutils
+
+        steps:
+            - name: Download build artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  name: dist
+                  path: dist/
+
+            - name: Publish to Test PyPI
+              uses: pypa/gh-action-pypi-publish@release/v1
+              with:
+                  repository-url: https://test.pypi.org/legacy/
+
+    publish-pypi:
+        name: Publish to PyPI
+        needs: [build, test-built-package]
+        runs-on: ubuntu-latest
+        if: github.event_name == 'release' && github.event.action == 'published'
+        environment:
+            name: pypi
+            url: https://pypi.org/p/hydroutils
+
+        steps:
+            - name: Download build artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  name: dist
+                  path: dist/
+
+            - name: Publish to PyPI
+              uses: pypa/gh-action-pypi-publish@release/v1
+
+    create-github-release:
+        name: Update GitHub Release
+        needs: [publish-pypi]
+        runs-on: ubuntu-latest
+        if: github.event_name == 'release' && github.event.action == 'published'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Download build artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  name: dist
+                  path: dist/
+
+            - name: Update Release with artifacts
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: dist/*
+                  tag_name: ${{ github.ref_name }}
+                  body: |
+                      ## Changes
+                      
+                      See [CHANGELOG.md](https://github.com/OuyangWenyu/hydroutils/blob/main/CHANGELOG.md) for detailed changes.
+                      
+                      ## Installation
+                      
+                      ```bash
+                      pip install hydroutils==${{ github.ref_name }}
+                      ```
+                      
+                      or with uv:
+                      
+                      ```bash
+                      uv add hydroutils==${{ github.ref_name }}
+                      ```
