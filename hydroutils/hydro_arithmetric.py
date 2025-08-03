@@ -7,6 +7,7 @@ Description: some common arithmetric calculations
 FilePath: \\hydroutils\\hydroutils\\hydro_arithmetric.py
 Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 """
+
 import numpy as np
 
 

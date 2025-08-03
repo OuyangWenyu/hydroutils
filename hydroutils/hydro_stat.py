@@ -11,6 +11,7 @@ Copyright (c) 2021-2022 MHPI group, Wenyu Ouyang. All rights reserved.
 import copy
 import itertools
 import warnings
+from typing import Dict, List, Tuple, Union, Optional, Any, Callable
 import HydroErr as he
 import numpy as np
 import scipy.stats
@@ -20,7 +21,9 @@ import pandas as pd
 ALL_METRICS = ["Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV"]
 
 
-def fms(obs, sim, lower: float = 0.2, upper: float = 0.7) -> float:
+def fms(
+    obs: np.ndarray, sim: np.ndarray, lower: float = 0.2, upper: float = 0.7
+) -> float:
     r"""
     TODO: not fully tested
     Calculate the slope of the middle section of the flow duration curve [#]_
@@ -87,7 +90,11 @@ def fms(obs, sim, lower: float = 0.2, upper: float = 0.7) -> float:
 
 
 def mean_peak_timing(
-    obs, sim, window: int = None, resolution: str = "1D", datetime_coord: str = None
+    obs: np.ndarray,
+    sim: np.ndarray,
+    window: Optional[int] = None,
+    resolution: str = "1D",
+    datetime_coord: Optional[str] = None,
 ) -> float:
     """
     TODO: not finished
@@ -187,7 +194,7 @@ def mean_peak_timing(
     return np.mean(timing_errors) if timing_errors else np.nan
 
 
-def KGE(xs, xo):
+def KGE(xs: np.ndarray, xo: np.ndarray) -> float:
     """
     Kling Gupta Efficiency (Gupta et al., 2009, http://dx.doi.org/10.1016/j.jhydrol.2009.08.003)
     input:
@@ -206,7 +213,7 @@ def KGE(xs, xo):
 HYDRO_METRICS = {
     "nse": ("nse", "Nash-Sutcliffe Efficiency"),
     "rmse": ("rmse", "Root Mean Square Error"),
-    "mae": ("me", "Mean Absolute Error"),
+    "mae": ("mae", "Mean Absolute Error"),
     "bias": ("me", "Mean Error (Bias)"),
     "pearson_r": ("pearson_r", "Pearson correlation coefficient"),
     "r_squared": ("r_squared", "Coefficient of determination (R²)"),
@@ -220,10 +227,14 @@ HYDRO_METRICS = {
 }
 
 
-def _create_metric_function(he_func_name, description):
+def _create_metric_function(
+    he_func_name: str, description: str
+) -> Callable[[np.ndarray, np.ndarray], float]:
     """工厂函数：动态创建指标计算函数"""
 
-    def metric_func(observed, simulated, **kwargs):
+    def metric_func(
+        observed: np.ndarray, simulated: np.ndarray, **kwargs: Any
+    ) -> float:
         """
         {description}
 
@@ -245,7 +256,8 @@ def _create_metric_function(he_func_name, description):
         return he_func(observed, simulated, **kwargs)
 
     # 更新函数的文档字符串
-    metric_func.__doc__ = metric_func.__doc__.format(description=description)
+    if metric_func.__doc__ is not None:
+        metric_func.__doc__ = metric_func.__doc__.format(description=description)
     metric_func.__name__ = he_func_name
 
     return metric_func
@@ -265,17 +277,19 @@ for func_name, (he_func_name, description) in HYDRO_METRICS.items():
         setattr(current_module, func_name, metric_func)
 
 
-def pbias(observed, simulated):
+def pbias(
+    observed: Union[np.ndarray, List[float]], simulated: Union[np.ndarray, List[float]]
+) -> float:
     """
     Calculate Percent Bias (PBIAS)
-    
+
     Parameters
     ----------
     observed : array-like
         Observed values
     simulated : array-like
         Simulated values
-    
+
     Returns
     -------
     float
@@ -283,19 +297,19 @@ def pbias(observed, simulated):
     """
     observed = np.asarray(observed)
     simulated = np.asarray(simulated)
-    
+
     # Remove NaN values
     mask = ~(np.isnan(observed) | np.isnan(simulated))
     observed = observed[mask]
     simulated = simulated[mask]
-    
+
     if len(observed) == 0:
         return np.nan
-        
+
     return np.sum(simulated - observed) / np.sum(observed) * 100
 
 
-def add_metric(func_name, he_func_name, description):
+def add_metric(func_name: str, he_func_name: str, description: str) -> None:
     """
     添加新的指标函数
 
@@ -317,7 +331,7 @@ def add_metric(func_name, he_func_name, description):
         print(f"警告: HydroErr中不存在函数 {he_func_name}")
 
 
-def stat_error_i(targ_i, pred_i):
+def stat_error_i(targ_i: np.ndarray, pred_i: np.ndarray) -> Dict[str, float]:
     """statistics for one dimensional array"""
     ind = np.where(np.logical_and(~np.isnan(pred_i), ~np.isnan(targ_i)))[0]
     # Theoretically at least two points for correlation
@@ -369,7 +383,9 @@ def stat_error_i(targ_i, pred_i):
         )
 
 
-def stat_error(target: np.ndarray, pred: np.ndarray, fill_nan: str = "no") -> dict:
+def stat_error(
+    target: np.ndarray, pred: np.ndarray, fill_nan: str = "no"
+) -> Union[Dict[str, np.ndarray], Dict[str, List[float]]]:
     """
     Statistics indicators include: Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
 
@@ -413,7 +429,7 @@ def stat_error(target: np.ndarray, pred: np.ndarray, fill_nan: str = "no") -> di
         # but for ET, it is not very resonable to calculate the metric for each basin in this way, for example,
         # the non_nan_idx: [1, 9, 17, 33, 41], then there are 16 elements in 17 -> 33, so use all_non_nan_idx is better
         # hence we don't use each_non_nan_idx finally
-        out_dict = dict(
+        out_dict: Dict[str, List[float]] = dict(
             Bias=[],
             RMSE=[],
             ubRMSE=[],
@@ -497,9 +513,9 @@ def stat_error(target: np.ndarray, pred: np.ndarray, fill_nan: str = "no") -> di
                 # Theoretically at least two points for correlation
                 Corr[k] = scipy.stats.pearsonr(xx, yy)[0]
                 yymean = yy.mean()
-                SST = np.sum((yy - yymean) ** 2)
-                SSReg = np.sum((xx - yymean) ** 2)
-                SSRes = np.sum((yy - xx) ** 2)
+                SST: float = np.sum((yy - yymean) ** 2)
+                SSReg: float = np.sum((xx - yymean) ** 2)
+                SSRes: float = np.sum((yy - xx) ** 2)
                 R2[k] = 1 - SSRes / SST
                 NSE[k] = 1 - SSRes / SST
                 KGe[k] = KGE(xx, yy)
@@ -538,7 +554,9 @@ def stat_error(target: np.ndarray, pred: np.ndarray, fill_nan: str = "no") -> di
     return outDict
 
 
-def stat_errors(target: np.ndarray, pred: np.ndarray, fill_nan: list = None) -> list:
+def stat_errors(
+    target: np.ndarray, pred: np.ndarray, fill_nan: Optional[List[str]] = None
+) -> List[Dict[str, np.ndarray]]:
     """Calculate statistics for 3-dim arrays
 
     Parameters
@@ -575,7 +593,7 @@ def stat_errors(target: np.ndarray, pred: np.ndarray, fill_nan: list = None) -> 
     return dict_list
 
 
-def cal_4_stat_inds(b):
+def cal_4_stat_inds(b: np.ndarray) -> List[float]:
     """
     Calculate four statistics indices: percentile 10 and 90, mean value, standard deviation
 
@@ -589,16 +607,16 @@ def cal_4_stat_inds(b):
     list
         [p10, p90, mean, std]
     """
-    p10 = np.percentile(b, 10).astype(float)
-    p90 = np.percentile(b, 90).astype(float)
-    mean = np.mean(b).astype(float)
-    std = np.std(b).astype(float)
+    p10: float = np.percentile(b, 10).astype(float)
+    p90: float = np.percentile(b, 90).astype(float)
+    mean: float = np.mean(b).astype(float)
+    std: float = np.std(b).astype(float)
     if std < 0.001:
         std = 1
     return [p10, p90, mean, std]
 
 
-def cal_stat(x: np.array) -> list:
+def cal_stat(x: np.ndarray) -> List[float]:
     """
     Get statistic values of x (Exclude the NaN values)
 
@@ -619,7 +637,7 @@ def cal_stat(x: np.array) -> list:
     return cal_4_stat_inds(b)
 
 
-def cal_stat_gamma(x):
+def cal_stat_gamma(x: np.ndarray) -> List[float]:
     """
     Try to transform a time series data to normal distribution
 
@@ -710,7 +728,7 @@ def trans_norm(x, var_lst, stat_dict, *, to_norm):
     return out
 
 
-def ecdf(data):
+def ecdf(data: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Compute ECDF"""
     x = np.sort(data)
     n = x.size
@@ -718,7 +736,7 @@ def ecdf(data):
     return (x, y)
 
 
-def wilcoxon_t_test(xs, xo):
+def wilcoxon_t_test(xs: np.ndarray, xo: np.ndarray) -> Tuple[float, float]:
     """Wilcoxon t test"""
     diff = xs - xo  # same result when using xo-xs
     w, p = wilcoxon(diff)
