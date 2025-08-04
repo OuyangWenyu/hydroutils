@@ -1,7 +1,7 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2025-08-04 09:01:11
+LastEditTime: 2025-08-04 09:13:42
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
 FilePath: \hydroutils\hydroutils\hydro_stat.py
@@ -16,9 +16,48 @@ import HydroErr as he
 import numpy as np
 import scipy.stats
 from scipy.stats import wilcoxon
+from scipy import signal
 import pandas as pd
 
 ALL_METRICS = ["Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV"]
+
+
+def _validate_inputs(obs: np.ndarray, sim: np.ndarray) -> None:
+    """Validate input arrays for peak timing analysis."""
+    if not isinstance(obs, np.ndarray) or not isinstance(sim, np.ndarray):
+        raise TypeError("Both obs and sim must be numpy arrays")
+
+    if obs.shape != sim.shape:
+        raise ValueError("obs and sim must have the same shape")
+
+    if len(obs) < 3:
+        raise ValueError(
+            "Time series must have at least 3 data points for peak detection"
+        )
+
+
+def _mask_valid(obs: np.ndarray, sim: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """Remove NaN values from both time series."""
+    mask = ~(np.isnan(obs) | np.isnan(sim))
+    return obs[mask], sim[mask]
+
+
+def _get_frequency_factor(target_freq: str, current_freq: str) -> float:
+    """Get frequency conversion factor between two pandas frequency strings."""
+    # Simple conversion factors for common frequencies
+    freq_to_hours = {
+        "1H": 1,
+        "3H": 3,
+        "6H": 6,
+        "12H": 12,
+        "1D": 24,
+        "D": 24,
+    }
+
+    target_hours = freq_to_hours.get(target_freq, 24)
+    current_hours = freq_to_hours.get(current_freq, 24)
+
+    return target_hours / current_hours
 
 
 def fms(
@@ -141,7 +180,7 @@ def flood_peak_error(Q_obs, Q_sim):
         return np.nan
 
 
-def mean_peak_timing(
+def flood_peak_timing(
     obs: np.ndarray,
     sim: np.ndarray,
     window: Optional[int] = None,
@@ -149,37 +188,36 @@ def mean_peak_timing(
     datetime_coord: Optional[str] = None,
 ) -> float:
     """
-    TODO: not finished
-    Mean difference in peak flow timing.
+    Calculate mean difference in peak flow timing (simplified version for numpy arrays).
 
     Uses scipy.find_peaks to find peaks in the observed time series. Starting with all observed peaks, those with a
     prominence of less than the standard deviation of the observed time series are discarded. Next, the lowest peaks
     are subsequently discarded until all remaining peaks have a distance of at least 100 steps. Finally, the
     corresponding peaks in the simulated time series are searched in a window of size `window` on either side of the
     observed peaks and the absolute time differences between observed and simulated peaks is calculated.
-    The final metric is the mean absolute time difference across all peaks. For more details, see Appendix of [#]_
+    The final metric is the mean absolute time difference across all peaks (in time steps).
 
     Parameters
     ----------
-    obs : DataArray
+    obs : np.ndarray
         Observed time series.
-    sim : DataArray
+    sim : np.ndarray
         Simulated time series.
     window : int, optional
         Size of window to consider on each side of the observed peak for finding the simulated peak. That is, the total
-        window length to find the peak in the simulations is :math:`2 * \\text{window} + 1` centered at the observed
+        window length to find the peak in the simulations is 2 * window + 1 centered at the observed
         peak. The default depends on the temporal resolution, e.g. for a resolution of '1D', a window of 3 is used and
-        for a resolution of '1H' the the window size is 12.
+        for a resolution of '1H' the window size is 12.
     resolution : str, optional
         Temporal resolution of the time series in pandas format, e.g. '1D' for daily and '1H' for hourly.
+        Currently used only for determining default window size.
     datetime_coord : str, optional
-        Name of datetime coordinate. Tried to infer automatically if not specified.
-
+        Name of datetime coordinate. Currently unused in this simplified implementation.
 
     Returns
     -------
     float
-        Mean peak time difference.
+        Mean peak time difference in time steps. Returns NaN if no peaks are found.
 
     References
     ----------
@@ -191,56 +229,49 @@ def mean_peak_timing(
     _validate_inputs(obs, sim)
 
     # get time series with only valid observations (scipy's find_peaks doesn't guarantee correctness with NaNs)
-    obs, sim = _mask_valid(obs, sim)
+    obs_clean, sim_clean = _mask_valid(obs, sim)
+
+    if len(obs_clean) < 3:
+        return np.nan
+
+    # determine default window size based on resolution
+    if window is None:
+        # infer a reasonable window size based on resolution
+        window = max(int(_get_frequency_factor("12H", resolution)), 3)
 
     # heuristic to get indices of peaks and their corresponding height.
+    # Use prominence based on standard deviation to filter significant peaks
+    prominence_threshold = np.std(obs_clean)
+    if prominence_threshold == 0:  # Handle constant time series
+        prominence_threshold = (
+            0.01 * np.mean(obs_clean) if np.mean(obs_clean) != 0 else 0.01
+        )
+
     peaks, _ = signal.find_peaks(
-        obs.values, distance=100, prominence=np.std(obs.values)
+        obs_clean, distance=100, prominence=prominence_threshold
     )
 
-    # infer name of datetime index
-    if datetime_coord is None:
-        datetime_coord = utils.infer_datetime_coord(obs)
-
-    if window is None:
-        # infer a reasonable window size
-        window = max(int(utils.get_frequency_factor("12H", resolution)), 3)
+    if len(peaks) == 0:
+        return np.nan
 
     # evaluate timing
     timing_errors = []
     for idx in peaks:
-        # skip peaks at the start and end of the sequence and peaks around missing observations
-        # (NaNs that were removed in obs & sim would result in windows that span too much time).
-        if (
-            (idx - window < 0)
-            or (idx + window >= len(obs))
-            or (
-                pd.date_range(
-                    obs[idx - window][datetime_coord].values,
-                    obs[idx + window][datetime_coord].values,
-                    freq=resolution,
-                ).size
-                != 2 * window + 1
-            )
-        ):
+        # skip peaks at the start and end of the sequence
+        if (idx - window < 0) or (idx + window >= len(obs_clean)):
             continue
 
-        # check if the value at idx is a peak (both neighbors must be smaller)
-        if (sim[idx] > sim[idx - 1]) and (sim[idx] > sim[idx + 1]):
-            peak_sim = sim[idx]
-        else:
-            # define peak around idx as the max value inside of the window
-            values = sim[idx - window : idx + window + 1]
-            peak_sim = values[values.argmax()]
+        # find the corresponding peak in simulated data within the window
+        window_start = max(0, idx - window)
+        window_end = min(len(sim_clean), idx + window + 1)
+        sim_window = sim_clean[window_start:window_end]
 
-        # get xarray object of qobs peak, for getting the date and calculating the datetime offset
-        peak_obs = obs[idx]
+        # find the index of maximum value in the window
+        local_peak_idx = np.argmax(sim_window)
+        global_peak_idx = window_start + local_peak_idx
 
-        # calculate the time difference between the peaks
-        delta = peak_obs.coords[datetime_coord] - peak_sim.coords[datetime_coord]
-
-        timing_error = np.abs(delta.values / pd.to_timedelta(resolution))
-
+        # calculate the time difference between the peaks (in time steps)
+        timing_error = abs(idx - global_peak_idx)
         timing_errors.append(timing_error)
 
     return np.mean(timing_errors) if timing_errors else np.nan

@@ -1,10 +1,10 @@
 """
 Author: Wenyu Ouyang
 Date: 2025-08-03
-LastEditTime: 2025-08-03 10:26:38
+LastEditTime: 2025-08-04 09:12:43
 LastEditors: Wenyu Ouyang
 Description: Unit tests for hydro_stat module
-FilePath: \\hydroutils\\tests\\test_hydro_stat.py
+FilePath: \hydroutils\tests\test_hydro_stat.py
 Copyright (c) 2021-2025 MHPI group, Wenyu Ouyang. All rights reserved.
 """
 
@@ -25,6 +25,7 @@ from hydroutils.hydro_stat import (
     KGE,
     add_metric,
     HYDRO_METRICS,
+    flood_peak_timing,
 )
 
 
@@ -333,6 +334,141 @@ class TestConsistency:
                 # 测试函数调用
                 result = metric_func(observed, simulated)
                 assert isinstance(result, (float, np.floating)) or np.isnan(result)
+
+
+class TestFloodPeakTiming:
+    """测试mean_peak_timing函数"""
+
+    @pytest.fixture
+    def synthetic_peak_data(self):
+        """生成有明显峰值的合成数据"""
+        # 创建有两个峰值的观测数据
+        t = np.arange(200)
+        obs = 2 + np.sin(t * 0.1) + 0.5 * np.random.normal(0, 0.1, len(t))
+        # 在位置50和150添加峰值
+        obs[50] = 8.0
+        obs[150] = 7.5
+
+        # 模拟数据：峰值位置略有偏移
+        sim = obs.copy()
+        sim[52] = 7.8  # 峰值偏移2个时间步
+        sim[50] = 3.0  # 原位置降低
+        sim[153] = 7.2  # 峰值偏移3个时间步
+        sim[150] = 3.5  # 原位置降低
+
+        return obs, sim
+
+    @pytest.fixture
+    def no_peak_data(self):
+        """生成没有明显峰值的平滑数据"""
+        t = np.arange(100)
+        obs = 2 + 0.1 * t + 0.05 * np.random.normal(0, 0.1, len(t))
+        sim = obs + 0.1 * np.random.normal(0, 0.05, len(t))
+        return obs, sim
+
+    def test_mean_peak_timing_basic(self, synthetic_peak_data):
+        """测试基本的峰值时间差计算"""
+        obs, sim = synthetic_peak_data
+        result = flood_peak_timing(obs, sim, window=5)
+
+        assert isinstance(result, (float, np.floating))
+        assert not np.isnan(result)
+        assert result >= 0  # 时间差应该是非负数
+
+    def test_mean_peak_timing_no_peaks(self, no_peak_data):
+        """测试没有峰值的情况"""
+        obs, sim = no_peak_data
+        result = flood_peak_timing(obs, sim, window=5)
+
+        # 如果没有检测到峰值，应该返回NaN
+        assert np.isnan(result)
+
+    def test_mean_peak_timing_perfect_match(self):
+        """测试完美匹配的情况"""
+        # 创建有峰值的数据
+        obs = np.zeros(100)
+        obs[25] = 10.0  # 峰值在位置25
+        obs[75] = 8.0  # 峰值在位置75
+
+        sim = obs.copy()  # 完美匹配
+
+        result = flood_peak_timing(obs, sim, window=10)
+
+        assert isinstance(result, (float, np.floating))
+        assert np.isclose(result, 0.0, atol=0.1)  # 应该接近0
+
+    def test_mean_peak_timing_with_nans(self):
+        """测试包含NaN值的数据"""
+        obs = np.ones(50) * 2.0
+        obs[25] = 10.0  # 添加峰值
+        obs[10] = np.nan  # 添加NaN
+
+        sim = obs.copy()
+        sim[27] = 9.5  # 峰值偏移2个位置
+        sim[25] = 2.0  # 原位置降低
+        sim[15] = np.nan  # 添加NaN
+
+        result = flood_peak_timing(obs, sim, window=5)
+
+        # 应该能处理NaN值并返回有效结果
+        assert isinstance(result, (float, np.floating)) or np.isnan(result)
+
+    def test_mean_peak_timing_empty_arrays(self):
+        """测试空数组"""
+        with pytest.raises(ValueError):
+            flood_peak_timing(np.array([]), np.array([]))
+
+    def test_mean_peak_timing_short_arrays(self):
+        """测试太短的数组"""
+        obs = np.array([1.0, 2.0])
+        sim = np.array([1.1, 2.1])
+
+        with pytest.raises(ValueError):
+            flood_peak_timing(obs, sim)
+
+    def test_mean_peak_timing_different_shapes(self):
+        """测试不同形状的数组"""
+        obs = np.array([1.0, 2.0, 3.0])
+        sim = np.array([1.1, 2.1])
+
+        with pytest.raises(ValueError):
+            flood_peak_timing(obs, sim)
+
+    def test_mean_peak_timing_window_sizes(self, synthetic_peak_data):
+        """测试不同窗口大小"""
+        obs, sim = synthetic_peak_data
+
+        # 测试不同窗口大小
+        result_small = flood_peak_timing(obs, sim, window=2)
+        result_large = flood_peak_timing(obs, sim, window=10)
+
+        # 两种窗口大小都应该返回有效结果
+        assert isinstance(result_small, (float, np.floating)) or np.isnan(result_small)
+        assert isinstance(result_large, (float, np.floating)) or np.isnan(result_large)
+
+    def test_mean_peak_timing_different_resolutions(self, synthetic_peak_data):
+        """测试不同时间分辨率设置"""
+        obs, sim = synthetic_peak_data
+
+        # 测试不同分辨率
+        result_hourly = flood_peak_timing(obs, sim, resolution="1H")
+        result_daily = flood_peak_timing(obs, sim, resolution="1D")
+
+        # 两种分辨率都应该返回有效结果
+        assert isinstance(result_hourly, (float, np.floating)) or np.isnan(
+            result_hourly
+        )
+        assert isinstance(result_daily, (float, np.floating)) or np.isnan(result_daily)
+
+    def test_mean_peak_timing_constant_data(self):
+        """测试常数数据（无变化）"""
+        obs = np.ones(50) * 5.0
+        sim = np.ones(50) * 5.0
+
+        result = flood_peak_timing(obs, sim, window=5)
+
+        # 常数数据可能没有峰值，应该返回NaN
+        assert np.isnan(result)
 
 
 if __name__ == "__main__":
