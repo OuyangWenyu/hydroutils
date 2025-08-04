@@ -1,10 +1,10 @@
 """
 Author: MHPI group, Wenyu Ouyang
 Date: 2021-12-31 11:08:29
-LastEditTime: 2025-08-03 09:33:13
+LastEditTime: 2025-08-04 09:01:11
 LastEditors: Wenyu Ouyang
 Description: statistics calculation
-FilePath: \\hydroutils\\hydroutils\\hydro_stat.py
+FilePath: \hydroutils\hydroutils\hydro_stat.py
 Copyright (c) 2021-2022 MHPI group, Wenyu Ouyang. All rights reserved.
 """
 
@@ -87,6 +87,58 @@ def fms(
     )
 
     return fms * 100
+
+
+def flood_volume_error(Q_obs, Q_sim, delta_t_seconds=10800):
+    """
+    Calculate relative flood volume error.
+
+    Parameters
+    ----------
+    Q_obs : array-like
+        Observed streamflow.
+    Q_sim : array-like
+        Simulated streamflow.
+    delta_t_seconds : int, optional
+        Time step in seconds, by default 10800 (3 hours).
+
+    Returns
+    -------
+    float
+        Relative flood volume error (%).
+    """
+    vol_obs = np.sum(Q_obs) * delta_t_seconds
+    vol_sim = np.sum(Q_sim) * delta_t_seconds
+
+    if vol_obs > 1e-6:
+        return ((vol_sim - vol_obs) / vol_obs) * 100.0
+    else:
+        return np.nan
+
+
+def flood_peak_error(Q_obs, Q_sim):
+    """
+    Calculate relative flood peak error.
+
+    Parameters
+    ----------
+    Q_obs : array-like
+        Observed streamflow.
+    Q_sim : array-like
+        Simulated streamflow.
+
+    Returns
+    -------
+    float
+        Relative flood peak error (%).
+    """
+    peak_obs = np.max(Q_obs)
+    peak_sim = np.max(Q_sim)
+
+    if peak_obs > 1e-6:
+        return ((peak_sim - peak_obs) / peak_obs) * 100.0
+    else:
+        return np.nan
 
 
 def mean_peak_timing(
