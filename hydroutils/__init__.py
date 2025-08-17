@@ -13,3 +13,4 @@ __email__ = 'wenyuouyang@outlook.com'
 __version__ = '0.0.14'
 
 from .hydro_log import *
+from .hydro_event import *
