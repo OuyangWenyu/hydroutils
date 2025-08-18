@@ -50,6 +50,8 @@ dependencies = [
     "xarray",
     "numba",
     "requests",
+    "pint",
+    "pint-xarray",
 ]
 
 [project.optional-dependencies]

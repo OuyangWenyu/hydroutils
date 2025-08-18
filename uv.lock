@@ -1547,6 +1547,30 @@ wheels = [
 ]
 
 [[package]]
+name = "flexcache"
+version = "0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/55/b0/8a21e330561c65653d010ef112bf38f60890051d244ede197ddaa08e50c1/flexcache-0.3.tar.gz", hash = "sha256:18743bd5a0621bfe2cf8d519e4c3bfdf57a269c15d1ced3fb4b64e0ff4600656", size = 15816, upload-time = "2024-03-09T03:21:07.555Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/cd/c883e1a7c447479d6e13985565080e3fea88ab5a107c21684c813dba1875/flexcache-0.3-py3-none-any.whl", hash = "sha256:d43c9fea82336af6e0115e308d9d33a185390b8346a017564611f1466dcd2e32", size = 13263, upload-time = "2024-03-09T03:21:05.635Z" },
+]
+
+[[package]]
+name = "flexparser"
+version = "0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/82/99/b4de7e39e8eaf8207ba1a8fa2241dd98b2ba72ae6e16960d8351736d8702/flexparser-0.4.tar.gz", hash = "sha256:266d98905595be2ccc5da964fe0a2c3526fbbffdc45b65b3146d75db992ef6b2", size = 31799, upload-time = "2024-11-07T02:00:56.249Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fe/5e/3be305568fe5f34448807976dc82fc151d76c3e0e03958f34770286278c1/flexparser-0.4-py3-none-any.whl", hash = "sha256:3738b456192dcb3e15620f324c447721023c0293f6af9955b481e91d00179846", size = 27625, upload-time = "2024-11-07T02:00:54.523Z" },
+]
+
+[[package]]
 name = "fonttools"
 version = "4.59.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1812,6 +1836,10 @@ dependencies = [
     { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pandas" },
+    { name = "pint", version = "0.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pint", version = "0.25", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pint-xarray", version = "0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pint-xarray", version = "0.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "requests" },
     { name = "rich" },
     { name = "s3fs" },
@@ -1953,6 +1981,8 @@ requires-dist = [
     { name = "numba" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "pint" },
+    { name = "pint-xarray" },
     { name = "pre-commit", marker = "extra == 'all'" },
     { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'all'", specifier = ">=6.0" },
@@ -3961,6 +3991,84 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/31/5e/03966aedfbfcbb4d5f8aa042452d3361f325b963ebbadddac05b122e47dd/pillow-11.3.0-pp311-pypy311_pp73-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5418b53c0d59b3824d05e029669efa023bbef0f3e92e75ec8428f3799487f361", size = 4957170, upload-time = "2025-07-01T09:16:23.762Z" },
     { url = "https://files.pythonhosted.org/packages/cc/2d/e082982aacc927fc2cab48e1e731bdb1643a1406acace8bed0900a61464e/pillow-11.3.0-pp311-pypy311_pp73-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:504b6f59505f08ae014f724b6207ff6222662aab5cc9542577fb084ed0676ac7", size = 5581505, upload-time = "2025-07-01T09:16:25.593Z" },
     { url = "https://files.pythonhosted.org/packages/34/e7/ae39f538fd6844e982063c3a5e4598b8ced43b9633baa3a85ef33af8c05c/pillow-11.3.0-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:c84d689db21a1c397d001aa08241044aa2069e7587b398c8cc63020390b1c1b8", size = 6984598, upload-time = "2025-07-01T09:16:27.732Z" },
+]
+
+[[package]]
+name = "pint"
+version = "0.24.4"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version == '3.10.*'",
+    "python_full_version < '3.10'",
+]
+dependencies = [
+    { name = "flexcache", marker = "python_full_version < '3.11'" },
+    { name = "flexparser", marker = "python_full_version < '3.11'" },
+    { name = "platformdirs", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/20/bb/52b15ddf7b7706ed591134a895dbf6e41c8348171fb635e655e0a4bbb0ea/pint-0.24.4.tar.gz", hash = "sha256:35275439b574837a6cd3020a5a4a73645eb125ce4152a73a2f126bf164b91b80", size = 342225, upload-time = "2024-11-07T16:29:46.061Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/16/bd2f5904557265882108dc2e04f18abc05ab0c2b7082ae9430091daf1d5c/Pint-0.24.4-py3-none-any.whl", hash = "sha256:aa54926c8772159fcf65f82cc0d34de6768c151b32ad1deb0331291c38fe7659", size = 302029, upload-time = "2024-11-07T16:29:43.976Z" },
+]
+
+[[package]]
+name = "pint"
+version = "0.25"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14'",
+    "python_full_version >= '3.12' and python_full_version < '3.14'",
+    "python_full_version == '3.11.*'",
+]
+dependencies = [
+    { name = "flexcache", marker = "python_full_version >= '3.11'" },
+    { name = "flexparser", marker = "python_full_version >= '3.11'" },
+    { name = "platformdirs", marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5a/cb/e6ffaf3d019e8501b1264dac529bf829ac2f1fe1d488cfcf67f1fccadacf/pint-0.25.tar.gz", hash = "sha256:22911a30d682ee0540d656571c19a7b1806ce00b2be88a16f67218108b7b8cc2", size = 253010, upload-time = "2025-08-15T19:49:12.72Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/cc/c528311d798e22ec884b816e8aa2989e0f1f28cdc8e5969e2be5f10bce85/pint-0.25-py3-none-any.whl", hash = "sha256:cc20ae3dff010b9bbea41fb80c2de008f683cc83512cea73633d55aead80aa1e", size = 305462, upload-time = "2025-08-15T19:49:11.083Z" },
+]
+
+[[package]]
+name = "pint-xarray"
+version = "0.4"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.10'",
+]
+dependencies = [
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pint", version = "0.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "xarray", version = "2024.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/31/97/f2ee67b46ac14073b58e5245946f615cbd2875ea7713405ba960471edef3/pint_xarray-0.4.tar.gz", hash = "sha256:b6b737a9c46dfb14a8598c27a71100496994c9d79dab61fd77f0d2685ae7065e", size = 47835, upload-time = "2024-06-23T14:17:53.866Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/5c/9b205b9acd844c758cb013f22fa9576a043ec9d1819c237030dc29ef3744/pint_xarray-0.4-py3-none-any.whl", hash = "sha256:dcbbd6e6257817828b5cf7915254a8031d7a1e94df110218d280f3a1b956d4f5", size = 32677, upload-time = "2024-06-23T14:17:52.261Z" },
+]
+
+[[package]]
+name = "pint-xarray"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14'",
+    "python_full_version >= '3.12' and python_full_version < '3.14'",
+    "python_full_version == '3.11.*'",
+    "python_full_version == '3.10.*'",
+]
+dependencies = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pint", version = "0.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "pint", version = "0.25", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "xarray", version = "2025.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "xarray", version = "2025.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/04/2a/3e39c85c9107bd25f67f0438fca8990ae6843ef3b6ccf9081fd02ef5ea4c/pint_xarray-0.5.1.tar.gz", hash = "sha256:708670b84cb2583aea602c7d1a56c976322f2a5c53a1043f99f2dc68b2f2fd27", size = 51807, upload-time = "2025-08-09T22:46:33.657Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/26/fd5e5d034af92d5eaabde3e4e1920143f9ab1292c83296bf0ec9e2731958/pint_xarray-0.5.1-py3-none-any.whl", hash = "sha256:b17b61274726f39bedb6c5079c71ed21d173cb4de9b6aab802343e1e3662c4c4", size = 36932, upload-time = "2025-08-09T22:46:32.205Z" },
 ]
 
 [[package]]
