@@ -197,280 +197,452 @@ def _validate_inverse_consistency(source_unit, target_unit, inverse_param):
         )
 
 
-def streamflow_unit_conv(
-    streamflow,
-    area,
-    target_unit="mm/d",
-    inverse=False,
-    source_unit=None,
-    area_unit="km^2",
-):
-    """Convert the unit of streamflow data from m^3/s or ft^3/s to mm/xx(time) for a basin or inverse.
+def _detect_data_unit(data, source_unit=None):
+    """Detect and validate the unit of streamflow data.
 
     Parameters
     ----------
-    streamflow: xarray.Dataset, numpy.ndarray, pandas.DataFrame/Series, or pint.Quantity
-        Streamflow data of each basin.
-    area: xarray.Dataset, pint.Quantity, numpy.ndarray, pandas.DataFrame/Series
-        Area of each basin. Can be with or without units.
-    target_unit: str
-        The unit to convert to.
-    inverse: bool
-        If True, convert the unit to m^3/s.
-        If False, convert the unit to mm/day or mm/h.
-    source_unit: str, optional
-        The source unit of streamflow data. Use this when streamflow doesn't have
-        unit information or when the unit is a custom format like 'mm/3h' that
-        pint cannot recognize directly. If None, the function will try to get
-        unit information from streamflow data attributes.
-    area_unit: str, optional
-        The unit of area data when area is provided without units (e.g., numpy array).
-        Default is "km^2". Only used when area doesn't have unit information.
+    data : numpy.ndarray, pandas.Series, pandas.DataFrame, or xarray.Dataset
+        Input data to detect units from
+    source_unit : str, optional
+        Explicitly provided source unit
 
     Returns
     -------
-    Converted data in the same type as the input streamflow.
-    For numpy arrays, returns numpy array directly.
+    str
+        The detected unit string
+
+    Raises
+    ------
+    ValueError
+        If no unit can be detected and source_unit is not provided
+        If source_unit conflicts with detected data units
     """
-    # Determine the actual source unit from data or parameter
-    actual_source_unit = _get_actual_source_unit(streamflow, source_unit)
+    detected_unit = None
 
-    # Normalize units for comparison
-    source_normalized = _normalize_unit(actual_source_unit)
-    target_normalized = _normalize_unit(target_unit)
+    # Try to detect unit from data
+    if isinstance(data, xr.Dataset):
+        # Get first data variable key
+        data_key = list(data.keys())[0]
 
-    # Early return if source and target units are identical
-    if source_normalized and source_normalized == target_normalized:
-        return streamflow
+        # Check attrs for units
+        if "units" in data[data_key].attrs:
+            detected_unit = data[data_key].attrs["units"]
+        else:
+            # Try pint units
+            try:
+                detected_unit = str(data[data_key].pint.units)
+            except (AttributeError, ValueError):
+                detected_unit = None
 
-    # Validate inverse parameter consistency with units
-    if actual_source_unit:
-        _validate_inverse_consistency(actual_source_unit, target_unit, inverse)
+    elif isinstance(data, pint.Quantity):
+        detected_unit = str(data.units)
+    elif hasattr(data, "attrs") and "units" in data.attrs:
+        # For pandas with attrs
+        detected_unit = data.attrs["units"]
 
-    # Get conversion information for target unit
-    target_standard_unit, target_conversion_factor = _get_unit_conversion_info(
-        target_unit
-    )
+    # Validate consistency if both detected and provided
+    if detected_unit and source_unit:
+        if _normalize_unit(detected_unit) != _normalize_unit(source_unit):
+            raise ValueError(
+                f"Provided source_unit '{source_unit}' conflicts with detected "
+                f"data unit '{detected_unit}'"
+            )
 
-    # Get conversion information for source unit if provided
-    if source_unit:
-        source_standard_unit, source_conversion_factor = _get_unit_conversion_info(
-            source_unit
+    # Determine final unit
+    final_unit = source_unit or detected_unit
+
+    if not final_unit:
+        raise ValueError(
+            "No unit information found in data. Please provide source_unit parameter."
+        )
+
+    return final_unit
+
+
+def _detect_area_unit(area, area_unit="km^2"):
+    """Detect and validate the unit of area data.
+
+    Parameters
+    ----------
+    area : numpy.ndarray, pandas.Series, pandas.DataFrame, xarray.Dataset, or pint.Quantity
+        Input area data
+    area_unit : str, optional
+        Default area unit when no units are detected. Default is "km^2".
+
+    Returns
+    -------
+    str
+        The detected or default area unit
+    """
+    detected_unit = None
+
+    # Try to detect unit from area data
+    if isinstance(area, xr.Dataset):
+        area_key = list(area.keys())[0]
+        if "units" in area[area_key].attrs:
+            detected_unit = area[area_key].attrs["units"]
+        else:
+            try:
+                detected_unit = str(area[area_key].pint.units)
+            except (AttributeError, ValueError):
+                detected_unit = None
+    elif isinstance(area, pint.Quantity):
+        detected_unit = str(area.units)
+    elif hasattr(area, "attrs") and "units" in area.attrs:
+        detected_unit = area.attrs["units"]
+
+    # Use detected unit or fallback to provided area_unit
+    return detected_unit or area_unit
+
+
+def _determine_conversion_direction(source_unit, target_unit):
+    """Determine if conversion is from depth to volume units or vice versa.
+
+    Parameters
+    ----------
+    source_unit : str
+        Source unit string
+    target_unit : str
+        Target unit string
+
+    Returns
+    -------
+    bool
+        True if converting from depth units to volume units
+        False if converting from volume units to depth units
+
+    Raises
+    ------
+    ValueError
+        If units are incompatible for conversion
+    """
+    source_norm = _normalize_unit(source_unit)
+    target_norm = _normalize_unit(target_unit)
+
+    # Define unit patterns
+    depth_pattern = re.compile(r"mm/(?:\d+)?[hd](?:ay|our)?$")
+    volume_pattern = re.compile(r"(?:m\^?3|ft\^?3)/s$")
+
+    source_is_depth = bool(depth_pattern.match(source_norm))
+    source_is_volume = bool(volume_pattern.match(source_norm))
+    target_is_depth = bool(depth_pattern.match(target_norm))
+    target_is_volume = bool(volume_pattern.match(target_norm))
+
+    # Validate compatibility
+    if not (
+        (source_is_depth or source_is_volume) and (target_is_depth or target_is_volume)
+    ):
+        raise ValueError(
+            f"Incompatible units for conversion: '{source_unit}' to '{target_unit}'"
+        )
+
+    if source_is_depth and target_is_volume:
+        return True  # depth to volume
+    elif source_is_volume and target_is_depth:
+        return False  # volume to depth
+    else:
+        # Same type conversion (depth to depth or volume to volume)
+        return None
+
+
+def _perform_conversion(
+    data, area, source_unit, area_unit, target_unit, is_depth_to_volume
+):
+    """Perform the actual unit conversion based on data type.
+
+    Parameters
+    ----------
+    data : numpy.ndarray, pandas.Series, pandas.DataFrame, or xarray.Dataset
+        Input streamflow data
+    area : numpy.ndarray, pandas.Series, pandas.DataFrame, xarray.Dataset, or pint.Quantity
+        Area data
+    source_unit : str
+        Source unit of data
+    area_unit : str
+        Unit of area data
+    target_unit : str
+        Target unit for conversion
+    is_depth_to_volume : bool or None
+        Conversion direction. None for same-type conversions.
+
+    Returns
+    -------
+    Converted data in same format as input
+    """
+    # Handle custom units (mm/3h, mm/5d, etc.)
+    source_standard_unit, source_factor = _get_unit_conversion_info(source_unit)
+    target_standard_unit, target_factor = _get_unit_conversion_info(target_unit)
+
+    # Dispatch to appropriate conversion method based on data type
+    if isinstance(data, xr.Dataset):
+        return _convert_xarray(
+            data,
+            area,
+            source_standard_unit,
+            source_factor,
+            area_unit,
+            target_standard_unit,
+            target_factor,
+            target_unit,
+            is_depth_to_volume,
+        )
+    elif isinstance(data, (np.ndarray, pd.Series, pd.DataFrame)):
+        return _convert_numpy_pandas(
+            data,
+            area,
+            source_standard_unit,
+            source_factor,
+            area_unit,
+            target_standard_unit,
+            target_factor,
+            is_depth_to_volume,
         )
     else:
-        source_standard_unit, source_conversion_factor = None, 1
+        raise TypeError(f"Unsupported data type: {type(data)}")
 
-    # Regular expression to match units with numbers
-    custom_unit_pattern = re.compile(r"mm/(\d+)(h|d)")
 
-    # Function to handle the conversion for numpy and pandas
-    def np_pd_conversion(streamflow, area, target_unit, inverse, conversion_factor):
-        if not inverse:
-            result = (streamflow / area).to(target_unit) * conversion_factor
-        else:
-            result = (streamflow * area).to(target_unit) / conversion_factor
-        return result.magnitude
+def _convert_xarray(
+    data,
+    area,
+    source_unit,
+    source_factor,
+    area_unit,
+    target_unit,
+    target_factor,
+    target_unit_str,
+    is_depth_to_volume,
+):
+    """Convert xarray Dataset units."""
+    data_key = list(data.keys())[0]
 
-    # Handle xarray
-    if isinstance(streamflow, xr.Dataset) and isinstance(area, xr.Dataset):
-        # Check for units in attrs first, then try pint-xarray units
-        streamflow_key = list(streamflow.keys())[0]
-        streamflow_units = streamflow[streamflow_key].attrs.get("units", None)
+    # Try pint-xarray first, fallback to manual conversion if not available
+    try:
+        # Check if pint-xarray is available
+        if hasattr(data[data_key], "pint"):
+            data_qty = data.pint.quantify()
 
-        # Check if streamflow has pint units
-        has_pint_units = False
-        try:
-            # Check if data already has pint units
-            streamflow[streamflow_key].pint.units
-            has_pint_units = True
-        except (AttributeError, ValueError):
-            has_pint_units = False
-
-        # Handle source_unit parameter
-        if source_unit is not None:
-            # Process custom units with source conversion factor
-            if isinstance(streamflow, xr.Dataset):
-                # For xarray, convert custom unit to standard unit
-                streamflow_processed = streamflow / source_conversion_factor
-                key = list(streamflow_processed.keys())[0]
-                streamflow_processed[key].attrs["units"] = source_standard_unit
+            if isinstance(area, xr.Dataset):
+                area_qty = area.pint.quantify()
             else:
-                streamflow_processed = streamflow
-        elif streamflow_units is None and not has_pint_units:
-            raise ValueError(
-                "streamflow has no unit information. "
-                "Please provide source_unit parameter."
-            )
-        else:
-            streamflow_processed = streamflow
-
-        if not inverse:
-            if not (
-                custom_unit_pattern.match(target_unit)
-                or re.match(r"mm/(?!\d)", target_unit)
-            ):
-                raise ValueError(
-                    "target_unit should be a valid unit like 'mm/d', 'mm/day', 'mm/h', 'mm/hour', 'mm/3h', 'mm/5d'"
+                # Convert area to xr.Dataset with units
+                area_qty = xr.Dataset(
+                    {
+                        data_key: (
+                            ["time"] if "time" in data.dims else list(data.dims)[:1],
+                            area,
+                        )
+                    }
                 )
+                area_qty[data_key].attrs["units"] = area_unit
+                area_qty = area_qty.pint.quantify()
 
-            try:
-                q = streamflow_processed.pint.quantify()
-            except Exception as e:
-                # If pint-xarray is not available, provide a helpful error message
-                if "no attribute 'pint'" in str(e):
-                    raise ValueError(
-                        "pint-xarray extension is not available. "
-                        "Please install pint-xarray or provide explicit source_unit parameter."
-                    )
-                elif source_unit is None:
-                    raise ValueError(
-                        "Failed to quantify streamflow units. "
-                        f"Please provide source_unit parameter. Error: {e}"
-                    )
-                else:
-                    raise ValueError(
-                        f"Failed to quantify streamflow with source_unit "
-                        f"'{source_unit}'. Error: {e}"
-                    )
+            # Perform conversion using pint-xarray
+            data_var = data_qty[data_key] / source_factor
+            area_var = area_qty[list(area_qty.keys())[0]]
 
-            a = area.pint.quantify()
-            r = q[list(q.keys())[0]] / a[list(a.keys())[0]]
-            # result = r.pint.to(target_unit).to_dataset(name=list(q.keys())[0])
-            result = (
-                r.pint.to(target_standard_unit) * target_conversion_factor
-            ).to_dataset(name=list(q.keys())[0])
-            # Manually set the unit attribute to the custom unit
-            result_ = result.pint.dequantify()
-            result_[list(result_.keys())[0]].attrs["units"] = target_unit
-            return result_
-        else:
-            # For inverse conversion
-            if target_unit not in ["m^3/s", "m3/s"]:
-                raise ValueError("target_unit should be 'm^3/s'")
-
-            # Handle source_unit for inverse conversion
-            if source_unit is not None:
-                # Process custom units with source conversion factor
-                streamflow_processed = streamflow / source_conversion_factor
-                key = list(streamflow_processed.keys())[0]
-                streamflow_processed[key].attrs["units"] = source_standard_unit
+            if is_depth_to_volume is True:
+                result_qty = data_var * area_var
+            elif is_depth_to_volume is False:
+                result_qty = data_var / area_var
             else:
-                streamflow_units = streamflow[list(streamflow.keys())[0]].attrs.get(
-                    "units", None
-                )
+                result_qty = data_var
 
-                # Check if streamflow has pint units for inverse conversion
-                has_pint_units_inverse = False
-                try:
-                    streamflow[list(streamflow.keys())[0]].pint.units
-                    has_pint_units_inverse = True
-                except (AttributeError, ValueError):
-                    has_pint_units_inverse = False
+            # Convert to target unit
+            result_qty = result_qty.pint.to(target_unit) * target_factor
+            result_dataset = result_qty.to_dataset(name=data_key)
 
-                if streamflow_units:
-                    if custom_match := custom_unit_pattern.match(streamflow_units):
-                        num, unit = custom_match.groups()
-                        if unit == "h":
-                            temp_standard_unit = "mm/h"
-                            temp_conversion_factor = int(num)
-                        elif unit == "d":
-                            temp_standard_unit = "mm/d"
-                            temp_conversion_factor = int(num)
-                        # Convert custom unit to standard unit
-                        r_ = streamflow / temp_conversion_factor
-                        r_[list(r_.keys())[0]].attrs["units"] = temp_standard_unit
-                        streamflow_processed = r_
-                    else:
-                        streamflow_processed = streamflow
-                elif has_pint_units_inverse:
-                    # Data has pint units, use as is
-                    streamflow_processed = streamflow
-                else:
-                    raise ValueError(
-                        "streamflow has no unit information. "
-                        "Please provide source_unit parameter."
-                    )
+            # Dequantify and set final unit
+            result_final = result_dataset.pint.dequantify()
+            result_final[data_key].attrs["units"] = target_unit_str
 
-            try:
-                r = streamflow_processed.pint.quantify()
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to quantify streamflow units for inverse conversion. "
-                    f"Error: {e}"
-                )
+            return result_final
 
-            a = area.pint.quantify()
-            q = r[list(r.keys())[0]] * a[list(a.keys())[0]]
-            result = q.pint.to(target_unit).to_dataset(name=list(r.keys())[0])
-            # dequantify to get normal xr_dataset
-            return result.pint.dequantify()
+    except (AttributeError, ImportError):
+        # Fallback to manual conversion without pint-xarray
+        pass
 
-    # Handle numpy and pandas
-    elif isinstance(streamflow, pint.Quantity) and isinstance(area, pint.Quantity):
-        if type(streamflow.magnitude) not in [np.ndarray, pd.DataFrame, pd.Series]:
-            raise TypeError(
-                "Input streamflow must be xarray.Dataset, or pint.Quantity "
-                "wrapping numpy.ndarray, or pandas.DataFrame/Series"
-            )
-        if type(area.magnitude) != type(streamflow.magnitude):
-            raise TypeError("streamflow and area must be the same type")
-        return np_pd_conversion(
-            streamflow, area, target_standard_unit, inverse, target_conversion_factor
-        )
+    # Manual conversion without pint-xarray
+    data_values = data[data_key].values / source_factor
 
-    # Handle numpy and pandas without units (requires source_unit)
-    elif isinstance(streamflow, (np.ndarray, pd.DataFrame, pd.Series)):
-        if source_unit is None:
-            raise ValueError(
-                "streamflow data has no unit information. "
-                "Please provide source_unit parameter."
-            )
+    if isinstance(area, xr.Dataset):
+        area_key = list(area.keys())[0]
+        area_values = area[area_key].values
+    else:
+        area_values = area
 
-        # Process custom unit if needed
-        streamflow_processed = streamflow / source_conversion_factor
-        processed_unit = source_standard_unit
+    # Create pint quantities for conversion
+    try:
+        data_qty = data_values * ureg(source_unit)
+        area_qty = area_values * ureg(area_unit)
 
-        try:
-            # Create pint quantity for streamflow
-            streamflow_qty = streamflow_processed * ureg(processed_unit)
-        except Exception as e:
-            raise ValueError(
-                f"Failed to create quantity with unit '{processed_unit}'. Error: {e}"
-            )
-
-        # Handle area with or without units
-        if isinstance(area, pint.Quantity):
-            area_qty = area
-        elif isinstance(area, (np.ndarray, pd.DataFrame, pd.Series)):
-            # Area has no units, use area_unit parameter
-            try:
-                area_qty = area * ureg(area_unit)
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to create quantity with unit '{area_unit}'. Error: {e}"
-                )
+        # Perform conversion
+        if is_depth_to_volume is True:
+            result_qty = data_qty * area_qty
+        elif is_depth_to_volume is False:
+            result_qty = data_qty / area_qty
         else:
-            raise TypeError(
-                "area must be pint.Quantity, numpy.ndarray, or pandas.DataFrame/Series"
-            )
+            result_qty = data_qty
 
-        result = np_pd_conversion(
-            streamflow_qty,
-            area_qty,
-            target_standard_unit,
-            inverse,
-            target_conversion_factor,
-        )
+        # Convert to target unit
+        converted_qty = result_qty.to(ureg(target_unit))
+        result_values = converted_qty.magnitude * target_factor
 
-        # For numpy/pandas input, return numpy array directly (not pint.Quantity)
+        # Create result dataset
+        result = data.copy()
+        result[data_key] = result[data_key].copy()
+        result[data_key].values = result_values
+        result[data_key].attrs["units"] = target_unit_str
+
         return result
 
+    except Exception as e:
+        raise ValueError(f"Failed to convert xarray data: {e}")
+
+
+def _convert_numpy_pandas(
+    data,
+    area,
+    source_unit,
+    source_factor,
+    area_unit,
+    target_unit,
+    target_factor,
+    is_depth_to_volume,
+):
+    """Convert numpy array or pandas Series/DataFrame units."""
+    # Extract values for computation, preserve data structure
+    is_pandas = isinstance(data, (pd.Series, pd.DataFrame))
+    data_index = None
+    data_columns = None
+
+    if isinstance(data, pd.Series):
+        data_values = data.values / source_factor
+        data_index = data.index
+    elif isinstance(data, pd.DataFrame):
+        data_values = data.values / source_factor
+        data_index = data.index
+        data_columns = data.columns
     else:
-        raise TypeError(
-            "Input streamflow must be xarray.Dataset, pint.Quantity wrapping "
-            "numpy.ndarray/pandas.DataFrame/Series, or numpy.ndarray/pandas."
-            "DataFrame/Series with source_unit parameter"
-        )
+        data_values = data / source_factor
+
+    # Handle area values
+    if isinstance(area, pint.Quantity):
+        area_values = area.magnitude
+        area_unit_for_calc = str(area.units)
+    elif isinstance(area, (pd.Series, pd.DataFrame)):
+        area_values = area.values
+        area_unit_for_calc = area_unit
+    else:
+        area_values = area
+        area_unit_for_calc = area_unit
+
+    # Create pint quantities for conversion
+    try:
+        data_qty = data_values * ureg(source_unit)
+        area_qty = area_values * ureg(area_unit_for_calc)
+
+        # Perform conversion
+        if is_depth_to_volume is True:
+            result_qty = data_qty * area_qty
+        elif is_depth_to_volume is False:
+            result_qty = data_qty / area_qty
+        else:
+            result_qty = data_qty
+
+        # Convert to target unit
+        converted_qty = result_qty.to(ureg(target_unit))
+        result_values = converted_qty.magnitude * target_factor
+
+        # Reconstruct pandas structure if needed
+        if isinstance(data, pd.Series):
+            return pd.Series(result_values, index=data_index)
+        elif isinstance(data, pd.DataFrame):
+            return pd.DataFrame(result_values, index=data_index, columns=data_columns)
+        else:
+            return result_values
+
+    except Exception as e:
+        raise ValueError(f"Failed to convert numpy/pandas data: {e}")
+
+
+def streamflow_unit_conv(
+    data,
+    area,
+    target_unit,
+    source_unit=None,
+    area_unit="km^2",
+):
+    """Convert streamflow data units between depth units (mm/time) and volume units (m³/s).
+
+    This function automatically detects conversion direction based on source and target units,
+    removing the need for an explicit inverse parameter.
+
+    Parameters
+    ----------
+    data : numpy.ndarray, pandas.Series, pandas.DataFrame, or xarray.Dataset
+        Streamflow data. Can include unit information in attributes (xarray) or
+        requires source_unit parameter for numpy/pandas data.
+    area : numpy.ndarray, pandas.Series, pandas.DataFrame, xarray.Dataset, or pint.Quantity
+        Basin area data. Units will be detected from data attributes or pint units.
+        If no units detected, area_unit parameter will be used.
+    target_unit : str
+        Target unit for conversion. Examples: "mm/d", "mm/h", "mm/3h", "m^3/s".
+    source_unit : str, optional
+        Source unit of streamflow data. Required if data has no unit information.
+        If provided and data has units, they must match or ValueError is raised.
+    area_unit : str, optional
+        Unit for area when area data has no unit information. Default is "km^2".
+
+    Returns
+    -------
+    Converted data in the same type as input data.
+    Unit information is preserved in xarray attributes when applicable.
+
+    Raises
+    ------
+    ValueError
+        If no unit information can be determined for data or area.
+        If source_unit conflicts with detected data units.
+        If units are incompatible for conversion.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> # Convert m³/s to mm/day
+    >>> flow = np.array([10.5, 15.2, 8.1])
+    >>> basin_area = np.array([1000])  # km²
+    >>> result = streamflow_unit_conv(flow, basin_area, "mm/d", source_unit="m^3/s")
+
+    >>> # Convert mm/h to m³/s
+    >>> flow_mm = np.array([2.1, 3.5, 1.8])
+    >>> result = streamflow_unit_conv(flow_mm, basin_area, "m^3/s", source_unit="mm/h")
+    """
+    # Step 1: Detect and validate source unit
+    detected_source_unit = _detect_data_unit(data, source_unit)
+
+    # Step 2: Detect and validate area unit
+    detected_area_unit = _detect_area_unit(area, area_unit)
+
+    # Step 3: Determine conversion direction and validate compatibility
+    is_depth_to_volume = _determine_conversion_direction(
+        detected_source_unit, target_unit
+    )
+
+    # Step 4: Early return if no conversion needed
+    if _normalize_unit(detected_source_unit) == _normalize_unit(target_unit):
+        return data
+
+    # Step 5: Perform the actual conversion based on data type
+    return _perform_conversion(
+        data,
+        area,
+        detected_source_unit,
+        detected_area_unit,
+        target_unit,
+        is_depth_to_volume,
+    )
 
 
 def detect_time_interval(
