@@ -225,18 +225,25 @@ def _detect_data_unit(data, source_unit=None):
         # Get first data variable key
         data_key = list(data.keys())[0]
 
-        # Check attrs for units
+        # Check attrs for units first
         if "units" in data[data_key].attrs:
             detected_unit = data[data_key].attrs["units"]
         else:
-            # Try pint units
-            try:
-                detected_unit = str(data[data_key].pint.units)
-            except (AttributeError, ValueError):
-                detected_unit = None
+            # Check if the data itself is a pint.Quantity
+            if isinstance(data[data_key].data, pint.Quantity):
+                detected_unit = str(data[data_key].data.units)
+                detected_unit = _normalize_unit(detected_unit)
+            else:
+                # Try pint-xarray units
+                try:
+                    detected_unit = str(data[data_key].pint.units)
+                except (AttributeError, ValueError):
+                    detected_unit = None
 
     elif isinstance(data, pint.Quantity):
         detected_unit = str(data.units)
+        # Normalize pint unit strings for consistency
+        detected_unit = _normalize_unit(detected_unit)
     elif hasattr(data, "attrs") and "units" in data.attrs:
         # For pandas with attrs
         detected_unit = data.attrs["units"]
@@ -387,6 +394,17 @@ def _perform_conversion(
             target_unit,
             is_depth_to_volume,
         )
+    elif isinstance(data, pint.Quantity):
+        return _convert_pint_quantity(
+            data,
+            area,
+            source_standard_unit,
+            source_factor,
+            area_unit,
+            target_standard_unit,
+            target_factor,
+            is_depth_to_volume,
+        )
     elif isinstance(data, (np.ndarray, pd.Series, pd.DataFrame)):
         return _convert_numpy_pandas(
             data,
@@ -498,6 +516,54 @@ def _convert_xarray(
 
     except Exception as e:
         raise ValueError(f"Failed to convert xarray data: {e}")
+
+
+def _convert_pint_quantity(
+    data,
+    area,
+    source_unit,
+    source_factor,
+    area_unit,
+    target_unit,
+    target_factor,
+    is_depth_to_volume,
+):
+    """Convert pint.Quantity streamflow units."""
+    # Extract values and handle source factor
+    data_values = data.magnitude / source_factor
+    data_units = str(data.units)
+
+    # Handle area - could be pint.Quantity or numpy/pandas
+    if isinstance(area, pint.Quantity):
+        area_values = area.magnitude
+        area_unit_for_calc = str(area.units)
+    else:
+        area_values = area
+        area_unit_for_calc = area_unit
+
+    # Create pint quantities for conversion
+    try:
+        data_qty = data_values * ureg(source_unit)
+        area_qty = area_values * ureg(area_unit_for_calc)
+
+        # Perform conversion based on direction
+        if is_depth_to_volume is True:
+            result_qty = data_qty * area_qty
+        elif is_depth_to_volume is False:
+            result_qty = data_qty / area_qty
+        else:
+            # Same type conversion
+            result_qty = data_qty
+
+        # Convert to target unit
+        converted_qty = result_qty.to(ureg(target_unit))
+        final_result = converted_qty.magnitude * target_factor
+
+        # Return as numpy array (not pint.Quantity) to match interface
+        return final_result
+
+    except Exception as e:
+        raise ValueError(f"Failed to convert pint.Quantity data: {e}")
 
 
 def _convert_numpy_pandas(

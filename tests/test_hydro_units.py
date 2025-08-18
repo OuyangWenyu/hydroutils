@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2025-08-18 11:46:35
-LastEditTime: 2025-08-18 15:14:40
+LastEditTime: 2025-08-18 16:04:57
 LastEditors: Wenyu Ouyang
 Description: Unit tests for hydro_units module.
 FilePath: \hydroutils\tests\test_hydro_units.py
@@ -186,6 +186,67 @@ class TestStreamflowUnitConv:
             area_unit=area_unit,
         )
         np.testing.assert_array_almost_equal(result, expected, decimal=4)
+
+    def test_pint_quantity_support(self):
+        """Test that streamflow_unit_conv supports pint.Quantity inputs."""
+        # Test the exact scenario from parametrize tests
+        streamflow = np.array([1080.0, 2160.0]) * ureg.mm / ureg.h / 3  # mm/3h
+        area = np.array([1]) * ureg.km**2
+        expected = np.array([100, 200])
+
+        result = streamflow_unit_conv(streamflow, area, "m^3/s")
+        np.testing.assert_array_almost_equal(result, expected, decimal=6)
+
+        # Test mixed types - pint streamflow + numpy area
+        streamflow_pint = np.array([10.0, 20.0]) * ureg.m**3 / ureg.s
+        area_numpy = np.array([1000.0])  # km²
+
+        result2 = streamflow_unit_conv(
+            streamflow_pint, area_numpy, "mm/d", area_unit="km^2"
+        )
+        expected2 = np.array([0.864, 1.728])
+        np.testing.assert_array_almost_equal(result2, expected2, decimal=3)
+
+    def test_pint_quantity_unit_detection(self):
+        """Test automatic unit detection from pint.Quantity objects."""
+        # Test that units are correctly detected from pint quantities
+        streamflow = np.array([100.0, 200.0]) * ureg.m**3 / ureg.s
+        area = np.array([1]) * ureg.km**2
+
+        # Should not need source_unit parameter - detected automatically
+        result = streamflow_unit_conv(streamflow, area, "mm/d")
+        expected = np.array([8640.0, 17280.0])
+        np.testing.assert_array_almost_equal(result, expected, decimal=4)
+
+    def test_xarray_with_pint_quantity_data(self):
+        """Test xarray Dataset containing pint.Quantity data arrays."""
+        # Create xarray Dataset with pint.Quantity data (reproducing the issue scenario)
+        streamflow = xr.Dataset({
+            "streamflow": xr.DataArray(
+                np.array([[100, 200], [300, 400]]), dims=["time", "basin"]
+            )
+        })
+        area = xr.Dataset({
+            "area": xr.DataArray(np.array([1, 2]), dims=["basin"])
+        })
+        
+        # Attach pint units to DataArrays (as done in failing test)
+        streamflow["streamflow"] = streamflow["streamflow"] * ureg.m**3 / ureg.s
+        area["area"] = area["area"] * ureg.km**2
+        
+        # Test conversion to mm/d
+        result = streamflow_unit_conv(streamflow, area, "mm/d")
+        expected = np.array([[8640.0, 8640.0], [25920.0, 17280.0]])
+        
+        np.testing.assert_allclose(result["streamflow"].values, expected, rtol=1e-6)
+        assert result["streamflow"].attrs.get("units") == "mm/d"
+        
+        # Test conversion to mm/3h (custom unit)
+        result2 = streamflow_unit_conv(streamflow, area, "mm/3h")
+        expected2 = np.array([[1080.0, 1080.0], [3240.0, 2160.0]])
+        
+        np.testing.assert_allclose(result2["streamflow"].values, expected2, rtol=1e-6)
+        assert result2["streamflow"].attrs.get("units") == "mm/3h"
 
 
 class TestDetectTimeInterval:
