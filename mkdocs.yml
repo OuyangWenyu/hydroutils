@@ -50,3 +50,5 @@ nav:
     - Report Issues: https://github.com/OuyangWenyu/hydroutils/issues
     - API Reference:
           - hydroutils module: hydroutils.md
+          - hydro_plot module: hydro_plot.md
+remote_name: upstream

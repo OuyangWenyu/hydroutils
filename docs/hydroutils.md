@@ -1,4 +1,4 @@
  
 # hydroutils module
 
-::: hydroutils.hydroutils
+::: hydroutils
