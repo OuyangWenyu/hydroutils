@@ -327,14 +327,30 @@ def _determine_conversion_direction(source_unit, target_unit):
     source_norm = _normalize_unit(source_unit)
     target_norm = _normalize_unit(target_unit)
 
-    # Define unit patterns
-    depth_pattern = re.compile(r"mm/(?:\d+)?[hd](?:ay|our)?$")
-    volume_pattern = re.compile(r"(?:m\^?3|ft\^?3)/s$")
+    depth_patterns = [
+        r"mm/\d*[hH](?:our|r)?s?$",  # mm/h, mm/3h, mm/24h, mm/hour, mm/Hr
+        r"mm/\d*[dD](?:ay)?s?$",  # mm/d, mm/1d, mm/day, mm/Day
+        r"mm/\d*[mM](?:in)?s?$",  # mm/m, mm/30m, mm/min
+        r"mm/\d*[sS](?:ec)?s?$",  # mm/s, mm/sec
+        r"in/\d*[hH](?:our|r)?s?$",  # in/h, in/hour
+        r"in/\d*[dD](?:ay)?s?$",  # in/d, in/day
+    ]
 
-    source_is_depth = bool(depth_pattern.match(source_norm))
-    source_is_volume = bool(volume_pattern.match(source_norm))
-    target_is_depth = bool(depth_pattern.match(target_norm))
-    target_is_volume = bool(volume_pattern.match(target_norm))
+    volume_patterns = [
+        r"m(?:\*\*3|\^3|3)/s$",  # m**3/s, m^3/s, m3/s
+        r"ft(?:\*\*3|\^3|3)/s$",  # ft**3/s, ft^3/s, ft3/s
+        r"l/s$",  # l/s
+        r"gal/s$",  # gal/s
+    ]
+
+    source_is_depth = any(re.match(pattern, source_norm) for pattern in depth_patterns)
+    source_is_volume = any(
+        re.match(pattern, source_norm) for pattern in volume_patterns
+    )
+    target_is_depth = any(re.match(pattern, target_norm) for pattern in depth_patterns)
+    target_is_volume = any(
+        re.match(pattern, target_norm) for pattern in volume_patterns
+    )
 
     # Validate compatibility
     if not (
