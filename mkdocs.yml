@@ -42,11 +42,22 @@ markdown_extensions:
 
 nav:
     - Home: index.md
-    - Installation: installation.md
-    - Usage: usage.md
-    - Contributing: contributing.md
-    - FAQ: faq.md
-    - Changelog: changelog.md
-    - Report Issues: https://github.com/OuyangWenyu/hydroutils/issues
+    - Getting Started:
+          - Installation: installation.md
+          - Quick Start: usage.md
+          - FAQ: faq.md
     - API Reference:
-          - hydroutils module: hydroutils.md
+          - Overview: api/hydroutils.md
+          - Core Modules:
+              - Statistical Analysis: api/hydro_stat.md
+              - Visualization: api/hydro_plot.md
+              - Time Processing: api/hydro_time.md
+              - File Operations: api/hydro_file.md
+          - Advanced Modules:
+              - Mathematical Operations: api/hydro_arithmetric.md
+              - AWS S3 Integration: api/hydro_s3.md
+              - Logging Utilities: api/hydro_log.md
+    - Development:
+          - Contributing: contributing.md
+          - Changelog: changelog.md
+          - Report Issues: https://github.com/OuyangWenyu/hydroutils/issues
