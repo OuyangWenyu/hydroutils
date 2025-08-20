@@ -37,7 +37,7 @@ dependencies = [
     "numpy",
     "pandas",
     "matplotlib",
-    "seaborn", 
+    "seaborn",
     "cartopy",
     "HydroErr",
     "async-retriever",
@@ -52,6 +52,9 @@ dependencies = [
     "requests",
     "pint",
     "pint-xarray",
+    "mkdocs-git-revision-date-localized-plugin>=1.4.7",
+    "mkdocs-git-revision-date-plugin>=0.3.2",
+    "mkdocstrings-python>=1.17.0",
 ]
 
 [project.optional-dependencies]
@@ -87,10 +90,7 @@ test = [
 
 # 文档依赖
 docs = [
-    "mkdocs-material",
-    "mkdocstrings[python]",
-    "mkdocs-git-revision-date-plugin",
-    "mkdocs-jupyter",
+
     "ipykernel",
     "mkdocstrings>=0.30.0",
     "mkdocstrings-python>=1.17.0",
@@ -98,6 +98,13 @@ docs = [
     "Sphinx>=4.0",
     "sphinx-rtd-theme",
     "myst-parser",
+    "aiohappyeyeballs>=2.6.1",
+    "aiosignal>=1.4.0",
+    "ipykernel>=6.30.1",
+    "mkdocs-git-revision-date-plugin>=0.3.2",
+    "mkdocs-jupyter>=0.25.1",
+    "mkdocs-material>=9.6.17",
+    "yarl>=1.20.1",
 ]
 
 # 发布依赖

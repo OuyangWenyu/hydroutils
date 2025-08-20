@@ -3,7 +3,6 @@ on:
     push:
         branches:
             - dev
-            - main
 
 jobs:
     deploy:
@@ -30,10 +29,11 @@ jobs:
                   source .venv/bin/activate
                   uv sync
                   uv add mkdocstrings 
-                #   uv pip sync requirements.txt
-                #   uv pip install --upgrade minio argon2-cffi-bindings
-
-                #   uv add mkdocs-material 
+                  uv add mkdocs-material 
+                  uv add mkdocs-jupyter
+                # uv pip sync requirements.txt
+                # uv pip install --upgrade minio argon2-cffi-bindings
+                #   
                 #   uv add mkdocstrings-python-legacy 
                 #   uv add mkdocs-git-revision-date-plugin 
                 #   uv add mkdocs-jupyter 

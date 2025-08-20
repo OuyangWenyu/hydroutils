@@ -1831,6 +1831,9 @@ dependencies = [
     { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "matplotlib", version = "3.10.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "minio" },
+    { name = "mkdocs-git-revision-date-localized-plugin" },
+    { name = "mkdocs-git-revision-date-plugin" },
+    { name = "mkdocstrings-python" },
     { name = "numba", version = "0.60.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "numba", version = "0.61.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -1853,6 +1856,8 @@ dependencies = [
 
 [package.optional-dependencies]
 all = [
+    { name = "aiohappyeyeballs" },
+    { name = "aiosignal" },
     { name = "black", extra = ["jupyter"] },
     { name = "build" },
     { name = "bump2version" },
@@ -1862,7 +1867,7 @@ all = [
     { name = "mkdocs-git-revision-date-plugin" },
     { name = "mkdocs-jupyter" },
     { name = "mkdocs-material" },
-    { name = "mkdocstrings", extra = ["python"] },
+    { name = "mkdocstrings" },
     { name = "mkdocstrings-python" },
     { name = "mkdocstrings-python-legacy" },
     { name = "mypy" },
@@ -1885,6 +1890,7 @@ all = [
     { name = "types-requests", version = "2.32.4.20250611", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "watchdog" },
     { name = "wheel" },
+    { name = "yarl" },
 ]
 dev = [
     { name = "black", extra = ["jupyter"] },
@@ -1909,11 +1915,13 @@ dev = [
     { name = "wheel" },
 ]
 docs = [
+    { name = "aiohappyeyeballs" },
+    { name = "aiosignal" },
     { name = "ipykernel" },
     { name = "mkdocs-git-revision-date-plugin" },
     { name = "mkdocs-jupyter" },
     { name = "mkdocs-material" },
-    { name = "mkdocstrings", extra = ["python"] },
+    { name = "mkdocstrings" },
     { name = "mkdocstrings-python" },
     { name = "mkdocstrings-python-legacy" },
     { name = "myst-parser", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -1922,6 +1930,7 @@ docs = [
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "sphinx-rtd-theme" },
+    { name = "yarl" },
 ]
 release = [
     { name = "build" },
@@ -1950,6 +1959,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohappyeyeballs", marker = "extra == 'all'", specifier = ">=2.6.1" },
+    { name = "aiohappyeyeballs", marker = "extra == 'docs'", specifier = ">=2.6.1" },
+    { name = "aiosignal", marker = "extra == 'all'", specifier = ">=1.4.0" },
+    { name = "aiosignal", marker = "extra == 'docs'", specifier = ">=1.4.0" },
     { name = "async-retriever" },
     { name = "black", extras = ["jupyter"], marker = "extra == 'all'" },
     { name = "black", extras = ["jupyter"], marker = "extra == 'dev'" },
@@ -1967,19 +1980,22 @@ requires-dist = [
     { name = "grip", marker = "extra == 'dev'" },
     { name = "hydroerr" },
     { name = "ipykernel", marker = "extra == 'all'" },
+    { name = "ipykernel", marker = "extra == 'all'", specifier = ">=6.30.1" },
     { name = "ipykernel", marker = "extra == 'docs'" },
+    { name = "ipykernel", marker = "extra == 'docs'", specifier = ">=6.30.1" },
     { name = "matplotlib" },
     { name = "minio" },
-    { name = "mkdocs-git-revision-date-plugin", marker = "extra == 'all'" },
-    { name = "mkdocs-git-revision-date-plugin", marker = "extra == 'docs'" },
-    { name = "mkdocs-jupyter", marker = "extra == 'all'" },
-    { name = "mkdocs-jupyter", marker = "extra == 'docs'" },
-    { name = "mkdocs-material", marker = "extra == 'all'" },
-    { name = "mkdocs-material", marker = "extra == 'docs'" },
+    { name = "mkdocs-git-revision-date-localized-plugin", specifier = ">=1.4.7" },
+    { name = "mkdocs-git-revision-date-plugin", specifier = ">=0.3.2" },
+    { name = "mkdocs-git-revision-date-plugin", marker = "extra == 'all'", specifier = ">=0.3.2" },
+    { name = "mkdocs-git-revision-date-plugin", marker = "extra == 'docs'", specifier = ">=0.3.2" },
+    { name = "mkdocs-jupyter", marker = "extra == 'all'", specifier = ">=0.25.1" },
+    { name = "mkdocs-jupyter", marker = "extra == 'docs'", specifier = ">=0.25.1" },
+    { name = "mkdocs-material", marker = "extra == 'all'", specifier = ">=9.6.17" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.6.17" },
     { name = "mkdocstrings", marker = "extra == 'all'", specifier = ">=0.30.0" },
     { name = "mkdocstrings", marker = "extra == 'docs'", specifier = ">=0.30.0" },
-    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'all'" },
-    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'" },
+    { name = "mkdocstrings-python", specifier = ">=1.17.0" },
     { name = "mkdocstrings-python", marker = "extra == 'all'", specifier = ">=1.17.0" },
     { name = "mkdocstrings-python", marker = "extra == 'docs'", specifier = ">=1.17.0" },
     { name = "mkdocstrings-python-legacy", marker = "extra == 'all'", specifier = ">=0.2.7" },
@@ -2033,6 +2049,8 @@ requires-dist = [
     { name = "wheel", marker = "extra == 'all'" },
     { name = "wheel", marker = "extra == 'dev'" },
     { name = "xarray" },
+    { name = "yarl", marker = "extra == 'all'", specifier = ">=1.20.1" },
+    { name = "yarl", marker = "extra == 'docs'", specifier = ">=1.20.1" },
 ]
 provides-extras = ["all", "dev", "docs", "release", "test"]
 
@@ -2122,7 +2140,7 @@ wheels = [
 
 [[package]]
 name = "ipykernel"
-version = "6.30.0"
+version = "6.30.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appnope", marker = "sys_platform == 'darwin'" },
@@ -2141,9 +2159,9 @@ dependencies = [
     { name = "tornado" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/38/27/9e6e30ed92f2ac53d29f70b09da8b2dc456e256148e289678fa0e825f46a/ipykernel-6.30.0.tar.gz", hash = "sha256:b7b808ddb2d261aae2df3a26ff3ff810046e6de3dfbc6f7de8c98ea0a6cb632c", size = 165125, upload-time = "2025-07-21T10:36:09.259Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/76/11082e338e0daadc89c8ff866185de11daf67d181901038f9e139d109761/ipykernel-6.30.1.tar.gz", hash = "sha256:6abb270161896402e76b91394fcdce5d1be5d45f456671e5080572f8505be39b", size = 166260, upload-time = "2025-08-04T15:47:35.018Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/3d/00813c3d9b46e3dcd88bd4530e0a3c63c0509e5d8c9eff34723ea243ab04/ipykernel-6.30.0-py3-none-any.whl", hash = "sha256:fd2936e55c4a1c2ee8b1e5fa6a372b8eecc0ab1338750dee76f48fa5cca1301e", size = 117264, upload-time = "2025-07-21T10:36:06.854Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/c7/b445faca8deb954fe536abebff4ece5b097b923de482b26e78448c89d1dd/ipykernel-6.30.1-py3-none-any.whl", hash = "sha256:aa6b9fb93dca949069d8b85b6c79b2518e32ac583ae9c7d37c51d119e18b3fb4", size = 117484, upload-time = "2025-08-04T15:47:32.622Z" },
 ]
 
 [[package]]
@@ -3047,6 +3065,21 @@ wheels = [
 ]
 
 [[package]]
+name = "mkdocs-git-revision-date-localized-plugin"
+version = "1.4.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "babel" },
+    { name = "gitpython" },
+    { name = "mkdocs" },
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5e/f8/a17ec39a4fc314d40cc96afdc1d401e393ebd4f42309d454cc940a2cf38a/mkdocs_git_revision_date_localized_plugin-1.4.7.tar.gz", hash = "sha256:10a49eff1e1c3cb766e054b9d8360c904ce4fe8c33ac3f6cc083ac6459c91953", size = 450473, upload-time = "2025-05-28T18:26:20.697Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/53/b6/106fcc15287e7228658fbd0ad9e8b0d775becced0a089cc39984641f4a0f/mkdocs_git_revision_date_localized_plugin-1.4.7-py3-none-any.whl", hash = "sha256:056c0a90242409148f1dc94d5c9d2c25b5b8ddd8de45489fa38f7fa7ccad2bc4", size = 25382, upload-time = "2025-05-28T18:26:18.907Z" },
+]
+
+[[package]]
 name = "mkdocs-git-revision-date-plugin"
 version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
@@ -3078,11 +3111,13 @@ wheels = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.16"
+version = "9.6.17"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
     { name = "backrefs" },
+    { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "click", version = "8.2.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "colorama" },
     { name = "jinja2" },
     { name = "markdown" },
@@ -3093,9 +3128,9 @@ dependencies = [
     { name = "pymdown-extensions" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/84/aec27a468c5e8c27689c71b516fb5a0d10b8fca45b9ad2dd9d6e43bc4296/mkdocs_material-9.6.16.tar.gz", hash = "sha256:d07011df4a5c02ee0877496d9f1bfc986cfb93d964799b032dd99fe34c0e9d19", size = 4028828, upload-time = "2025-07-26T15:53:47.542Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/02/51115cdda743e1551c5c13bdfaaf8c46b959acc57ba914d8ec479dd2fe1f/mkdocs_material-9.6.17.tar.gz", hash = "sha256:48ae7aec72a3f9f501a70be3fbd329c96ff5f5a385b67a1563e5ed5ce064affe", size = 4032898, upload-time = "2025-08-15T16:09:21.412Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/f4/90ad67125b4dd66e7884e4dbdfab82e3679eb92b751116f8bb25ccfe2f0c/mkdocs_material-9.6.16-py3-none-any.whl", hash = "sha256:8d1a1282b892fe1fdf77bfeb08c485ba3909dd743c9ba69a19a40f637c6ec18c", size = 9223743, upload-time = "2025-07-26T15:53:44.236Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/7c/0f0d44c92c8f3068930da495b752244bd59fd87b5b0f9571fa2d2a93aee7/mkdocs_material-9.6.17-py3-none-any.whl", hash = "sha256:221dd8b37a63f52e580bcab4a7e0290e4a6f59bd66190be9c3d40767e05f9417", size = 9229230, upload-time = "2025-08-15T16:09:18.301Z" },
 ]
 
 [[package]]
@@ -3123,11 +3158,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e2/0a/7e4776217d4802009c8238c75c5345e23014a4706a8414a62c0498858183/mkdocstrings-0.30.0.tar.gz", hash = "sha256:5d8019b9c31ddacd780b6784ffcdd6f21c408f34c0bd1103b5351d609d5b4444", size = 106597, upload-time = "2025-07-22T23:48:45.998Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/b4/3c5eac68f31e124a55d255d318c7445840fa1be55e013f507556d6481913/mkdocstrings-0.30.0-py3-none-any.whl", hash = "sha256:ae9e4a0d8c1789697ac776f2e034e2ddd71054ae1cf2c2bb1433ccfd07c226f2", size = 36579, upload-time = "2025-07-22T23:48:44.152Z" },
-]
-
-[package.optional-dependencies]
-python = [
-    { name = "mkdocstrings-python" },
 ]
 
 [[package]]
