@@ -1,0 +1,2275 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://zhuanglaihong.github.io/hydroutils/api/hydro_units/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+    
+    
+      
+        <title>hydro_units - hydroutils</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="preference" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#hydro_units" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="hydroutils" class="md-header__button md-logo" aria-label="hydroutils" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            hydroutils
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              hydro_units
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/zhuanglaihong/hydroutils" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="hydroutils" class="md-nav__button md-logo" aria-label="hydroutils" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    hydroutils
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/zhuanglaihong/hydroutils" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydroutils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Core Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_stat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Statistical Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_plot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Time Processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_file/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Operations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_arithmetric.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mathematical Operations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_s3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS S3 Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Logging Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/OuyangWenyu/hydroutils/issues" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Report Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#streamflow_unit_conv" class="md-nav__link">
+    <span class="md-ellipsis">
+      streamflow_unit_conv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detect_time_interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      detect_time_interval
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_time_interval_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_time_interval_info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate_unit_compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      validate_unit_compatibility
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units" class="md-nav__link">
+    <span class="md-ellipsis">
+      hydro_units
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.detect_time_interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      detect_time_interval
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="detect_time_interval">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.detect_time_interval--regular-3-hourly-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regular 3-hourly data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.detect_time_interval--daily-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Daily data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.detect_time_interval--mixed-intervals-most-common-is-6h" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixed intervals (most common is 6h)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.get_time_interval_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_time_interval_info
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="get_time_interval_info">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.get_time_interval_info--hourly-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hourly intervals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.get_time_interval_info--daily-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Daily intervals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.get_time_interval_info--invalid-format-raises-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invalid format raises error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv" class="md-nav__link">
+    <span class="md-ellipsis">
+      streamflow_unit_conv
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="streamflow_unit_conv">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv--returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Returns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv--raises" class="md-nav__link">
+    <span class="md-ellipsis">
+      Raises
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv--examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv--convert-m3s-to-mmday" class="md-nav__link">
+    <span class="md-ellipsis">
+      Convert m³/s to mm/day
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.streamflow_unit_conv--convert-mmh-to-m3s" class="md-nav__link">
+    <span class="md-ellipsis">
+      Convert mm/h to m³/s
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.validate_unit_compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      validate_unit_compatibility
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="validate_unit_compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.validate_unit_compatibility--compatible-conversions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compatible conversions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydroutils.hydro_units.validate_unit_compatibility--incompatible-conversions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Incompatible conversions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+
+
+
+                  
+
+
+  
+  
+
+
+<h1 id="hydro_units">hydro_units<a class="headerlink" href="#hydro_units" title="Permanent link">&para;</a></h1>
+<p>The <code>hydro_units</code> module provides comprehensive unit conversion functionality for hydrological data.</p>
+<h2 id="core-functions">Core Functions<a class="headerlink" href="#core-functions" title="Permanent link">&para;</a></h2>
+<h3 id="streamflow_unit_conv">streamflow_unit_conv<a class="headerlink" href="#streamflow_unit_conv" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">streamflow_unit_conv</span><span class="p">(</span>
+    <span class="n">streamflow_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">pint</span><span class="o">.</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">source_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m³/s&quot;</span><span class="p">,</span>
+    <span class="n">basin_area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_interval</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">pint</span><span class="o">.</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+<p>Converts streamflow data between different units (depth-based to volume-based and vice versa).</p>
+<p><strong>Example:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hydroutils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hu</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Convert from mm/h to m³/s</span>
+<span class="n">flow_mmh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">])</span>  <span class="c1"># mm/h</span>
+<span class="n">flow_m3s</span> <span class="o">=</span> <span class="n">hu</span><span class="o">.</span><span class="n">streamflow_unit_conv</span><span class="p">(</span>
+    <span class="n">flow_mmh</span><span class="p">,</span> 
+    <span class="n">source_unit</span><span class="o">=</span><span class="s2">&quot;mm/h&quot;</span><span class="p">,</span> 
+    <span class="n">target_unit</span><span class="o">=</span><span class="s2">&quot;m³/s&quot;</span><span class="p">,</span>
+    <span class="n">basin_area</span><span class="o">=</span><span class="mi">1000</span>  <span class="c1"># km²</span>
+<span class="p">)</span>
+</code></pre></div></td></tr></table></div></p>
+<h3 id="detect_time_interval">detect_time_interval<a class="headerlink" href="#detect_time_interval" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect_time_interval</span><span class="p">(</span><span class="n">time_series</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</code></pre></div></td></tr></table></div>
+<p>Automatically detects the time interval from a time series.</p>
+<h3 id="get_time_interval_info">get_time_interval_info<a class="headerlink" href="#get_time_interval_info" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_time_interval_info</span><span class="p">(</span><span class="n">time_interval</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</code></pre></div></td></tr></table></div>
+<p>Returns detailed information about a time interval.</p>
+<h3 id="validate_unit_compatibility">validate_unit_compatibility<a class="headerlink" href="#validate_unit_compatibility" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">validate_unit_compatibility</span><span class="p">(</span><span class="n">unit1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div></td></tr></table></div>
+<p>Validates if two units are compatible for conversion.</p>
+<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="hydroutils.hydro_units"></a>
+    <div class="doc doc-contents first">
+
+        <p>Hydrological unit conversion utilities.</p>
+<p>This module provides comprehensive unit conversion functionality for hydrological data,
+including streamflow unit conversions between depth units (mm/time) and volume units (m³/s).</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hydroutils.hydro_units.detect_time_interval" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">detect_time_interval</span><span class="p">(</span><span class="n">time_series</span><span class="p">)</span></code>
+
+<a href="#hydroutils.hydro_units.detect_time_interval" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Detect the time interval between points in a time series.</p>
+<p>This function analyzes a time series to determine the most common time
+interval between consecutive points. It handles various input formats and
+converts the interval to a standardized string format.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>time_series</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="pandas.DatetimeIndex">DatetimeIndex</span>, <span title="list">list</span>, <span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Time series
+data containing datetime information. Can be:
+- pandas DatetimeIndex
+- List of datetime-like objects
+- NumPy array of datetime-like objects</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Detected time interval in format suitable for unit conversion:
+- For hourly data: "Nh" where N is number of hours (e.g., "3h")
+- For daily data: "Nd" where N is number of days (e.g., "1d")</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If time series has fewer than 2 points.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Note</summary>
+  <ul>
+<li>Uses most common time difference (mode) for irregular intervals</li>
+<li>Rounds non-integer hours to nearest hour</li>
+<li>Prefers hours for intervals &lt; 24h, days for intervals ≥ 24h</li>
+<li>Automatically converts various datetime formats to pandas DatetimeIndex</li>
+</ul>
+</details>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>import pandas as pd</p>
+<h3 id="hydroutils.hydro_units.detect_time_interval--regular-3-hourly-data">Regular 3-hourly data<a class="headerlink" href="#hydroutils.hydro_units.detect_time_interval--regular-3-hourly-data" title="Permanent link">&para;</a></h3>
+<p>time_index = pd.date_range("2024-01-01", periods=8, freq="3h")
+detect_time_interval(time_index)
+'3h'</p>
+<h3 id="hydroutils.hydro_units.detect_time_interval--daily-data">Daily data<a class="headerlink" href="#hydroutils.hydro_units.detect_time_interval--daily-data" title="Permanent link">&para;</a></h3>
+<p>dates = ["2024-01-01", "2024-01-02", "2024-01-03"]
+detect_time_interval(dates)
+'1d'</p>
+<h3 id="hydroutils.hydro_units.detect_time_interval--mixed-intervals-most-common-is-6h">Mixed intervals (most common is 6h)<a class="headerlink" href="#hydroutils.hydro_units.detect_time_interval--mixed-intervals-most-common-is-6h" title="Permanent link">&para;</a></h3>
+<p>times = pd.to_datetime([
+...     "2024-01-01 00:00",
+...     "2024-01-01 06:00",
+...     "2024-01-01 12:00",
+...     "2024-01-01 18:00"
+... ])
+detect_time_interval(times)
+'6h'</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+            <details class="quote">
+              <summary>Source code in <code>hydroutils\hydro_units.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span>
+<span class="normal">868</span>
+<span class="normal">869</span>
+<span class="normal">870</span>
+<span class="normal">871</span>
+<span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span>
+<span class="normal">875</span>
+<span class="normal">876</span>
+<span class="normal">877</span>
+<span class="normal">878</span>
+<span class="normal">879</span>
+<span class="normal">880</span>
+<span class="normal">881</span>
+<span class="normal">882</span>
+<span class="normal">883</span>
+<span class="normal">884</span>
+<span class="normal">885</span>
+<span class="normal">886</span>
+<span class="normal">887</span>
+<span class="normal">888</span>
+<span class="normal">889</span>
+<span class="normal">890</span>
+<span class="normal">891</span>
+<span class="normal">892</span>
+<span class="normal">893</span>
+<span class="normal">894</span>
+<span class="normal">895</span>
+<span class="normal">896</span>
+<span class="normal">897</span>
+<span class="normal">898</span>
+<span class="normal">899</span>
+<span class="normal">900</span>
+<span class="normal">901</span>
+<span class="normal">902</span>
+<span class="normal">903</span>
+<span class="normal">904</span>
+<span class="normal">905</span>
+<span class="normal">906</span>
+<span class="normal">907</span>
+<span class="normal">908</span>
+<span class="normal">909</span>
+<span class="normal">910</span>
+<span class="normal">911</span>
+<span class="normal">912</span>
+<span class="normal">913</span>
+<span class="normal">914</span>
+<span class="normal">915</span>
+<span class="normal">916</span>
+<span class="normal">917</span>
+<span class="normal">918</span>
+<span class="normal">919</span>
+<span class="normal">920</span>
+<span class="normal">921</span>
+<span class="normal">922</span>
+<span class="normal">923</span>
+<span class="normal">924</span>
+<span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect_time_interval</span><span class="p">(</span>
+    <span class="n">time_series</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect the time interval between points in a time series.</span>
+
+<span class="sd">    This function analyzes a time series to determine the most common time</span>
+<span class="sd">    interval between consecutive points. It handles various input formats and</span>
+<span class="sd">    converts the interval to a standardized string format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        time_series (Union[pd.DatetimeIndex, list, np.ndarray]): Time series</span>
+<span class="sd">            data containing datetime information. Can be:</span>
+<span class="sd">            - pandas DatetimeIndex</span>
+<span class="sd">            - List of datetime-like objects</span>
+<span class="sd">            - NumPy array of datetime-like objects</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Detected time interval in format suitable for unit conversion:</span>
+<span class="sd">            - For hourly data: &quot;Nh&quot; where N is number of hours (e.g., &quot;3h&quot;)</span>
+<span class="sd">            - For daily data: &quot;Nd&quot; where N is number of days (e.g., &quot;1d&quot;)</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If time series has fewer than 2 points.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        - Uses most common time difference (mode) for irregular intervals</span>
+<span class="sd">        - Rounds non-integer hours to nearest hour</span>
+<span class="sd">        - Prefers hours for intervals &lt; 24h, days for intervals ≥ 24h</span>
+<span class="sd">        - Automatically converts various datetime formats to pandas DatetimeIndex</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; # Regular 3-hourly data</span>
+<span class="sd">        &gt;&gt;&gt; time_index = pd.date_range(&quot;2024-01-01&quot;, periods=8, freq=&quot;3h&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; detect_time_interval(time_index)</span>
+<span class="sd">        &#39;3h&#39;</span>
+
+<span class="sd">        &gt;&gt;&gt; # Daily data</span>
+<span class="sd">        &gt;&gt;&gt; dates = [&quot;2024-01-01&quot;, &quot;2024-01-02&quot;, &quot;2024-01-03&quot;]</span>
+<span class="sd">        &gt;&gt;&gt; detect_time_interval(dates)</span>
+<span class="sd">        &#39;1d&#39;</span>
+
+<span class="sd">        &gt;&gt;&gt; # Mixed intervals (most common is 6h)</span>
+<span class="sd">        &gt;&gt;&gt; times = pd.to_datetime([</span>
+<span class="sd">        ...     &quot;2024-01-01 00:00&quot;,</span>
+<span class="sd">        ...     &quot;2024-01-01 06:00&quot;,</span>
+<span class="sd">        ...     &quot;2024-01-01 12:00&quot;,</span>
+<span class="sd">        ...     &quot;2024-01-01 18:00&quot;</span>
+<span class="sd">        ... ])</span>
+<span class="sd">        &gt;&gt;&gt; detect_time_interval(times)</span>
+<span class="sd">        &#39;6h&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">time_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">time_series</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">time_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">time_series</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+        <span class="n">time_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">time_series</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_series</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Time series must have at least 2 time points to detect interval&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Calculate time differences</span>
+    <span class="n">time_diffs</span> <span class="o">=</span> <span class="n">time_series</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">time_series</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Get the most common time difference (mode)</span>
+    <span class="n">most_common_diff</span> <span class="o">=</span> <span class="n">time_diffs</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Convert to hours and days</span>
+    <span class="n">total_seconds</span> <span class="o">=</span> <span class="n">most_common_diff</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="n">hours</span> <span class="o">=</span> <span class="n">total_seconds</span> <span class="o">/</span> <span class="mi">3600</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">total_seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span><span class="p">)</span>
+
+    <span class="c1"># Determine the appropriate unit</span>
+    <span class="k">if</span> <span class="n">hours</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span> <span class="ow">and</span> <span class="n">hours</span> <span class="o">&lt;</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span><span class="si">}</span><span class="s2">h&quot;</span>
+    <span class="k">elif</span> <span class="n">days</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">)</span><span class="si">}</span><span class="s2">d&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For non-integer hours, round to nearest hour</span>
+        <span class="n">rounded_hours</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rounded_hours</span><span class="si">}</span><span class="s2">h&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hydroutils.hydro_units.get_time_interval_info" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_time_interval_info</span><span class="p">(</span><span class="n">time_interval</span><span class="p">)</span></code>
+
+<a href="#hydroutils.hydro_units.get_time_interval_info" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Parse a time interval string into its numeric value and unit.</p>
+<p>This function extracts the numeric value and unit from a time interval
+string using regular expressions. It supports hourly and daily intervals
+in a standardized format.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>time_interval</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Time interval string in format "Nh" or "Nd" where
+N is a positive integer. Examples: "1h", "3h", "1d", "5d".</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Tuple[int, str]: Two-element tuple containing:
+- number (int): The numeric value from the interval
+- unit (str): The unit, either 'h' for hours or 'd' for days</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If time_interval doesn't match expected format.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Note</summary>
+  <ul>
+<li>Only supports hours ('h') and days ('d') units</li>
+<li>Number must be a positive integer</li>
+<li>Format is case-sensitive ('h' and 'd' must be lowercase)</li>
+<li>No spaces allowed in the interval string</li>
+</ul>
+</details>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<h3 id="hydroutils.hydro_units.get_time_interval_info--hourly-intervals">Hourly intervals<a class="headerlink" href="#hydroutils.hydro_units.get_time_interval_info--hourly-intervals" title="Permanent link">&para;</a></h3>
+<p>get_time_interval_info("3h")
+(3, 'h')
+get_time_interval_info("24h")
+(24, 'h')</p>
+<h3 id="hydroutils.hydro_units.get_time_interval_info--daily-intervals">Daily intervals<a class="headerlink" href="#hydroutils.hydro_units.get_time_interval_info--daily-intervals" title="Permanent link">&para;</a></h3>
+<p>get_time_interval_info("1d")
+(1, 'd')
+get_time_interval_info("7d")
+(7, 'd')</p>
+<h3 id="hydroutils.hydro_units.get_time_interval_info--invalid-format-raises-error">Invalid format raises error<a class="headerlink" href="#hydroutils.hydro_units.get_time_interval_info--invalid-format-raises-error" title="Permanent link">&para;</a></h3>
+<p>get_time_interval_info("3hours")  # doctest: +IGNORE_EXCEPTION_DETAIL
+Traceback (most recent call last):
+    ...
+ValueError: Invalid time interval format: 3hours</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+            <details class="quote">
+              <summary>Source code in <code>hydroutils\hydro_units.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">931</span>
+<span class="normal">932</span>
+<span class="normal">933</span>
+<span class="normal">934</span>
+<span class="normal">935</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span>
+<span class="normal">966</span>
+<span class="normal">967</span>
+<span class="normal">968</span>
+<span class="normal">969</span>
+<span class="normal">970</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span>
+<span class="normal">977</span>
+<span class="normal">978</span>
+<span class="normal">979</span>
+<span class="normal">980</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_time_interval_info</span><span class="p">(</span><span class="n">time_interval</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a time interval string into its numeric value and unit.</span>
+
+<span class="sd">    This function extracts the numeric value and unit from a time interval</span>
+<span class="sd">    string using regular expressions. It supports hourly and daily intervals</span>
+<span class="sd">    in a standardized format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        time_interval (str): Time interval string in format &quot;Nh&quot; or &quot;Nd&quot; where</span>
+<span class="sd">            N is a positive integer. Examples: &quot;1h&quot;, &quot;3h&quot;, &quot;1d&quot;, &quot;5d&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[int, str]: Two-element tuple containing:</span>
+<span class="sd">            - number (int): The numeric value from the interval</span>
+<span class="sd">            - unit (str): The unit, either &#39;h&#39; for hours or &#39;d&#39; for days</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If time_interval doesn&#39;t match expected format.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        - Only supports hours (&#39;h&#39;) and days (&#39;d&#39;) units</span>
+<span class="sd">        - Number must be a positive integer</span>
+<span class="sd">        - Format is case-sensitive (&#39;h&#39; and &#39;d&#39; must be lowercase)</span>
+<span class="sd">        - No spaces allowed in the interval string</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; # Hourly intervals</span>
+<span class="sd">        &gt;&gt;&gt; get_time_interval_info(&quot;3h&quot;)</span>
+<span class="sd">        (3, &#39;h&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; get_time_interval_info(&quot;24h&quot;)</span>
+<span class="sd">        (24, &#39;h&#39;)</span>
+
+<span class="sd">        &gt;&gt;&gt; # Daily intervals</span>
+<span class="sd">        &gt;&gt;&gt; get_time_interval_info(&quot;1d&quot;)</span>
+<span class="sd">        (1, &#39;d&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; get_time_interval_info(&quot;7d&quot;)</span>
+<span class="sd">        (7, &#39;d&#39;)</span>
+
+<span class="sd">        &gt;&gt;&gt; # Invalid format raises error</span>
+<span class="sd">        &gt;&gt;&gt; get_time_interval_info(&quot;3hours&quot;)  # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">        ValueError: Invalid time interval format: 3hours</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(\d+)([hd])$&quot;</span><span class="p">,</span> <span class="n">time_interval</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid time interval format: </span><span class="si">{</span><span class="n">time_interval</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">number</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">),</span> <span class="n">unit</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hydroutils.hydro_units.streamflow_unit_conv" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">streamflow_unit_conv</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">target_unit</span><span class="p">,</span> <span class="n">source_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area_unit</span><span class="o">=</span><span class="s1">&#39;km^2&#39;</span><span class="p">)</span></code>
+
+<a href="#hydroutils.hydro_units.streamflow_unit_conv" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert streamflow data units between depth units (mm/time) and volume units (m³/s).</p>
+<p>This function automatically detects conversion direction based on source and target units,
+removing the need for an explicit inverse parameter.</p>
+<h4 id="hydroutils.hydro_units.streamflow_unit_conv--parameters">Parameters<a class="headerlink" href="#hydroutils.hydro_units.streamflow_unit_conv--parameters" title="Permanent link">&para;</a></h4>
+<p>data : numpy.ndarray, pandas.Series, pandas.DataFrame, or xarray.Dataset
+    Streamflow data. Can include unit information in attributes (xarray) or
+    requires source_unit parameter for numpy/pandas data.
+area : numpy.ndarray, pandas.Series, pandas.DataFrame, xarray.Dataset, or pint.Quantity
+    Basin area data. Units will be detected from data attributes or pint units.
+    If no units detected, area_unit parameter will be used.
+target_unit : str
+    Target unit for conversion. Examples: "mm/d", "mm/h", "mm/3h", "m^3/s".
+source_unit : str, optional
+    Source unit of streamflow data. Required if data has no unit information.
+    If provided and data has units, they must match or ValueError is raised.
+area_unit : str, optional
+    Unit for area when area data has no unit information. Default is "km^2".</p>
+<h4 id="hydroutils.hydro_units.streamflow_unit_conv--returns">Returns<a class="headerlink" href="#hydroutils.hydro_units.streamflow_unit_conv--returns" title="Permanent link">&para;</a></h4>
+<p>Converted data in the same type as input data.
+Unit information is preserved in xarray attributes when applicable.</p>
+<h4 id="hydroutils.hydro_units.streamflow_unit_conv--raises">Raises<a class="headerlink" href="#hydroutils.hydro_units.streamflow_unit_conv--raises" title="Permanent link">&para;</a></h4>
+<p>ValueError
+    If no unit information can be determined for data or area.
+    If source_unit conflicts with detected data units.
+    If units are incompatible for conversion.</p>
+<h4 id="hydroutils.hydro_units.streamflow_unit_conv--examples">Examples<a class="headerlink" href="#hydroutils.hydro_units.streamflow_unit_conv--examples" title="Permanent link">&para;</a></h4>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>import numpy as np
+import pandas as pd</p>
+<h3 id="hydroutils.hydro_units.streamflow_unit_conv--convert-m3s-to-mmday">Convert m³/s to mm/day<a class="headerlink" href="#hydroutils.hydro_units.streamflow_unit_conv--convert-m3s-to-mmday" title="Permanent link">&para;</a></h3>
+<p>flow = np.array([10.5, 15.2, 8.1])
+basin_area = np.array([1000])  # km²
+result = streamflow_unit_conv(flow, basin_area, "mm/d", source_unit="m^3/s")</p>
+<h3 id="hydroutils.hydro_units.streamflow_unit_conv--convert-mmh-to-m3s">Convert mm/h to m³/s<a class="headerlink" href="#hydroutils.hydro_units.streamflow_unit_conv--convert-mmh-to-m3s" title="Permanent link">&para;</a></h3>
+<p>flow_mm = np.array([2.1, 3.5, 1.8])
+result = streamflow_unit_conv(flow_mm, basin_area, "m^3/s", source_unit="mm/h")</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hydroutils\hydro_units.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">streamflow_unit_conv</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">,</span>
+    <span class="n">target_unit</span><span class="p">,</span>
+    <span class="n">source_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">area_unit</span><span class="o">=</span><span class="s2">&quot;km^2&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert streamflow data units between depth units (mm/time) and volume units (m³/s).</span>
+
+<span class="sd">    This function automatically detects conversion direction based on source and target units,</span>
+<span class="sd">    removing the need for an explicit inverse parameter.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : numpy.ndarray, pandas.Series, pandas.DataFrame, or xarray.Dataset</span>
+<span class="sd">        Streamflow data. Can include unit information in attributes (xarray) or</span>
+<span class="sd">        requires source_unit parameter for numpy/pandas data.</span>
+<span class="sd">    area : numpy.ndarray, pandas.Series, pandas.DataFrame, xarray.Dataset, or pint.Quantity</span>
+<span class="sd">        Basin area data. Units will be detected from data attributes or pint units.</span>
+<span class="sd">        If no units detected, area_unit parameter will be used.</span>
+<span class="sd">    target_unit : str</span>
+<span class="sd">        Target unit for conversion. Examples: &quot;mm/d&quot;, &quot;mm/h&quot;, &quot;mm/3h&quot;, &quot;m^3/s&quot;.</span>
+<span class="sd">    source_unit : str, optional</span>
+<span class="sd">        Source unit of streamflow data. Required if data has no unit information.</span>
+<span class="sd">        If provided and data has units, they must match or ValueError is raised.</span>
+<span class="sd">    area_unit : str, optional</span>
+<span class="sd">        Unit for area when area data has no unit information. Default is &quot;km^2&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Converted data in the same type as input data.</span>
+<span class="sd">    Unit information is preserved in xarray attributes when applicable.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If no unit information can be determined for data or area.</span>
+<span class="sd">        If source_unit conflicts with detected data units.</span>
+<span class="sd">        If units are incompatible for conversion.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; # Convert m³/s to mm/day</span>
+<span class="sd">    &gt;&gt;&gt; flow = np.array([10.5, 15.2, 8.1])</span>
+<span class="sd">    &gt;&gt;&gt; basin_area = np.array([1000])  # km²</span>
+<span class="sd">    &gt;&gt;&gt; result = streamflow_unit_conv(flow, basin_area, &quot;mm/d&quot;, source_unit=&quot;m^3/s&quot;)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Convert mm/h to m³/s</span>
+<span class="sd">    &gt;&gt;&gt; flow_mm = np.array([2.1, 3.5, 1.8])</span>
+<span class="sd">    &gt;&gt;&gt; result = streamflow_unit_conv(flow_mm, basin_area, &quot;m^3/s&quot;, source_unit=&quot;mm/h&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Step 1: Detect and validate source unit</span>
+    <span class="n">detected_source_unit</span> <span class="o">=</span> <span class="n">_detect_data_unit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">source_unit</span><span class="p">)</span>
+
+    <span class="c1"># Step 2: Detect and validate area unit</span>
+    <span class="n">detected_area_unit</span> <span class="o">=</span> <span class="n">_detect_area_unit</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">area_unit</span><span class="p">)</span>
+
+    <span class="c1"># Step 3: Determine conversion direction and validate compatibility</span>
+    <span class="n">is_depth_to_volume</span> <span class="o">=</span> <span class="n">_determine_conversion_direction</span><span class="p">(</span>
+        <span class="n">detected_source_unit</span><span class="p">,</span> <span class="n">target_unit</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Step 4: Early return if no conversion needed</span>
+    <span class="k">if</span> <span class="n">_normalize_unit</span><span class="p">(</span><span class="n">detected_source_unit</span><span class="p">)</span> <span class="o">==</span> <span class="n">_normalize_unit</span><span class="p">(</span><span class="n">target_unit</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="c1"># Step 5: Perform the actual conversion based on data type</span>
+    <span class="k">return</span> <span class="n">_perform_conversion</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">,</span>
+        <span class="n">detected_source_unit</span><span class="p">,</span>
+        <span class="n">detected_area_unit</span><span class="p">,</span>
+        <span class="n">target_unit</span><span class="p">,</span>
+        <span class="n">is_depth_to_volume</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hydroutils.hydro_units.validate_unit_compatibility" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">validate_unit_compatibility</span><span class="p">(</span><span class="n">source_unit</span><span class="p">,</span> <span class="n">target_unit</span><span class="p">)</span></code>
+
+<a href="#hydroutils.hydro_units.validate_unit_compatibility" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if two hydrological units can be converted between each other.</p>
+<p>This function determines whether two units are compatible for hydrological
+unit conversion. It supports depth units (mm/time) and volume units (m³/s),
+and checks if the conversion between them is possible.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>source_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Source unit string. Examples:
+- Depth units: "mm/h", "mm/3h", "mm/d", "in/d"
+- Volume units: "m^3/s", "ft^3/s", "l/s"</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Target unit string (same format as source_unit).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if units are compatible for conversion, False otherwise.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Note</summary>
+  <ul>
+<li>Supports various time intervals for depth units</li>
+<li>Recognizes multiple formats for volume units</li>
+<li>Case-sensitive unit matching</li>
+<li>Compatible conversions:<ul>
+<li>depth -&gt; volume (e.g., mm/h -&gt; m³/s)</li>
+<li>volume -&gt; depth (e.g., m³/s -&gt; mm/d)</li>
+<li>depth -&gt; depth (e.g., mm/h -&gt; mm/d)</li>
+<li>volume -&gt; volume (e.g., m³/s -&gt; ft³/s)</li>
+</ul>
+</li>
+</ul>
+</details>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<h3 id="hydroutils.hydro_units.validate_unit_compatibility--compatible-conversions">Compatible conversions<a class="headerlink" href="#hydroutils.hydro_units.validate_unit_compatibility--compatible-conversions" title="Permanent link">&para;</a></h3>
+<p>validate_unit_compatibility("mm/3h", "m^3/s")
+True
+validate_unit_compatibility("m^3/s", "mm/d")
+True
+validate_unit_compatibility("mm/h", "mm/d")
+True</p>
+<h3 id="hydroutils.hydro_units.validate_unit_compatibility--incompatible-conversions">Incompatible conversions<a class="headerlink" href="#hydroutils.hydro_units.validate_unit_compatibility--incompatible-conversions" title="Permanent link">&para;</a></h3>
+<p>validate_unit_compatibility("mm/h", "celsius")
+False
+validate_unit_compatibility("m^3/s", "kg/m^3")
+False</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+            <details class="quote">
+              <summary>Source code in <code>hydroutils\hydro_units.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 983</span>
+<span class="normal"> 984</span>
+<span class="normal"> 985</span>
+<span class="normal"> 986</span>
+<span class="normal"> 987</span>
+<span class="normal"> 988</span>
+<span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span>
+<span class="normal">1007</span>
+<span class="normal">1008</span>
+<span class="normal">1009</span>
+<span class="normal">1010</span>
+<span class="normal">1011</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">validate_unit_compatibility</span><span class="p">(</span><span class="n">source_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if two hydrological units can be converted between each other.</span>
+
+<span class="sd">    This function determines whether two units are compatible for hydrological</span>
+<span class="sd">    unit conversion. It supports depth units (mm/time) and volume units (m³/s),</span>
+<span class="sd">    and checks if the conversion between them is possible.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source_unit (str): Source unit string. Examples:</span>
+<span class="sd">            - Depth units: &quot;mm/h&quot;, &quot;mm/3h&quot;, &quot;mm/d&quot;, &quot;in/d&quot;</span>
+<span class="sd">            - Volume units: &quot;m^3/s&quot;, &quot;ft^3/s&quot;, &quot;l/s&quot;</span>
+<span class="sd">        target_unit (str): Target unit string (same format as source_unit).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if units are compatible for conversion, False otherwise.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        - Supports various time intervals for depth units</span>
+<span class="sd">        - Recognizes multiple formats for volume units</span>
+<span class="sd">        - Case-sensitive unit matching</span>
+<span class="sd">        - Compatible conversions:</span>
+<span class="sd">            - depth -&gt; volume (e.g., mm/h -&gt; m³/s)</span>
+<span class="sd">            - volume -&gt; depth (e.g., m³/s -&gt; mm/d)</span>
+<span class="sd">            - depth -&gt; depth (e.g., mm/h -&gt; mm/d)</span>
+<span class="sd">            - volume -&gt; volume (e.g., m³/s -&gt; ft³/s)</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; # Compatible conversions</span>
+<span class="sd">        &gt;&gt;&gt; validate_unit_compatibility(&quot;mm/3h&quot;, &quot;m^3/s&quot;)</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; validate_unit_compatibility(&quot;m^3/s&quot;, &quot;mm/d&quot;)</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; validate_unit_compatibility(&quot;mm/h&quot;, &quot;mm/d&quot;)</span>
+<span class="sd">        True</span>
+
+<span class="sd">        &gt;&gt;&gt; # Incompatible conversions</span>
+<span class="sd">        &gt;&gt;&gt; validate_unit_compatibility(&quot;mm/h&quot;, &quot;celsius&quot;)</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; validate_unit_compatibility(&quot;m^3/s&quot;, &quot;kg/m^3&quot;)</span>
+<span class="sd">        False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Define unit categories</span>
+    <span class="n">depth_units</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;mm/\d*[hd]&quot;</span><span class="p">)</span>
+    <span class="n">volume_units</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;m\^?3/s&quot;</span><span class="p">)</span>
+
+    <span class="n">source_is_depth</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">depth_units</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">source_unit</span><span class="p">))</span>
+    <span class="n">source_is_volume</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">volume_units</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">source_unit</span><span class="p">))</span>
+    <span class="n">target_is_depth</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">depth_units</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">target_unit</span><span class="p">))</span>
+    <span class="n">target_is_volume</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">volume_units</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">target_unit</span><span class="p">))</span>
+
+    <span class="c1"># Compatible if both are depth units, both are volume units, or one of each</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">source_is_depth</span> <span class="ow">or</span> <span class="n">source_is_volume</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="n">target_is_depth</span> <span class="ow">or</span> <span class="n">target_is_volume</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    2025-08-20
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>
