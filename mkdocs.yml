@@ -62,5 +62,3 @@ nav:
           - Contributing: contributing.md
           - Changelog: changelog.md
           - Report Issues: https://github.com/OuyangWenyu/hydroutils/issues
-
-remote_name: upstream
