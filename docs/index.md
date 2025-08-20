@@ -1,3 +1,12 @@
+<!--
+ * @Author: Wenyu Ouyang
+ * @Date: 2025-08-20 15:17:45
+ * @LastEditTime: 2025-08-20 16:34:28
+ * @LastEditors: Wenyu Ouyang
+ * @Description: 
+ * @FilePath: \hydroutils\docs\index.md
+ * Copyright (c) 2023-2026 Wenyu Ouyang. All rights reserved.
+-->
 # Welcome to hydroutils
 
 [![image](https://img.shields.io/pypi/v/hydroutils.svg)](https://pypi.python.org/pypi/hydroutils)
@@ -15,10 +24,9 @@
 - Peak flow analysis and timing metrics
 - Flood event extraction and characterization
 
-### 🕐 Time Series Processing
-- Time unit conversions and standardization
-- Time interval detection and validation
-- Temporal data manipulation utilities
+### 🕐 Time Period Processing
+- Time period operations (intersection, generation, validation)
+- Date string parsing and manipulation
 
 ### 📈 Data Visualization
 - Specialized plotting functions for hydrological data
@@ -26,18 +34,12 @@
 - Time series plots with hydrological context
 
 ### 📁 File Operations
-- NetCDF file handling
 - CSV and text file processing
 - Data import/export utilities
 
 ### ☁️ Cloud Integration
 - AWS S3 integration for large dataset handling
 - Cloud-based data storage and retrieval
-
-### 🧮 Mathematical Operations
-- Hydrological unit conversions
-- Mathematical utilities for water resources calculations
-- Array operations optimized for hydrological data
 
 ## Quick Start
 
@@ -51,7 +53,7 @@ nse = hu.stat_error(observed, simulated)['NSE']
 events = hu.extract_flood_events(dataframe)
 
 # Convert streamflow units
-converted = hu.streamflow_unit_conv(data, from_unit='cms', to_unit='cfs')
+converted = hu.streamflow_unit_conv(data, basin_area, source_unit='cms', target_unit='mm/3h')
 ```
 
 ## Installation

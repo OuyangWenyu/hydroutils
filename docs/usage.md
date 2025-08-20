@@ -48,7 +48,7 @@ fms_value = hu.fms(observed, simulated, lower=0.2, upper=0.7)
 print(f"Flow Duration Curve Middle Slope: {fms_value:.3f}")
 ```
 
-## 2. Time Series Processing
+## 2. Time Period Processing
 
 ### Unit Conversions
 
@@ -57,8 +57,8 @@ Convert between different streamflow units:
 ```python
 # Convert cubic meters per second to cubic feet per second
 flow_cms = np.array([10.5, 12.3, 8.7, 15.2])
-flow_cfs = hu.streamflow_unit_conv(flow_cms, from_unit='cms', to_unit='cfs')
-print(f"Flow in CFS: {flow_cfs}")
+flow_mm3h = hu.streamflow_unit_conv(flow_cms, basin_area, source_unit='m^3/s', target_unit='mm/3h')
+print(f"Flow in mm/3h: {flow_mm3h}")
 
 # Detect time interval
 time_series = pd.date_range('2020-01-01', periods=100, freq='D')
@@ -211,8 +211,9 @@ kge_individual = hu.KGE(df['simulated'].values, df['observed'].values)
 print(f"KGE (individual calculation): {kge_individual:.3f}")
 
 # 5. Unit conversion example
-flow_cfs = hu.streamflow_unit_conv(df['observed'].values, 'cms', 'cfs')
-print(f"Mean flow: {df['observed'].mean():.1f} cms = {flow_cfs.mean():.1f} cfs")
+basin_area = 1000  # km^2
+flow_mm3h = hu.streamflow_unit_conv(df['observed'].values, basin_area, source_unit='m^3/s', target_unit='mm/3h')
+print(f"Mean flow: {df['observed'].mean():.1f} m^3/s = {flow_mm3h.mean():.1f} mm/3h")
 
 # 6. Visualization (optional)
 plt.figure(figsize=(12, 8))

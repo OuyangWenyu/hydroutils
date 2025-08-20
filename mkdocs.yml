@@ -53,8 +53,9 @@ nav:
               - Visualization: api/hydro_plot.md
               - Time Processing: api/hydro_time.md
               - File Operations: api/hydro_file.md
+              - Flood Event Analysis: api/hydro_event.md
+              - Unit Conversion: api/hydro_units.md
           - Advanced Modules:
-              - Mathematical Operations: api/hydro_arithmetric.md
               - AWS S3 Integration: api/hydro_s3.md
               - Logging Utilities: api/hydro_log.md
     - Development:
