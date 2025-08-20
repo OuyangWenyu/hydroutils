@@ -18,10 +18,27 @@ from hydroutils.hydro_file import get_cache_dir
 
 
 class HydroWarning:
+    """A class for displaying formatted warning messages using Rich console.
+
+    This class provides methods for displaying different types of warning messages
+    with consistent formatting and color coding using the Rich library.
+
+    Attributes:
+        console (Console): Rich console instance for formatted output.
+    """
+
     def __init__(self):
+        """Initialize HydroWarning with a Rich console instance."""
         self.console = Console()
 
     def no_directory(self, directory_name, message=None):
+        """Display a warning message for a missing directory.
+
+        Args:
+            directory_name (str): Name of the missing directory.
+            message (Text, optional): Custom warning message. If None, a default
+                message will be created. Defaults to None.
+        """
         if message is None:
             message = Text(
                 f"There is no such directory: {directory_name}", style="bold red"
@@ -29,6 +46,13 @@ class HydroWarning:
         self.console.print(message)
 
     def file_not_found(self, file_name, message=None):
+        """Display a warning message for a file that cannot be found.
+
+        Args:
+            file_name (str): Name of the file that could not be found.
+            message (Text, optional): Custom warning message. If None, a default
+                message will be created. Defaults to None.
+        """
         if message is None:
             message = Text(
                 f"We didn't find this file: {file_name}", style="bold yellow"
@@ -36,14 +60,36 @@ class HydroWarning:
         self.console.print(message)
 
     def operation_successful(self, operation_detail, message=None):
+        """Display a success message for a completed operation.
+
+        Args:
+            operation_detail (str): Description of the successful operation.
+            message (Text, optional): Custom success message. If None, a default
+                message will be created. Defaults to None.
+        """
         if message is None:
             message = Text(f"Operation Success: {operation_detail}", style="bold green")
         self.console.print(message)
 
 
 def hydro_logger(cls):
-    """
-    Class decorator: Adds a logger attribute to the class.
+    """Class decorator that adds a configured logger to the decorated class.
+
+    This decorator sets up a logger with both file and console handlers. The file
+    handler writes all logs (DEBUG and above) to a timestamped file in the cache
+    directory, while the console handler shows INFO and above messages.
+
+    Args:
+        cls: The class to be decorated.
+
+    Returns:
+        The decorated class with an added logger attribute.
+
+    Example:
+        @hydro_logger
+        class MyClass:
+            def my_method(self):
+                self.logger.info("This will be logged")
     """
     # Use the class name as the logger name
     logger_name = f"{cls.__module__}.{cls.__name__}"

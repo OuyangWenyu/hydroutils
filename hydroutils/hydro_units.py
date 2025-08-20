@@ -447,7 +447,43 @@ def _convert_xarray(
     target_unit_str,
     is_depth_to_volume,
 ):
-    """Convert xarray Dataset units."""
+    """Convert units of an xarray Dataset with support for pint-xarray.
+
+    This function handles unit conversion for xarray Datasets, attempting to use
+    pint-xarray for unit-aware calculations when available, with a fallback to
+    manual conversion using pint directly.
+
+    Args:
+        data (xr.Dataset): Input dataset containing streamflow data.
+        area (Union[xr.Dataset, np.ndarray]): Basin area data.
+        source_unit (str): Source unit (standard form, e.g., 'mm/h').
+        source_factor (int): Factor to convert from custom to standard unit.
+        area_unit (str): Unit of the area data.
+        target_unit (str): Target unit (standard form).
+        target_factor (int): Factor to convert from standard to custom unit.
+        target_unit_str (str): Full target unit string for metadata.
+        is_depth_to_volume (bool): True for depth->volume, False for volume->depth.
+
+    Returns:
+        xr.Dataset: Converted dataset with updated units in metadata.
+
+    Note:
+        - Tries pint-xarray first for unit-aware calculations
+        - Falls back to manual conversion with pint if pint-xarray unavailable
+        - Preserves dataset structure and coordinates
+        - Updates unit metadata in dataset attributes
+        - Handles both depth->volume and volume->depth conversions
+
+    Example:
+        >>> import xarray as xr
+        >>> data = xr.Dataset({'flow': ('time', [1, 2, 3])})
+        >>> data.flow.attrs['units'] = 'mm/h'
+        >>> area = xr.Dataset({'area': 1000})  # km²
+        >>> result = _convert_xarray(data, area, 'mm/h', 1,
+        ...                         'km^2', 'm^3/s', 1, 'm^3/s', True)
+        >>> print(result.flow.attrs['units'])
+        'm^3/s'
+    """
     data_key = list(data.keys())[0]
 
     # Try pint-xarray first, fallback to manual conversion if not available
@@ -544,7 +580,42 @@ def _convert_pint_quantity(
     target_factor,
     is_depth_to_volume,
 ):
-    """Convert pint.Quantity streamflow units."""
+    """Convert units of a pint.Quantity object.
+
+    This function handles unit conversion for pint.Quantity objects, which
+    already have unit information attached. It supports both depth->volume
+    and volume->depth conversions.
+
+    Args:
+        data (pint.Quantity): Input streamflow data with units.
+        area (Union[pint.Quantity, np.ndarray]): Basin area data.
+        source_unit (str): Source unit (standard form, e.g., 'mm/h').
+        source_factor (int): Factor to convert from custom to standard unit.
+        area_unit (str): Unit of the area data if not a pint.Quantity.
+        target_unit (str): Target unit (standard form).
+        target_factor (int): Factor to convert from standard to custom unit.
+        is_depth_to_volume (bool): True for depth->volume, False for volume->depth.
+
+    Returns:
+        np.ndarray: Converted data values (not a pint.Quantity).
+
+    Note:
+        - Extracts magnitude and units from pint.Quantity objects
+        - Handles area data as either pint.Quantity or raw values
+        - Performs unit-aware calculations using pint
+        - Returns raw numpy array to match interface
+        - Applies custom unit factors for non-standard units
+
+    Example:
+        >>> import pint
+        >>> ureg = pint.UnitRegistry()
+        >>> data = [1, 2, 3] * ureg('mm/h')
+        >>> area = 1000 * ureg('km^2')
+        >>> result = _convert_pint_quantity(data, area, 'mm/h', 1,
+        ...                                'km^2', 'm^3/s', 1, True)
+        >>> print(result)  # Values in m^3/s
+        array([277.77..., 555.55..., 833.33...])
+    """
     # Extract values and handle source factor
     data_values = data.magnitude / source_factor
     data_units = str(data.units)
@@ -592,7 +663,51 @@ def _convert_numpy_pandas(
     target_factor,
     is_depth_to_volume,
 ):
-    """Convert numpy array or pandas Series/DataFrame units."""
+    """Convert units for numpy arrays and pandas objects.
+
+    This function handles unit conversion for numpy arrays, pandas Series, and
+    pandas DataFrames. It preserves the input data structure while performing
+    unit conversions using pint.
+
+    Args:
+        data (Union[np.ndarray, pd.Series, pd.DataFrame]): Input data.
+        area (Union[np.ndarray, pd.Series, pd.DataFrame, pint.Quantity]): Basin area.
+        source_unit (str): Source unit (standard form, e.g., 'mm/h').
+        source_factor (int): Factor to convert from custom to standard unit.
+        area_unit (str): Unit of the area data if not a pint.Quantity.
+        target_unit (str): Target unit (standard form).
+        target_factor (int): Factor to convert from standard to custom unit.
+        is_depth_to_volume (bool): True for depth->volume, False for volume->depth.
+
+    Returns:
+        Union[np.ndarray, pd.Series, pd.DataFrame]: Converted data in same format
+            as input.
+
+    Note:
+        - Preserves pandas index and column structure
+        - Handles area data in various formats
+        - Uses pint for unit-aware calculations
+        - Applies custom unit factors for non-standard units
+        - Returns same type as input data
+
+    Example:
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> # NumPy array example
+        >>> data = np.array([1, 2, 3])  # mm/h
+        >>> area = np.array([1000])  # km²
+        >>> result = _convert_numpy_pandas(data, area, 'mm/h', 1,
+        ...                               'km^2', 'm^3/s', 1, True)
+        >>> print(result)  # Values in m^3/s
+        array([277.77..., 555.55..., 833.33...])
+        
+        >>> # Pandas Series example
+        >>> data = pd.Series([1, 2, 3], index=['a', 'b', 'c'])
+        >>> result = _convert_numpy_pandas(data, area, 'mm/h', 1,
+        ...                               'km^2', 'm^3/s', 1, True)
+        >>> print(result.index)
+        Index(['a', 'b', 'c'], dtype='object')
+    """
     # Extract values for computation, preserve data structure
     is_pandas = isinstance(data, (pd.Series, pd.DataFrame))
     data_index = None
@@ -730,26 +845,54 @@ def streamflow_unit_conv(
 def detect_time_interval(
     time_series: Union[pd.DatetimeIndex, list, np.ndarray],
 ) -> str:
-    """
-    Automatically detect the time interval of a time series.
+    """Detect the time interval between points in a time series.
 
-    Parameters
-    ----------
-    time_series : pd.DatetimeIndex, list, or np.ndarray
-        Time series data with datetime information
+    This function analyzes a time series to determine the most common time
+    interval between consecutive points. It handles various input formats and
+    converts the interval to a standardized string format.
 
-    Returns
-    -------
-    str
-        Detected time interval in format suitable for unit conversion
-        (e.g., "1h", "3h", "1d")
+    Args:
+        time_series (Union[pd.DatetimeIndex, list, np.ndarray]): Time series
+            data containing datetime information. Can be:
+            - pandas DatetimeIndex
+            - List of datetime-like objects
+            - NumPy array of datetime-like objects
 
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> time_index = pd.date_range("2024-01-01", periods=8, freq="3h")
-    >>> detect_time_interval(time_index)
-    '3h'
+    Returns:
+        str: Detected time interval in format suitable for unit conversion:
+            - For hourly data: "Nh" where N is number of hours (e.g., "3h")
+            - For daily data: "Nd" where N is number of days (e.g., "1d")
+
+    Raises:
+        ValueError: If time series has fewer than 2 points.
+
+    Note:
+        - Uses most common time difference (mode) for irregular intervals
+        - Rounds non-integer hours to nearest hour
+        - Prefers hours for intervals < 24h, days for intervals ≥ 24h
+        - Automatically converts various datetime formats to pandas DatetimeIndex
+
+    Example:
+        >>> import pandas as pd
+        >>> # Regular 3-hourly data
+        >>> time_index = pd.date_range("2024-01-01", periods=8, freq="3h")
+        >>> detect_time_interval(time_index)
+        '3h'
+        
+        >>> # Daily data
+        >>> dates = ["2024-01-01", "2024-01-02", "2024-01-03"]
+        >>> detect_time_interval(dates)
+        '1d'
+        
+        >>> # Mixed intervals (most common is 6h)
+        >>> times = pd.to_datetime([
+        ...     "2024-01-01 00:00",
+        ...     "2024-01-01 06:00",
+        ...     "2024-01-01 12:00",
+        ...     "2024-01-01 18:00"
+        ... ])
+        >>> detect_time_interval(times)
+        '6h'
     """
     if isinstance(time_series, list):
         time_series = pd.to_datetime(time_series)
@@ -786,25 +929,48 @@ def detect_time_interval(
 
 
 def get_time_interval_info(time_interval: str) -> Tuple[int, str]:
-    """
-    Parse time interval string to extract number and unit.
+    """Parse a time interval string into its numeric value and unit.
 
-    Parameters
-    ----------
-    time_interval : str
-        Time interval string (e.g., "1h", "3h", "1d")
+    This function extracts the numeric value and unit from a time interval
+    string using regular expressions. It supports hourly and daily intervals
+    in a standardized format.
 
-    Returns
-    -------
-    tuple
-        (number, unit) where number is int and unit is str
+    Args:
+        time_interval (str): Time interval string in format "Nh" or "Nd" where
+            N is a positive integer. Examples: "1h", "3h", "1d", "5d".
 
-    Examples
-    --------
-    >>> get_time_interval_info("3h")
-    (3, 'h')
-    >>> get_time_interval_info("1d")
-    (1, 'd')
+    Returns:
+        Tuple[int, str]: Two-element tuple containing:
+            - number (int): The numeric value from the interval
+            - unit (str): The unit, either 'h' for hours or 'd' for days
+
+    Raises:
+        ValueError: If time_interval doesn't match expected format.
+
+    Note:
+        - Only supports hours ('h') and days ('d') units
+        - Number must be a positive integer
+        - Format is case-sensitive ('h' and 'd' must be lowercase)
+        - No spaces allowed in the interval string
+
+    Example:
+        >>> # Hourly intervals
+        >>> get_time_interval_info("3h")
+        (3, 'h')
+        >>> get_time_interval_info("24h")
+        (24, 'h')
+        
+        >>> # Daily intervals
+        >>> get_time_interval_info("1d")
+        (1, 'd')
+        >>> get_time_interval_info("7d")
+        (7, 'd')
+        
+        >>> # Invalid format raises error
+        >>> get_time_interval_info("3hours")  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid time interval format: 3hours
     """
     match = re.match(r"^(\d+)([hd])$", time_interval)
     if not match:
@@ -815,27 +981,45 @@ def get_time_interval_info(time_interval: str) -> Tuple[int, str]:
 
 
 def validate_unit_compatibility(source_unit: str, target_unit: str) -> bool:
-    """
-    Check if two units are compatible for conversion.
+    """Check if two hydrological units can be converted between each other.
 
-    Parameters
-    ----------
-    source_unit : str
-        Source unit string
-    target_unit : str
-        Target unit string
+    This function determines whether two units are compatible for hydrological
+    unit conversion. It supports depth units (mm/time) and volume units (m³/s),
+    and checks if the conversion between them is possible.
 
-    Returns
-    -------
-    bool
-        True if units are compatible for conversion
+    Args:
+        source_unit (str): Source unit string. Examples:
+            - Depth units: "mm/h", "mm/3h", "mm/d", "in/d"
+            - Volume units: "m^3/s", "ft^3/s", "l/s"
+        target_unit (str): Target unit string (same format as source_unit).
 
-    Examples
-    --------
-    >>> validate_unit_compatibility("mm/3h", "m^3/s")
-    True
-    >>> validate_unit_compatibility("mm/h", "celsius")
-    False
+    Returns:
+        bool: True if units are compatible for conversion, False otherwise.
+
+    Note:
+        - Supports various time intervals for depth units
+        - Recognizes multiple formats for volume units
+        - Case-sensitive unit matching
+        - Compatible conversions:
+            - depth -> volume (e.g., mm/h -> m³/s)
+            - volume -> depth (e.g., m³/s -> mm/d)
+            - depth -> depth (e.g., mm/h -> mm/d)
+            - volume -> volume (e.g., m³/s -> ft³/s)
+
+    Example:
+        >>> # Compatible conversions
+        >>> validate_unit_compatibility("mm/3h", "m^3/s")
+        True
+        >>> validate_unit_compatibility("m^3/s", "mm/d")
+        True
+        >>> validate_unit_compatibility("mm/h", "mm/d")
+        True
+        
+        >>> # Incompatible conversions
+        >>> validate_unit_compatibility("mm/h", "celsius")
+        False
+        >>> validate_unit_compatibility("m^3/s", "kg/m^3")
+        False
     """
     # Define unit categories
     depth_units = re.compile(r"mm/\d*[hd]")

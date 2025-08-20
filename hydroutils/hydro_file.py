@@ -28,7 +28,14 @@ import async_retriever as ar
 
 
 def zip_extract(the_dir) -> None:
-    """Extract the downloaded zip files in the_dir"""
+    """Extract the downloaded zip files in the specified directory.
+
+    Args:
+        the_dir (Path): The directory containing zip files to extract.
+
+    Returns:
+        None
+    """
     for f in the_dir.glob("*.zip"):
         with zipfile.ZipFile(f) as zf:
             # extract files to a directory named by f.stem
@@ -36,7 +43,15 @@ def zip_extract(the_dir) -> None:
 
 
 def unzip_file(data_zip, path_unzip):
-    """extract a zip file"""
+    """Extract a zip file to the specified directory.
+
+    Args:
+        data_zip (str): Path to the zip file to extract.
+        path_unzip (str): Directory where the contents will be extracted.
+
+    Returns:
+        None
+    """
     with zipfile.ZipFile(data_zip, "r") as zip_temp:
         zip_temp.extractall(path_unzip)
 
@@ -87,12 +102,17 @@ def is_there_file(zipfile_path, unzip_dir):
 
 
 def download_one_zip(data_url, data_dir):
-    """
-    download one zip file from url as data_file
-    Parameters
-    ----------
-    data_url: the URL of the downloading website
-    data_dir: where we will put the data
+    """Download one zip file from URL and extract it.
+
+    Args:
+        data_url (str): The URL of the file to download.
+        data_dir (str): Directory where the file will be downloaded and extracted.
+
+    Returns:
+        None
+
+    Note:
+        The function will create the target directory if it doesn't exist.
     """
 
     zipfile_path, unzip_dir = zip_file_name_from_url(data_url, data_dir)
@@ -108,14 +128,17 @@ def download_one_zip(data_url, data_dir):
 
 
 def download_zip_files(urls, the_dir: Path):
-    """Download multi-files from multi-urls
+    """Download multiple files from multiple URLs.
 
-    Parameters
-    ----------
-    urls : list
-        list of all urls
-    the_dir : Path
-        the directory containing all downloaded files
+    Args:
+        urls (list): List of URLs to download files from.
+        the_dir (Path): Directory where downloaded files will be stored.
+
+    Returns:
+        None
+
+    Note:
+        Uses a temporary directory for caching during download.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         cache_names = tmpdir.joinpath(f"{the_dir.stem}.sqlite")
@@ -125,7 +148,18 @@ def download_zip_files(urls, the_dir: Path):
 
 
 def download_small_zip(data_url, data_dir):
-    """download zip file and unzip"""
+    """Download a small zip file and extract it.
+
+    Args:
+        data_url (str): URL of the zip file to download.
+        data_dir (str): Directory where the file will be downloaded and extracted.
+
+    Returns:
+        None
+
+    Note:
+        Uses urllib.request for downloading small files.
+    """
     zipfile_path, unzip_dir = zip_file_name_from_url(data_url, data_dir)
     if not is_there_file(zipfile_path, unzip_dir):
         if not os.path.isdir(unzip_dir):
@@ -135,19 +169,55 @@ def download_small_zip(data_url, data_dir):
 
 
 def download_small_file(data_url, temp_file):
-    """download data from url to the temp_file"""
+    """Download a small file from URL.
+
+    Args:
+        data_url (str): URL of the file to download.
+        temp_file (str): Path where the downloaded file will be saved.
+
+    Returns:
+        None
+
+    Note:
+        Uses requests library for downloading.
+    """
     r = requests.get(data_url)
     with open(temp_file, "w") as f:
         f.write(r.text)
 
 
 def download_excel(data_url, temp_file):
-    """download a excel file according to url"""
+    """Download an Excel file from URL.
+
+    Args:
+        data_url (str): URL of the Excel file to download.
+        temp_file (str): Path where the Excel file will be saved.
+
+    Returns:
+        None
+
+    Note:
+        Only downloads if the file doesn't already exist locally.
+    """
     if not os.path.isfile(temp_file):
         urllib.request.urlretrieve(data_url, temp_file)
 
 
 def download_a_file_from_google_drive(drive, dir_id, download_dir):
+    """Download files from Google Drive.
+
+    Args:
+        drive: Google Drive API instance.
+        dir_id (str): ID of the Google Drive directory.
+        download_dir (str): Local directory to save downloaded files.
+
+    Returns:
+        None
+
+    Note:
+        Handles both files and folders recursively.
+        Skips already downloaded files.
+    """
     file_list = drive.ListFile(
         {"q": f"'{dir_id}' in parents and trashed=false"}
     ).GetList()
@@ -171,25 +241,65 @@ def download_a_file_from_google_drive(drive, dir_id, download_dir):
 
 
 def serialize_json(my_dict, my_file, encoding="utf-8", ensure_ascii=True):
+    """Serialize a dictionary to a JSON file.
+
+    Args:
+        my_dict (dict): Dictionary to serialize.
+        my_file (str): Path to the output JSON file.
+        encoding (str, optional): File encoding. Defaults to "utf-8".
+        ensure_ascii (bool, optional): If True, ensure ASCII output. Defaults to True.
+
+    Returns:
+        None
+    """
     with open(my_file, "w", encoding=encoding) as FP:
         json.dump(my_dict, FP, ensure_ascii=ensure_ascii, indent=4)
 
 
 def unserialize_json_ordered(my_file):
-    # m_file = os.path.join(my_file, 'master.json')
+    """Load a JSON file into an OrderedDict, preserving key order.
+
+    Args:
+        my_file (str): Path to the JSON file to read.
+
+    Returns:
+        OrderedDict: Dictionary with preserved key order from the JSON file.
+    """
     with open(my_file, "r") as fp:
         m_dict = json.load(fp, object_pairs_hook=OrderedDict)
     return m_dict
 
 
 def unserialize_json(my_file):
+    """Load a JSON file into a Python object.
+
+    Args:
+        my_file (str): Path to the JSON file to read.
+
+    Returns:
+        object: Python object (typically dict or list) loaded from the JSON file.
+    """
     with open(my_file, "r") as fp:
         my_object = json.load(fp)
     return my_object
 
 
 class NumpyArrayEncoder(json.JSONEncoder):
+    """JSON encoder that handles NumPy arrays and scalar types.
+
+    This encoder converts NumPy arrays and scalar types to Python native types
+    that can be serialized by the standard JSON encoder.
+    """
+
     def default(self, obj):
+        """Convert NumPy types to JSON serializable objects.
+
+        Args:
+            obj: Object to encode.
+
+        Returns:
+            JSON serializable object.
+        """
         if isinstance(obj, np.ndarray):
             return self.convert_ndarray(obj)
         elif isinstance(obj, (np.integer, np.floating)):
@@ -197,6 +307,14 @@ class NumpyArrayEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
     def convert_ndarray(self, array):
+        """Convert a NumPy array to a nested list.
+
+        Args:
+            array (np.ndarray): NumPy array to convert.
+
+        Returns:
+            list or scalar: Python native type equivalent of the array.
+        """
         if array.ndim == 0:
             return array.item()
         return [
@@ -210,26 +328,72 @@ class NumpyArrayEncoder(json.JSONEncoder):
 
 
 def serialize_json_np(my_dict, my_file):
+    """Serialize a dictionary containing NumPy arrays to a JSON file.
+
+    Args:
+        my_dict (dict): Dictionary containing NumPy arrays to serialize.
+        my_file (str): Path to the output JSON file.
+
+    Returns:
+        None
+
+    Note:
+        Uses NumpyArrayEncoder to handle NumPy types.
+    """
     with open(my_file, "w") as FP:
         json.dump(my_dict, FP, cls=NumpyArrayEncoder)
 
 
 def serialize_pickle(my_object, my_file):
+    """Serialize an object to a pickle file.
+
+    Args:
+        my_object (object): Python object to serialize.
+        my_file (str): Path to the output pickle file.
+
+    Returns:
+        None
+    """
     with open(my_file, "wb") as f:
         pickle.dump(my_object, f)
 
 
 def unserialize_pickle(my_file):
+    """Load an object from a pickle file.
+
+    Args:
+        my_file (str): Path to the pickle file to read.
+
+    Returns:
+        object: Python object loaded from the pickle file.
+    """
     with open(my_file, "rb") as f:
         my_object = pickle.load(f)
     return my_object
 
 
 def serialize_numpy(my_array, my_file):
+    """Save a NumPy array to a binary file.
+
+    Args:
+        my_array (np.ndarray): NumPy array to save.
+        my_file (str): Path to the output file.
+
+    Returns:
+        None
+    """
     np.save(my_file, my_array)
 
 
 def unserialize_numpy(my_file):
+    """Load a NumPy array from a binary file.
+
+    Args:
+        my_file (str): Path to the NumPy array file.
+
+    Returns:
+        np.ndarray: NumPy array loaded from the file.
+    """
     return np.load(my_file)
 
 
@@ -255,17 +419,13 @@ def get_lastest_file_in_a_dir(dir_path):
 
 
 def get_latest_file_in_a_lst(lst):
-    """get the latest file in a list
+    """Get the most recently modified file from a list of files.
 
-    Parameters
-    ----------
-    lst : list
-        list of files
+    Args:
+        lst (list): List of file paths.
 
-    Returns
-    -------
-    str
-        the latest file
+    Returns:
+        str: Path of the most recently modified file.
     """
     lst_ctime = [os.path.getctime(file) for file in lst]
     sort_idx = np.argsort(lst_ctime)
@@ -273,6 +433,21 @@ def get_latest_file_in_a_lst(lst):
 
 
 def get_cache_dir(app_name="hydro"):
+    """Get the appropriate cache directory for the current operating system.
+
+    Args:
+        app_name (str, optional): Name of the application. Defaults to "hydro".
+
+    Returns:
+        str: Path to the cache directory.
+
+    Note:
+        Creates the directory if it doesn't exist.
+        Follows OS-specific conventions:
+        - Windows: %LOCALAPPDATA%/app_name/Cache
+        - macOS: ~/Library/Caches/app_name
+        - Linux: ~/.cache/app_name
+    """
     home = os.path.expanduser("~")
     system = platform.system()
 

@@ -17,6 +17,21 @@ import tzfpy
 
 
 def t2str(t_: Union[str, datetime.datetime]):
+    """Convert between datetime string and datetime object.
+
+    Args:
+        t_ (Union[str, datetime.datetime]): Input time, either as string or datetime object.
+
+    Returns:
+        Union[str, datetime.datetime]: If input is string, returns datetime object.
+                                     If input is datetime, returns string.
+
+    Raises:
+        NotImplementedError: If input type is not supported.
+
+    Note:
+        String format is always "%Y-%m-%d".
+    """
     if type(t_) is str:
         return datetime.datetime.strptime(t_, "%Y-%m-%d")
     elif type(t_) is datetime.datetime:
@@ -26,19 +41,19 @@ def t2str(t_: Union[str, datetime.datetime]):
 
 
 def t_range_days(t_range, *, step=np.timedelta64(1, "D")) -> np.array:
-    """
-    Transform the two-value t_range list to a uniformly-spaced list (default is a daily list).
-    For example, ["2000-01-01", "2000-01-05"] -> ["2000-01-01", "2000-01-02", "2000-01-03", "2000-01-04"]
-    Parameters
-    ----------
-    t_range
-        two-value t_range list
-    step
-        the time interval; its default value is 1 day
-    Returns
-    -------
-    np.array
-        a uniformly-spaced (daily) list
+    """Transform a date range into a uniformly-spaced array of dates.
+
+    Args:
+        t_range (list): Two-element list containing start and end dates as strings.
+        step (np.timedelta64, optional): Time interval between dates. Defaults to 1 day.
+
+    Returns:
+        np.array: Array of datetime64 objects with uniform spacing.
+
+    Example:
+        >>> t_range_days(["2000-01-01", "2000-01-05"])
+        array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
+              dtype='datetime64[D]')
     """
     sd = datetime.datetime.strptime(t_range[0], "%Y-%m-%d")
     ed = datetime.datetime.strptime(t_range[1], "%Y-%m-%d")
@@ -46,20 +61,18 @@ def t_range_days(t_range, *, step=np.timedelta64(1, "D")) -> np.array:
 
 
 def t_range_days_timedelta(t_array, td=12, td_type="h"):
-    """
-    for each day, add a timedelta
-    Parameters
-    ----------
-    t_array
-        its data type is same as the return type of "t_range_days" function
-    td
-        time periods
-    td_type
-        the type of time period
-    Returns
-    -------
-    np.array
-        a new t_array
+    """Add a time delta to each date in an array.
+
+    Args:
+        t_array (np.array): Array of datetime64 objects (output of t_range_days).
+        td (int, optional): Time period value. Defaults to 12.
+        td_type (str, optional): Time period unit ('Y','M','D','h','m','s'). Defaults to "h".
+
+    Returns:
+        np.array: New array with time delta added to each element.
+
+    Raises:
+        AssertionError: If td_type is not one of 'Y','M','D','h','m','s'.
     """
     assert td_type in ["Y", "M", "D", "h", "m", "s"]
     t_array_final = [t + np.timedelta64(td, td_type) for t in t_array]
@@ -67,17 +80,17 @@ def t_range_days_timedelta(t_array, td=12, td_type="h"):
 
 
 def t_days_lst2range(t_array: list) -> list:
-    """
-    Transform a period list to its interval.
-    For example,  ["2000-01-01", "2000-01-02", "2000-01-03", "2000-01-04"] ->  ["2000-01-01", "2000-01-04"]
-    Parameters
-    ----------
-    t_array: list[Union[np.datetime64, str]]
-        a period list
-    Returns
-    -------
-    list
-        An time interval
+    """Transform a list of dates into a start-end interval.
+
+    Args:
+        t_array (list[Union[np.datetime64, str]]): List of dates in chronological order.
+
+    Returns:
+        list: Two-element list containing first and last dates as strings.
+
+    Example:
+        >>> t_days_lst2range(["2000-01-01", "2000-01-02", "2000-01-03", "2000-01-04"])
+        ["2000-01-01", "2000-01-04"]
     """
     if type(t_array[0]) == np.datetime64:
         t0 = t_array[0].astype(datetime.datetime)
@@ -91,7 +104,20 @@ def t_days_lst2range(t_array: list) -> list:
 
 
 def t_range_years(t_range):
-    """t_range is a left-closed and right-open interval, if t_range[1] is not Jan.1 then end_year should be included"""
+    """Get array of years covered by a date range.
+
+    Args:
+        t_range (list): Two-element list of dates as strings ["YYYY-MM-DD", "YYYY-MM-DD"].
+
+    Returns:
+        np.array: Array of years covered by the date range.
+
+    Note:
+        - Range is left-closed and right-open interval.
+        - If end date is not January 1st, end year is included.
+        - Example: ["2000-01-01", "2002-01-01"] -> [2000, 2001]
+        - Example: ["2000-01-01", "2002-06-01"] -> [2000, 2001, 2002]
+    """
     start_year = int(t_range[0].split("-")[0])
     end_year = int(t_range[1].split("-")[0])
     end_month = int(t_range[1].split("-")[1])
@@ -104,6 +130,18 @@ def t_range_years(t_range):
 
 
 def get_year(a_time):
+    """Extract year from various time formats.
+
+    Args:
+        a_time (Union[datetime.date, np.datetime64, str]): Time in various formats.
+
+    Returns:
+        int: Year value.
+
+    Note:
+        Supports datetime.date, numpy.datetime64, and string formats.
+        For strings, assumes YYYY is at the start.
+    """
     if isinstance(a_time, datetime.date):
         return a_time.year
     elif isinstance(a_time, np.datetime64):
@@ -113,11 +151,30 @@ def get_year(a_time):
 
 
 def intersect(t_lst1, t_lst2):
+    """Find indices of common elements between two time lists.
+
+    Args:
+        t_lst1 (array-like): First time array.
+        t_lst2 (array-like): Second time array.
+
+    Returns:
+        tuple: (ind1, ind2) where ind1 and ind2 are indices of common elements
+        in t_lst1 and t_lst2 respectively.
+    """
     C, ind1, ind2 = np.intersect1d(t_lst1, t_lst2, return_indices=True)
     return ind1, ind2
 
 
 def date_to_julian(a_time):
+    """Convert a date to Julian day of the year.
+
+    Args:
+        a_time (Union[str, datetime.datetime]): Date to convert.
+            If string, must be in format 'YYYY-MM-DD'.
+
+    Returns:
+        int: Day of the year (1-366).
+    """
     if type(a_time) == str:
         fmt = "%Y-%m-%d"
         dt = datetime.datetime.strptime(a_time, fmt)
@@ -128,28 +185,40 @@ def date_to_julian(a_time):
 
 
 def t_range_to_julian(t_range):
+    """Convert a date range to a list of Julian days.
+
+    Args:
+        t_range (list): Two-element list of dates as strings ["YYYY-MM-DD", "YYYY-MM-DD"].
+
+    Returns:
+        list[int]: List of Julian days for each date in the range.
+    """
     t_array = t_range_days(t_range)
     t_array_str = np.datetime_as_string(t_array)
     return [date_to_julian(a_time[:10]) for a_time in t_array_str]
 
 
 def calculate_utc_offset(lat, lng, date=None):
-    """
-    Calculate the UTC offset for a given latitude and longitude using tzfpy.
+    """Calculate the UTC offset for a geographic location.
 
-    Parameters
-    ----------
-    lat : float
-        Latitude.
-    lng : float
-        Longitude.
-    date : datetime, optional
-        The date to consider for the UTC offset. If not provided, uses the current date.
+    This function determines the timezone and UTC offset for a given latitude and
+    longitude coordinate pair using the tzfpy library, which provides accurate
+    timezone data based on geographic location.
 
-    Returns
-    -------
-    int
-        UTC offset in hours.
+    Args:
+        lat (float): Latitude in decimal degrees (-90 to 90).
+        lng (float): Longitude in decimal degrees (-180 to 180).
+        date (datetime.datetime, optional): The date to calculate the offset for.
+            Defaults to current UTC time. Important for handling daylight saving time.
+
+    Returns:
+        int: UTC offset in hours, or None if timezone cannot be determined.
+
+    Example:
+        >>> calculate_utc_offset(35.6762, 139.6503)  # Tokyo, Japan
+        9
+        >>> calculate_utc_offset(51.5074, -0.1278)   # London, UK
+        0  # or 1 during DST
     """
     if date is None:
         date = datetime.datetime.utcnow()
@@ -165,21 +234,35 @@ def calculate_utc_offset(lat, lng, date=None):
 
 
 def generate_start0101_time_range(start_time, end_time, freq="8D"):
-    """Generate a time range with a flexible start date and each year starting from 01-01.
+    """Generate a time range with annual reset to January 1st.
 
-    Parameters
-    ----------
-    start_time : str or pd.Timestamp
-        The start time for the range (could be any date, string or Timestamp).
-    end_time : str or pd.Timestamp
-        The end time for the range (could be any date, string or Timestamp).
-    freq : str, optional
-        Time frequency for intervals, by default '8D'. Could be '7D', '10D', etc.
+    This function creates a time range with a specified frequency, but with the special
+    behavior that each year starts from January 1st regardless of the frequency interval.
+    This is particularly useful for creating time series that need to align with
+    calendar years while maintaining a regular interval pattern within each year.
 
-    Returns
-    -------
-    pd.DatetimeIndex
-        A time range index with custom intervals and annual reset at 01-01.
+    Args:
+        start_time (Union[str, pd.Timestamp]): Start date of the range.
+            Can be string ('YYYY-MM-DD') or pandas Timestamp.
+        end_time (Union[str, pd.Timestamp]): End date of the range.
+            Can be string ('YYYY-MM-DD') or pandas Timestamp.
+        freq (str, optional): Time frequency for intervals. Defaults to '8D'.
+            Common values: '7D' (weekly), '10D' (dekadal), etc.
+
+    Returns:
+        pd.DatetimeIndex: Time range with specified frequency and annual reset.
+
+    Example:
+        >>> generate_start0101_time_range('2020-03-15', '2021-02-15', freq='10D')
+        DatetimeIndex(['2020-03-15', '2020-03-25', '2020-04-04', ...,
+                      '2021-01-01', '2021-01-11', '2021-02-11'],
+                      dtype='datetime64[ns]', freq=None)
+
+    Note:
+        - If an interval would cross into a new year, it's truncated and the next
+          interval starts from January 1st of the new year.
+        - The frequency must be a valid pandas frequency string that represents
+          a fixed duration.
     """
     all_dates = []
 
@@ -206,7 +289,28 @@ def generate_start0101_time_range(start_time, end_time, freq="8D"):
 
 
 def assign_time_start_end(time_ranges, assign_way="intersection"):
-    # chose all time start from time_ranges:[[start1, end1], [start2, end2], ...]
+    """Determine start and end times from multiple time ranges.
+
+    Args:
+        time_ranges (list): List of time range pairs [[start1, end1], [start2, end2], ...].
+            Each start/end can be any comparable type (datetime, string, etc.).
+        assign_way (str, optional): Method to determine the final range. Defaults to "intersection".
+            - "intersection": Use latest start time and earliest end time.
+            - "union": Use earliest start time and latest end time.
+
+    Returns:
+        tuple: (time_start, time_end) The determined start and end times.
+
+    Raises:
+        NotImplementedError: If assign_way is not "intersection" or "union".
+
+    Example:
+        >>> ranges = [["2020-01-01", "2020-12-31"], ["2020-03-01", "2021-02-28"]]
+        >>> assign_time_start_end(ranges, "intersection")
+        ("2020-03-01", "2020-12-31")
+        >>> assign_time_start_end(ranges, "union")
+        ("2020-01-01", "2021-02-28")
+    """
     if assign_way == "intersection":
         time_start = max(t[0] for t in time_ranges)
         time_end = min(t[1] for t in time_ranges)

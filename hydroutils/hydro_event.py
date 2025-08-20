@@ -15,18 +15,22 @@ from typing import List, Dict, Optional, Tuple
 
 
 def time_to_ten_digits(time_obj) -> str:
-    """
-    将时间对象转换为十位数字格式 YYYYMMDDHH
+    """Convert a time object to a ten-digit format YYYYMMDDHH.
 
-    Parameters
-    ----------
-    time_obj : various
-        时间对象，可以是 datetime, numpy.datetime64, 或字符串
+    Args:
+        time_obj (Union[datetime.datetime, np.datetime64, str]): Time object to convert.
+            Can be datetime, numpy.datetime64, or string.
 
-    Returns
-    -------
-    str
-        十位数字格式的时间字符串 YYYYMMDDHH
+    Returns:
+        str: Ten-digit time string in YYYYMMDDHH format.
+
+    Example:
+        >>> time_to_ten_digits(datetime.datetime(2020, 1, 1, 12, 0))
+        '2020010112'
+        >>> time_to_ten_digits(np.datetime64('2020-01-01T12'))
+        '2020010112'
+        >>> time_to_ten_digits('2020-01-01T12:00:00')
+        '2020010112'
     """
     if isinstance(time_obj, np.datetime64):
         # 如果是numpy datetime64对象
@@ -58,35 +62,51 @@ def extract_flood_events(
     flood_event_col: str = "flood_event",
     time_col: str = "time",
 ) -> List[Dict]:
-    """
-    洪水事件提取函数 - 基于flood_event列提取
+    """Extract flood events from a DataFrame based on a flood event indicator column.
 
-    这个函数的设计理念是：只要有flood_event列标记洪水事件，就可以提取事件，
-    不需要关心其他列的具体名称，让调用者自己决定如何处理数据列。
+    This function extracts flood events based on a binary indicator column (flood_event).
+    The design philosophy is to be agnostic about other columns, letting the caller
+    decide how to handle the data columns. The function only requires the flood_event
+    column to mark events and a time column for event naming.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        包含站点数据的DataFrame，必须包含flood_event和time列
-    warmup_length : int, default=0
-        预热期长度（时间步数）
-    flood_event_col : str, default="flood_event"
-        洪水事件标记列名
-    time_col : str, default="time"
-        时间列名
+    Args:
+        df (pd.DataFrame): DataFrame containing site data. Must have flood_event and
+            time columns.
+        warmup_length (int, optional): Number of time steps to include as warmup
+            period before each event. Defaults to 0.
+        flood_event_col (str, optional): Name of the flood event indicator column.
+            Defaults to "flood_event".
+        time_col (str, optional): Name of the time column. Defaults to "time".
 
-    Returns
-    -------
-    List[Dict]
-        洪水事件列表，每个字典包含：
-        - event_name: 事件名称（基于时间）
-        - start_idx: 实际事件开始索引（在原DataFrame中）
-        - end_idx: 实际事件结束索引（在原DataFrame中）
-        - warmup_start_idx: 预热期开始索引（在原DataFrame中）
-        - data: 事件数据DataFrame（包含预热期）
-        - is_warmup_mask: 布尔数组，标记哪些行是预热期（True=预热期，False=实际事件）
-        - actual_start_time: 实际事件开始时间
-        - actual_end_time: 实际事件结束时间
+    Returns:
+        List[Dict]: List of flood events. Each dictionary contains:
+            - event_name (str): Event name based on start/end times
+            - start_idx (int): Start index of actual event in original DataFrame
+            - end_idx (int): End index of actual event in original DataFrame
+            - warmup_start_idx (int): Start index including warmup period
+            - data (pd.DataFrame): Event data including warmup period
+            - is_warmup_mask (np.ndarray): Boolean array marking warmup rows
+            - actual_start_time: Start time of actual event
+            - actual_end_time: End time of actual event
+
+    Raises:
+        ValueError: If required columns are missing from DataFrame.
+
+    Example:
+        >>> df = pd.DataFrame({
+        ...     'time': pd.date_range('2020-01-01', periods=5),
+        ...     'flood_event': [0, 1, 1, 1, 0],
+        ...     'flow': [100, 200, 300, 250, 150]
+        ... })
+        >>> events = extract_flood_events(df, warmup_length=1)
+        >>> len(events)
+        1
+        >>> events[0]['data']
+           time  flood_event  flow
+        0  2020-01-01    0  100  # warmup period
+        1  2020-01-02    1  200  # event start
+        2  2020-01-03    1  300
+        3  2020-01-04    1  250  # event end
     """
     events: List[Dict] = []
 
@@ -137,28 +157,32 @@ def _extract_single_event(
     flood_event_col: str = "flood_event",
     time_col: str = "time",
 ) -> Optional[Dict]:
-    """
-    提取单个洪水事件的数据
+    """Extract data for a single flood event.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        包含时间序列数据的DataFrame
-    start_idx : int
-        实际洪水事件开始索引
-    end_idx : int
-        实际洪水事件结束索引
-    warmup_length : int
-        预热期长度（时间步数）
-    flood_event_col : str, default="flood_event"
-        洪水事件标记列名
-    time_col : str, default="time"
-        时间列名
+    This internal function handles the extraction of data for a single flood event,
+    including the warmup period. It creates a dictionary containing all relevant
+    information about the event.
 
-    Returns
-    -------
-    Optional[Dict]
-        如果事件有效，返回包含事件信息和数据的字典
+    Args:
+        df (pd.DataFrame): DataFrame containing time series data.
+        start_idx (int): Start index of the actual flood event.
+        end_idx (int): End index of the actual flood event.
+        warmup_length (int): Number of time steps to include as warmup period.
+        flood_event_col (str, optional): Name of flood event indicator column.
+            Defaults to "flood_event".
+        time_col (str, optional): Name of time column. Defaults to "time".
+
+    Returns:
+        Optional[Dict]: If event is valid, returns a dictionary containing:
+            - event_name (str): Event name based on start/end times
+            - start_idx (int): Start index of actual event
+            - end_idx (int): End index of actual event
+            - warmup_start_idx (int): Start index including warmup
+            - data (pd.DataFrame): Event data including warmup
+            - is_warmup_mask (np.ndarray): Boolean array marking warmup rows
+            - actual_start_time: Start time of actual event
+            - actual_end_time: End time of actual event
+            Returns None if event data is invalid (less than 2 rows).
     """
     warmup_start_idx = max(0, start_idx - warmup_length)
 
@@ -199,27 +223,41 @@ def _extract_single_event(
 def get_event_indices(
     df: pd.DataFrame, warmup_length: int = 0, flood_event_col: str = "flood_event"
 ) -> List[Dict]:
-    """
-    仅获取洪水事件的索引信息，不提取数据
+    """Get index information for flood events without extracting data.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        包含站点数据的DataFrame
-    warmup_length : int, default=0
-        预热期长度（时间步数）
-    flood_event_col : str, default="flood_event"
-        洪水事件标记列名
+    This function identifies flood events in the DataFrame and returns their index
+    information, but does not extract the actual data. This is useful when you only
+    need to know the locations and durations of events.
 
-    Returns
-    -------
-    List[Dict]
-        事件索引信息列表，每个字典包含：
-        - start_idx: 实际事件开始索引
-        - end_idx: 实际事件结束索引
-        - warmup_start_idx: 预热期开始索引
-        - duration: 实际事件持续时间步数
-        - total_length: 包含预热期的总长度
+    Args:
+        df (pd.DataFrame): DataFrame containing site data.
+        warmup_length (int, optional): Number of time steps to include as warmup
+            period before each event. Defaults to 0.
+        flood_event_col (str, optional): Name of flood event indicator column.
+            Defaults to "flood_event".
+
+    Returns:
+        List[Dict]: List of event index information. Each dictionary contains:
+            - start_idx (int): Start index of actual event
+            - end_idx (int): End index of actual event
+            - warmup_start_idx (int): Start index including warmup period
+            - duration (int): Duration of actual event in time steps
+            - total_length (int): Total length including warmup period
+
+    Raises:
+        ValueError: If flood_event_col is not found in DataFrame.
+
+    Example:
+        >>> df = pd.DataFrame({'flood_event': [0, 1, 1, 1, 0]})
+        >>> indices = get_event_indices(df, warmup_length=1)
+        >>> indices[0]
+        {
+            'start_idx': 1,
+            'end_idx': 4,
+            'warmup_start_idx': 0,
+            'duration': 3,
+            'total_length': 4
+        }
     """
     # 检查必要的列是否存在
     if flood_event_col not in df.columns:
@@ -248,22 +286,32 @@ def get_event_indices(
 def extract_event_data_by_columns(
     df: pd.DataFrame, event_indices: Dict, data_columns: List[str]
 ) -> Dict:
-    """
-    根据事件索引和指定列名提取事件数据
+    """Extract event data for specified columns using event indices.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        原始DataFrame
-    event_indices : Dict
-        事件索引信息（来自get_event_indices或extract_flood_events_simple）
-    data_columns : List[str]
-        要提取的数据列名列表
+    This function extracts data from specified columns for a flood event using
+    the index information from get_event_indices or extract_flood_events.
 
-    Returns
-    -------
-    Dict
-        包含指定列数据的字典，键为列名，值为numpy数组
+    Args:
+        df (pd.DataFrame): Original DataFrame containing all data.
+        event_indices (Dict): Event index information dictionary containing:
+            - warmup_start_idx (int): Start index including warmup period
+            - end_idx (int): End index of event
+        data_columns (List[str]): List of column names to extract.
+
+    Returns:
+        Dict: Dictionary mapping column names to numpy arrays containing the
+            extracted data. If a column is not found, it will contain an array
+            of NaN values.
+
+    Example:
+        >>> df = pd.DataFrame({
+        ...     'time': pd.date_range('2020-01-01', periods=5),
+        ...     'flow': [100, 200, 300, 250, 150]
+        ... })
+        >>> indices = {'warmup_start_idx': 1, 'end_idx': 4}
+        >>> data = extract_event_data_by_columns(df, indices, ['flow'])
+        >>> data['flow']
+        array([200., 300., 250.])
     """
     start_idx = event_indices["warmup_start_idx"]
     end_idx = event_indices["end_idx"]
@@ -283,29 +331,41 @@ def find_flood_event_segments_from_array(
     flood_event_array: np.ndarray,
     warmup_length: int = 0,
 ) -> List[Dict]:
-    """
-    从洪水事件标记数组中找到连续的事件段
+    """Find continuous flood event segments in a binary indicator array.
 
-    这是一个底层函数，专门处理 flood_event 数组的分割逻辑，
-    可以被不同的上层函数复用。
+    This is a low-level function that handles the core logic of segmenting a
+    flood event indicator array into continuous events. It can be reused by
+    different higher-level functions.
 
-    Parameters
-    ----------
-    flood_event_array : np.ndarray
-        洪水事件标记数组，>0 表示洪水事件
-    warmup_length : int, default=0
-        预热期长度（时间步数）
+    Args:
+        flood_event_array (np.ndarray): Binary array where values > 0 indicate
+            flood events.
+        warmup_length (int, optional): Number of time steps to include as warmup
+            period before each event. Defaults to 0.
 
-    Returns
-    -------
-    List[Dict]
-        事件段信息列表，每个字典包含：
-        - extended_start: 包含预热期的开始索引
-        - extended_end: 事件结束索引
-        - original_start: 实际事件开始索引
-        - original_end: 实际事件结束索引
-        - duration: 实际事件持续时间步数
-        - total_length: 包含预热期的总长度
+    Returns:
+        List[Dict]: List of event segment information. Each dictionary contains:
+            - extended_start (int): Start index including warmup period
+            - extended_end (int): End index of event
+            - original_start (int): Start index of actual event
+            - original_end (int): End index of actual event
+            - duration (int): Duration of actual event in time steps
+            - total_length (int): Total length including warmup period
+
+    Example:
+        >>> arr = np.array([0, 0, 1, 1, 1, 0, 0, 1, 1, 0])
+        >>> segments = find_flood_event_segments_from_array(arr, warmup_length=1)
+        >>> len(segments)  # Two events found
+        2
+        >>> segments[0]  # First event with one timestep warmup
+        {
+            'extended_start': 1,  # Warmup start
+            'extended_end': 4,    # Event end
+            'original_start': 2,  # Actual event start
+            'original_end': 4,    # Actual event end
+            'duration': 3,        # Event duration
+            'total_length': 4     # Total length with warmup
+        }
     """
     segments = []
 
@@ -347,22 +407,31 @@ def find_flood_event_segments_as_tuples(
     flood_event_array: np.ndarray,
     warmup_length: int = 0,
 ) -> List[Tuple[int, int, int, int]]:
-    """
-    从洪水事件标记数组中找到连续的事件段（元组格式）
+    """Find continuous flood event segments and return them as tuples.
 
-    这是为了兼容现有代码的便利函数。
+    This is a convenience function that returns event segments as tuples instead
+    of dictionaries, for compatibility with existing code.
 
-    Parameters
-    ----------
-    flood_event_array : np.ndarray
-        洪水事件标记数组，>0 表示洪水事件
-    warmup_length : int, default=0
-        预热期长度（时间步数）
+    Args:
+        flood_event_array (np.ndarray): Binary array where values > 0 indicate
+            flood events.
+        warmup_length (int, optional): Number of time steps to include as warmup
+            period before each event. Defaults to 0.
 
-    Returns
-    -------
-    List[Tuple[int, int, int, int]]
-        (extended_start, extended_end, original_start, original_end) 元组列表
+    Returns:
+        List[Tuple[int, int, int, int]]: List of tuples, each containing:
+            (extended_start, extended_end, original_start, original_end)
+            where:
+            - extended_start: Start index including warmup period
+            - extended_end: End index of event
+            - original_start: Start index of actual event
+            - original_end: End index of actual event
+
+    Example:
+        >>> arr = np.array([0, 0, 1, 1, 1, 0])
+        >>> segments = find_flood_event_segments_as_tuples(arr, warmup_length=1)
+        >>> segments[0]  # (warmup_start, event_end, event_start, event_end)
+        (1, 4, 2, 4)
     """
     segments = find_flood_event_segments_from_array(flood_event_array, warmup_length)
 

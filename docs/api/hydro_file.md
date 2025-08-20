@@ -1,105 +1,67 @@
 # hydro_file
 
-The `hydro_file` module provides utilities for file operations, including downloading, compression, serialization, and cache management.
+The `hydro_file` module provides utilities for file I/O operations, including reading and writing various data formats commonly used in hydrological applications.
 
-## Download Functions
+## Core Functions
 
-### download_zip_files
+### read_ts_xrdataset
 
 ```python
-def download_zip_files(urls: list, the_dir: Path) -> None
+def read_ts_xrdataset(
+    file_path: str,
+    var_name: str = None,
+    time_name: str = "time",
+    lat_name: str = "lat",
+    lon_name: str = "lon"
+) -> xr.Dataset
 ```
 
-Downloads multiple files from multiple URLs in parallel.
+Reads time series data from NetCDF files into xarray Dataset format.
 
 **Example:**
 ```python
-from pathlib import Path
-urls = [
-    'https://example.com/file1.zip',
-    'https://example.com/file2.zip'
-]
-download_zip_files(urls, Path('./downloads'))
+import hydroutils as hu
+
+# Read NetCDF file
+ds = hu.read_ts_xrdataset('data.nc', var_name='precipitation')
+print(f"Dataset shape: {ds.dims}")
 ```
 
-### download_one_zip
+### write_ts_xrdataset
 
 ```python
-def download_one_zip(data_url: str, data_dir: str) -> list
+def write_ts_xrdataset(
+    ds: xr.Dataset,
+    file_path: str,
+    var_name: str = None,
+    encoding: dict = None
+) -> None
 ```
 
-Downloads and extracts a zip file from a URL.
+Writes xarray Dataset to NetCDF file.
 
-**Example:**
-```python
-files = download_one_zip('https://example.com/data.zip', './downloads')
-print(f"Downloaded and extracted: {files}")
-```
-
-### download_small_zip
-
-```python
-def download_small_zip(data_url: str, data_dir: str) -> None
-```
-
-Downloads and extracts a small zip file using urllib.
-
-### download_small_file
+### read_csv
 
 ```python
-def download_small_file(data_url: str, temp_file: str) -> None
+def read_csv(file_path: str, **kwargs) -> pd.DataFrame
 ```
 
-Downloads a small text file from a URL.
+Reads CSV files with enhanced error handling and encoding detection.
 
-### download_excel
+### write_csv
 
 ```python
-def download_excel(data_url: str, temp_file: str) -> None
+def write_csv(df: pd.DataFrame, file_path: str, **kwargs) -> None
 ```
 
-Downloads an Excel file from a URL.
-
-### download_a_file_from_google_drive
-
-```python
-def download_a_file_from_google_drive(drive, dir_id: str, download_dir: str) -> None
-```
-
-Downloads files and folders from Google Drive recursively.
-
-## Compression Functions
-
-### zip_extract
-
-```python
-def zip_extract(the_dir: Path) -> None
-```
-
-Extracts all zip files in a directory.
-
-### unzip_file
-
-```python
-def unzip_file(data_zip: str, path_unzip: str) -> None
-```
-
-Extracts a zip file to a specified directory.
-
-### unzip_nested_zip
-
-```python
-def unzip_nested_zip(dataset_zip: str, path_unzip: str) -> None
-```
-
-Recursively extracts a zip file and any nested zip files within it.
+Writes DataFrame to CSV with proper encoding and error handling.
 
 ## JSON Functions
 
 ### serialize_json
 
 ```python
-def serialize_json(my_dict: dict, my_file: str, encoding: str = "utf-8", ensure_ascii: bool = True) -> None
+def serialize_json(my_dict: dict, my_file: str) -> None
 ```
 
 Saves a dictionary to a JSON file.
@@ -111,14 +73,6 @@ def unserialize_json(my_file: str) -> dict
 ```
 
 Loads a JSON file into a dictionary.
-
-### unserialize_json_ordered
-
-```python
-def unserialize_json_ordered(my_file: str) -> OrderedDict
-```
-
-Loads a JSON file into an OrderedDict, preserving key order.
 
 ### serialize_json_np
 
@@ -174,14 +128,6 @@ def get_lastest_file_in_a_dir(dir_path: str) -> str
 
 Gets the most recently modified .pth file in a directory.
 
-### get_latest_file_in_a_lst
-
-```python
-def get_latest_file_in_a_lst(lst: list) -> str
-```
-
-Gets the most recently modified file from a list of files.
-
 ### get_cache_dir
 
 ```python
@@ -200,9 +146,6 @@ class NumpyArrayEncoder(json.JSONEncoder)
 
 JSON encoder that handles NumPy arrays and scalars.
 
-**Example:**
-```python
-import numpy as np
-data = {'array': np.array([1, 2, 3])}
-json_str = json.dumps(data, cls=NumpyArrayEncoder)
-```
+## API Reference
+
+::: hydroutils.hydro_file

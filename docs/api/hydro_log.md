@@ -59,3 +59,7 @@ obj.process_data()  # Logs will be written to file and console
 - Timestamps in log filenames
 - Both file (DEBUG level) and console (INFO level) output
 - Standard logging format with timestamp, module name, and log level
+
+## API Reference
+
+::: hydroutils.hydro_log

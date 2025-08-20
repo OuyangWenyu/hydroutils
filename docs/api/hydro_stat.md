@@ -176,3 +176,7 @@ def ecdf(data: np.ndarray) -> tuple
 ```
 
 Computes empirical cumulative distribution function (ECDF).
+
+## API Reference
+
+::: hydroutils.hydro_stat

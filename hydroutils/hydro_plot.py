@@ -26,13 +26,28 @@ from hydroutils.hydro_stat import ecdf
 
 
 def setup_matplotlib_chinese():
-    """
-    Configure matplotlib for Chinese font support.
+    """Configure matplotlib for Chinese font support and math rendering.
 
-    Returns
-    -------
-    bool
-        True if successful, False otherwise.
+    This function sets up matplotlib to properly display Chinese characters and
+    mathematical expressions. It configures the font family, handles negative signs,
+    and sets up math rendering to work harmoniously with Chinese text.
+
+    Returns:
+        bool: True if configuration was successful, False if there was an error
+            (usually due to missing SimHei font).
+
+    Note:
+        - Uses SimHei as the primary Chinese font
+        - Sets up STIX fonts for math rendering to match Times New Roman
+        - Handles negative sign display in Chinese context
+        - Configures sans-serif as the default font family
+
+    Example:
+        >>> if setup_matplotlib_chinese():
+        ...     plt.title("中文标题")
+        ...     plt.xlabel("时间 (s)")
+        ... else:
+        ...     print("Chinese font setup failed")
     """
     try:
         plt.rcParams["font.sans-serif"] = ["SimHei"]
@@ -61,25 +76,37 @@ def plot_scatter_with_11line(
     xlabel=None,
     ylabel=None,
 ):
-    """plot a scatter plot for two varaibles with a 1:1 line
-    Parameters
-    ----------
-    x : np.array
-        the first variable to be plotted
-    y : np.array
-        the second variable to be plotted
-    point_color: str
-        the color of scatter points, by default "blue"
-    line_color: str
-        the color of 1:1 line, by default "black"
-    xlim: list
-        points' x_range shown in the plot
-    ylim: list
-        points' y_range shown in the plot
-    Returns
-    -------
-    tuple[fig, ax]
-        the figure and the ax
+    """Create a scatter plot with a 1:1 line for comparing two variables.
+
+    This function creates a scatter plot comparing two variables and adds a 1:1
+    line to show the perfect correlation line. The plot includes customizable
+    colors, axis limits, and labels.
+
+    Args:
+        x (np.array): First variable to plot (x-axis).
+        y (np.array): Second variable to plot (y-axis).
+        point_color (str, optional): Color of scatter points. Defaults to "blue".
+        line_color (str, optional): Color of 1:1 line. Defaults to "black".
+        xlim (list, optional): X-axis limits [min, max]. Defaults to [0.0, 1.0].
+        ylim (list, optional): Y-axis limits [min, max]. Defaults to [0.0, 1.0].
+        xlabel (str, optional): X-axis label. Defaults to None.
+        ylabel (str, optional): Y-axis label. Defaults to None.
+
+    Returns:
+        tuple[plt.Figure, plt.Axes]: Matplotlib figure and axes objects.
+
+    Note:
+        - The plot uses a whitesmoke background
+        - Right and top spines are hidden
+        - Tick labels use font size 16
+        - The 1:1 line is dashed
+
+    Example:
+        >>> x = np.array([0.1, 0.2, 0.3, 0.4])
+        >>> y = np.array([0.15, 0.25, 0.35, 0.45])
+        >>> fig, ax = plot_scatter_with_11line(x, y,
+        ...                                    xlabel='Predicted',
+        ...                                    ylabel='Observed')
     """
     fig, ax = plt.subplots()
     # set background color for ax
@@ -108,7 +135,7 @@ def plot_scatter_with_11line(
 
 
 def plot_heat_map(
-    data,
+    data: pd.DataFrame,
     mask=None,
     fig_size=None,
     fmt="d",
@@ -117,20 +144,37 @@ def plot_heat_map(
     xticklabels=True,
     yticklabels=True,
 ):
-    """Plot a heat map for data
-    https://zhuanlan.zhihu.com/p/96040773?from_voters_page=true
-    Parameters
-    ----------
-    data : pd.DataFrame
-        2-d array
-    mask: np.array
-        a boolean array, if True, data in the position will not be shown
-    fig_size: tuple
-        the size of this figure
-    fmt: str, optional
-        String formatting code to use when adding annotations.
-    annot: boolean
-        Annotate each cell with the numeric value using integer formatting
+    """Create a heatmap visualization using seaborn.
+
+    This function creates a customizable heatmap for visualizing 2D data arrays.
+    It uses seaborn's heatmap function with additional formatting options and
+    supports masking specific data points.
+
+    Args:
+        data (pd.DataFrame): 2D data array to visualize.
+        mask (np.ndarray, optional): Boolean array of same shape as data. True
+            values will be masked (not shown). Defaults to None.
+        fig_size (tuple, optional): Figure size as (width, height). Defaults to None.
+        fmt (str, optional): String formatting code for cell annotations.
+            Defaults to "d" (integer).
+        square (bool, optional): If True, set the Axes aspect to "equal".
+            Defaults to True.
+        annot (bool, optional): If True, write the data value in each cell.
+            Defaults to True.
+        xticklabels (bool, optional): If True, show x-axis tick labels.
+            Defaults to True.
+        yticklabels (bool, optional): If True, show y-axis tick labels.
+            Defaults to True.
+
+    Note:
+        - Uses "RdBu_r" colormap (red-blue diverging)
+        - Annotations are shown by default
+        - Cells are square by default for better visualization
+        - Based on seaborn's heatmap: https://seaborn.pydata.org/generated/seaborn.heatmap.html
+
+    Example:
+        >>> data = pd.DataFrame([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        >>> plot_heat_map(data, fig_size=(8, 6))
     """
     if fig_size is not None:
         fig = plt.figure(figsize=fig_size)
@@ -166,49 +210,53 @@ def plot_boxes_matplotlib(
     median_line_color="black",
     median_font_size="small",
 ):
-    """Plot multiplt boxes for multiple indicators
-    Parameters
-    ----------
-    data : list
-        one element for one indictor, which could have multiple numpy array and each of them will be showed in a box
-    label1 : list, optional
-        name of each subplot, by default None
-    label2 : list, optional
-        legends' names, i.e. name of each box in one subplot (same in all subplots), by default None
-    leg_col: int, optional
-        number of cols for legend
-    colorlst : str, optional
-        _description_, by default "rbkgcmywrbkgcmyw"
-    title : _type_, optional
-        _description_, by default None
-    figsize : tuple, optional
-        _description_, by default (10, 8)
-    sharey : bool, optional
-        If true, all subplots share same y axis, by default False
-    xticklabel : _type_, optional
-        _description_, by default None
-    axin : _type_, optional
-        _description_, by default None
-    ylim : _type_, optional
-        _description_, by default None
-    ylabel : _type_, optional
-        _description_, by default None
-    notch: boolean, optional
-        if True, the median of a box will be a notch, by default False
-    widths : float, optional
-        _description_, by default 0.5
-    subplots_adjust_wspace: float
-        specifies the size of width for white space between subplots (called padding), as a fraction of the average Axes width. Default size is 0.2
-    show_median: boolean
-        if True, we show the median values, by default True
-    median_line_color: str
-        color of median lines, by default "black"
-    median_font_size: str
-        size of median font
-    Returns
-    -------
-    _type_
-        _description_
+    """Create multiple boxplots for comparing multiple indicators.
+
+    This function creates a figure with multiple boxplots, each representing a
+    different indicator. It supports customization of appearance, labels, and
+    layout, and can display median values and other statistics.
+
+    Args:
+        data (list): List of data arrays, each element represents one indicator
+            and can contain multiple numpy arrays for box comparison.
+        label1 (list, optional): Names for each subplot. Defaults to None.
+        label2 (list, optional): Legend names for boxes within each subplot.
+            Same across all subplots. Defaults to None.
+        leg_col (int, optional): Number of columns in the legend. Defaults to None.
+        colorlst (str, optional): String of color characters for boxes.
+            Defaults to "rbgcmywrbgcmyw".
+        title (str, optional): Figure title. Defaults to None.
+        figsize (tuple, optional): Figure size as (width, height).
+            Defaults to (8, 6).
+        sharey (bool, optional): If True, all subplots share y-axis scale.
+            Defaults to False.
+        xticklabel (list, optional): Labels for x-axis ticks. Defaults to None.
+        axin (matplotlib.axes.Axes, optional): Existing axes to plot on.
+            Defaults to None.
+        ylim (list, optional): Y-axis limits [min, max]. Defaults to None.
+        ylabel (list, optional): Y-axis labels for each subplot. Defaults to None.
+        notch (bool, optional): If True, boxes will have notches.
+            Defaults to False.
+        widths (float, optional): Width of the boxes. Defaults to 0.5.
+        subplots_adjust_wspace (float, optional): Width space between subplots.
+            Defaults to 0.2.
+        show_median (bool, optional): If True, show median values above boxes.
+            Defaults to True.
+        median_line_color (str, optional): Color of median lines.
+            Defaults to "black".
+        median_font_size (str, optional): Font size for median values.
+            Defaults to "small".
+
+    Returns:
+        Union[plt.Figure, Tuple[plt.Axes, dict]]: If axin is None, returns the
+        figure object. Otherwise, returns a tuple of (axes, boxplot_dict).
+
+    Example:
+        >>> data = [np.random.normal(0, 1, 100), np.random.normal(2, 1, 100)]
+        >>> fig = plot_boxes_matplotlib(data,
+        ...                           label1=['Group A'],
+        ...                           label2=['Sample 1', 'Sample 2'],
+        ...                           show_median=True)
     """
     nc = len(data)
     if axin is None:
@@ -750,43 +798,60 @@ def plot_ts(
     dash_lines=None,
     alpha=1,
 ):
-    """Plot time series for multi arrays with matplotlib
+    """Plot multiple time series with customizable styling.
 
-    Parameters
-    ----------
-    t : Union[list, np.array]
-        time series but not just date; it can also be numbers like 1, 2, 3, ...
-    y : Union[list, np.array]
-        shown data series; the len of y should be equal to t's
-    ax : _type_, optional
-        _description_, by default None
-    t_bar : _type_, optional
-        _description_, by default None
-    title : _type_, optional
-        _description_, by default None
-    xlabel: str, optional
-        the name of x axis, by default None
-    ylabel : str, optional
-        the name of y axis, by default None
-    fig_size : tuple, optional
-        _description_, by default (12, 4)
-    c_lst : str, optional
-        _description_, by default "rbkgcmy"
-    leg_lst : _type_, optional
-        _description_, by default None
-    marker_lst : _type_, optional
-        _description_, by default None
-    linewidth : int, optional
-        _description_, by default 2
-    linespec : _type_, optional
-        _description_, by default None
-    dash_lines : _type_, optional
-        if dash_line, then we will plot dashed line, by default None
+    This function creates a time series plot that can handle multiple series,
+    with extensive customization options for appearance and formatting. It supports
+    both continuous lines and scatter plots, with optional vertical bars and
+    legends.
 
-    Returns
-    -------
-    _type_
-        _description_
+    Args:
+        t (Union[list, np.array]): Time values. Can be dates, numbers, or a list
+            of arrays (one per series).
+        y (Union[list, np.array]): Data values to plot. Can be a single array or
+            list of arrays for multiple series.
+        ax (matplotlib.axes.Axes, optional): Existing axes to plot on.
+            Defaults to None.
+        t_bar (Union[float, list], optional): Position(s) for vertical bars.
+            Defaults to None.
+        title (str, optional): Plot title. Defaults to None.
+        xlabel (str, optional): X-axis label. Defaults to None.
+        ylabel (str, optional): Y-axis label. Defaults to None.
+        fig_size (tuple, optional): Figure size as (width, height).
+            Defaults to (12, 4).
+        c_lst (str, optional): String of color characters for lines.
+            Defaults to "rbkgcmyrbkgcmyrbkgcmy".
+        leg_lst (list, optional): Legend labels for each series. Defaults to None.
+        marker_lst (list, optional): Marker styles for each series.
+            Defaults to None.
+        linewidth (Union[int, list], optional): Line width(s). Can be single value
+            or list. Defaults to 2.
+        linespec (list, optional): Line style specifications. Defaults to None.
+        dash_lines (list[bool], optional): Which lines should be dashed.
+            Defaults to None.
+        alpha (Union[float, list], optional): Opacity value(s) between 0 and 1.
+            Defaults to 1.
+
+    Returns:
+        Union[Tuple[plt.Figure, plt.Axes], plt.Axes]: If ax is None, returns
+        (figure, axes), otherwise returns just the axes.
+
+    Note:
+        - Automatically handles NaN values by plotting points instead of lines
+        - Supports multiple line styles including solid, dashed, and markers
+        - Right and top spines are hidden for cleaner appearance
+        - Grid is enabled by default
+        - Font size is set to 16 for tick labels
+        - Legend is placed in upper right if provided
+
+    Example:
+        >>> t = np.arange(100)
+        >>> y1 = np.sin(t/10)
+        >>> y2 = np.cos(t/10)
+        >>> fig, ax = plot_ts(t, [y1, y2],
+        ...                  leg_lst=['sin', 'cos'],
+        ...                  xlabel='Time',
+        ...                  ylabel='Value')
     """
     is_new_fig = False
     if ax is None:
@@ -1141,54 +1206,73 @@ def plot_map_carto(
     legend_font_size=None,
     colorbar_font_size=None,
 ):
-    """_summary_
+    """Create a map visualization using Cartopy with data points or categories.
 
-    Parameters
-    ----------
-    data : np.array
-        data shown in the map, 1-d array, one value for one point
-    lat : np.array
-        1-d array, latitude of each point
-    lon : np.array
-        1-d array, longitude of each point
-    fig : _type_, optional
-        _description_, by default None
-    ax : _type_, optional
-        _description_, by default None
-    pertile_range : list, optional
-        value's range shown in the map, by default None
-        for example, [0, 100] means all data; [23, 75] means 25-quantile to 75-quantile values
-    value_range: list, optinal
-        if value_range is not None, its values are used rather than percential_range
-    fig_size : tuple, optional
-        _description_, by default (8, 8)
-    need_colorbar : bool, optional
-        _description_, by default True
-    colorbar_size : list, optional
-        size of colorbar, by default [0.91, 0.318, 0.02, 0.354]
-    cmap_str : str, optional
-        _description_, by default "jet"
-    idx_lst : _type_, optional
-        for scatter plot, it is better to use idx_lst to plot multiple-type points, by default None
-    markers : list, optional
-        the marker shown in the map, by default None
-    marker_size : int, optional
-        _description_, by default 20
-    is_discrete : bool, optional
-        if True, legend is used, else colorbar is used, by default False
-    colors : str, optional
-        colors for different parts, by default "rbkgcmywrbkgcmyw"
-    category_names : list, optional
-        shown in the legend when using discrete values, by default None
-    legend_font_size : _type_, optional
-        _description_, by default None
-    colorbar_font_size : float, optional
-        font size of colorbar, by default None
+    This function creates a map using Cartopy and plots data points on it. It supports
+    both continuous and discrete data visualization, with options for customizing
+    markers, colors, and legends/colorbars.
 
-    Returns
-    -------
-    _type_
-        _description_
+    Args:
+        data (np.ndarray): 1-D array of values to plot, one per point.
+        lat (np.ndarray): 1-D array of latitude values.
+        lon (np.ndarray): 1-D array of longitude values.
+        fig (plt.Figure, optional): Existing figure to plot on. Defaults to None.
+        ax (plt.Axes, optional): Existing axes to plot on. Defaults to None.
+        pertile_range (list, optional): Percentile range for color scaling as
+            [min_percentile, max_percentile]. Example: [25, 75] for interquartile
+            range. Defaults to None.
+        value_range (list, optional): Explicit value range for color scaling as
+            [min_value, max_value]. Overrides pertile_range. Defaults to None.
+        fig_size (tuple, optional): Figure size as (width, height).
+            Defaults to (8, 8).
+        need_colorbar (bool, optional): Whether to show colorbar.
+            Defaults to True.
+        colorbar_size (list, optional): Colorbar position and size as
+            [left, bottom, width, height]. Defaults to [0.91, 0.318, 0.02, 0.354].
+        cmap_str (Union[str, list], optional): Colormap name(s). Can be single
+            string or list for multiple point types. Defaults to "jet".
+        idx_lst (list, optional): List of index arrays for plotting multiple
+            point types separately. Defaults to None.
+        markers (Union[str, list], optional): Marker style(s) for points. Can be
+            single style or list. Defaults to None.
+        marker_size (Union[int, list], optional): Marker size(s). Can be single
+            value or list. Defaults to 20.
+        is_discrete (bool, optional): If True, treat data as discrete categories.
+            Defaults to False.
+        colors (str, optional): String of color characters for discrete
+            categories. Defaults to "rbkgcmywrbkgcmyw".
+        category_names (list, optional): Names for discrete categories.
+            Defaults to None.
+        legend_font_size (float, optional): Font size for legend.
+            Defaults to None.
+        colorbar_font_size (float, optional): Font size for colorbar.
+            Defaults to None.
+
+    Returns:
+        plt.Axes: The map axes object.
+
+    Note:
+        - Uses Cartopy's PlateCarree projection
+        - Automatically determines map extent from data points
+        - Includes state boundaries and coastlines
+        - Supports both continuous (colorbar) and discrete (legend) data
+        - Can plot multiple point types with different markers/colors
+        - Handles NaN values appropriately
+
+    Example:
+        >>> # Continuous data example
+        >>> data = np.random.rand(100)
+        >>> lat = np.random.uniform(30, 45, 100)
+        >>> lon = np.random.uniform(-120, -100, 100)
+        >>> ax = plot_map_carto(data, lat, lon,
+        ...                    value_range=[0, 1],
+        ...                    cmap_str='viridis')
+        >>>
+        >>> # Discrete categories example
+        >>> categories = np.random.randint(0, 3, 100)
+        >>> ax = plot_map_carto(categories, lat, lon,
+        ...                    is_discrete=True,
+        ...                    category_names=['Low', 'Medium', 'High'])
     """
     if value_range is not None:
         vmin = value_range[0]
@@ -1350,34 +1434,55 @@ def plot_rainfall_runoff(
     linewidth=1,
     prcp_interval=20,
 ):
-    """Plot rainfall and runoff in one figure
+    """Create a combined rainfall-runoff plot with dual axes.
 
-    Parameters
-    ----------
-    t : a np.array or a list of some np.array and the length of the list is same as the length of qs
-        time series, better to be a list with the same length of qs
-    p : np.array
-        precipitation, a time series
-    qs : a np.array or a list of some np.array
-        streamflow, a list with multiple time series
-    fig_size : tuple, optional
-        figure size, by default (8, 6)
-    c_lst : str, optional
-        colors, by default "rbkgcmy"
-    leg_lst : list, optional
-        legends, by default None
-    dash_lines : list, optional
-        if a line is dash line, by default None
-    title : str, optional
-        the title of the figure, by default None
-    xlabel : str, optional
-        label of x axis, by default None
-    ylabel : str, optional
-        label of y axis, by default None
-    linewidth : int, optional
-        the width of lines, by default 1
-    prcp_interval : int, optional
-        the interval of precipitation, by default 20
+    This function creates a figure with two synchronized axes: one for streamflow
+    (primary) and one for precipitation (secondary, inverted). The precipitation
+    is plotted as filled areas from the top, while streamflow lines are plotted
+    normally.
+
+    Args:
+        t (Union[np.array, list]): Time values. If list, must match length of qs.
+        p (np.array): Precipitation time series.
+        qs (Union[np.array, list]): Streamflow time series. Can be single array
+            or list of arrays for multiple series.
+        fig_size (tuple, optional): Figure size as (width, height).
+            Defaults to (8, 6).
+        c_lst (str, optional): String of color characters for lines.
+            Defaults to "rbkgcmy".
+        leg_lst (list, optional): Legend labels for streamflow series.
+            Defaults to None.
+        dash_lines (list[bool], optional): Which streamflow lines should be
+            dashed. Defaults to None.
+        title (str, optional): Plot title. Defaults to None.
+        xlabel (str, optional): X-axis label. Defaults to None.
+        ylabel (str, optional): Primary Y-axis label (streamflow).
+            Defaults to None.
+        prcp_ylabel (str, optional): Secondary Y-axis label (precipitation).
+            Defaults to "prcp(mm/day)".
+        linewidth (int, optional): Width of streamflow lines. Defaults to 1.
+        prcp_interval (int, optional): Interval for precipitation Y-axis ticks.
+            Defaults to 20.
+
+    Returns:
+        Tuple[plt.Figure, plt.Axes]: The figure and primary axes objects.
+
+    Note:
+        - Precipitation is plotted from top with blue fill and 0.5 alpha
+        - Streamflow axis range is extended by 20% at top
+        - Legend is placed at upper left with fontsize 16
+        - Grid is enabled on primary (streamflow) axis
+        - All tick labels use fontsize 16
+        - Right and top spines are hidden
+
+    Example:
+        >>> t = np.arange(100)
+        >>> p = np.random.uniform(0, 10, 100)  # precipitation
+        >>> q1 = np.random.uniform(0, 100, 100)  # streamflow 1
+        >>> q2 = np.random.uniform(0, 80, 100)   # streamflow 2
+        >>> fig, ax = plot_rainfall_runoff(t, p, [q1, q2],
+        ...                               leg_lst=['Obs', 'Sim'],
+        ...                               ylabel='Streamflow (m³/s)')
     """
     fig, ax = plt.subplots(figsize=fig_size)
     if dash_lines is not None:
@@ -1534,7 +1639,55 @@ def plot_event_characteristics(
     net_rain_key: str = "P_eff",
     obs_flow_key: str = "Q_obs_eff",
 ):
-    """为单个洪水事件绘制特征图并保存，确保径流曲线在柱状图上层。@author: Zheng Zhang"""
+    """Create and save a detailed flood event characteristics plot.
+
+    This function creates a comprehensive visualization of a flood event, showing
+    both the net rainfall and direct runoff, along with key event characteristics
+    in a text box. The runoff curve is plotted on top of the rainfall bars for
+    better visibility.
+
+    Args:
+        event_analysis (Dict): Dictionary containing flood event data and analysis:
+            - filepath (str): Path to source data file
+            - peak_obs (float): Peak observed flow
+            - runoff_volume_m3 (float): Total runoff volume in m³
+            - runoff_duration_hours (float): Event duration in hours
+            - total_net_rain (float): Total net rainfall in mm
+            - lag_time_hours (float): Time lag between peak rain and peak flow
+            - P_eff (np.ndarray): Net rainfall time series
+            - Q_obs_eff (np.ndarray): Observed flow time series
+        output_folder (str): Directory where the plot will be saved.
+        delta_t_hours (float, optional): Time step in hours. Defaults to 3.0.
+        net_rain_key (str, optional): Key for net rainfall in event_analysis.
+            Defaults to "P_eff".
+        obs_flow_key (str, optional): Key for observed flow in event_analysis.
+            Defaults to "Q_obs_eff".
+
+    Note:
+        - Uses dual axes: left for runoff (m³/s), right for rainfall (mm)
+        - Rainfall is plotted as blue bars from top
+        - Runoff is plotted as orange line with higher z-order
+        - Includes grid for better readability
+        - Text box shows key event characteristics
+        - Saves plot as PNG with 150 DPI
+        - Uses SimSun font for Chinese characters
+
+    Example:
+        >>> event = {
+        ...     'filepath': 'event_001.csv',
+        ...     'peak_obs': 150.5,
+        ...     'runoff_volume_m3': 2.5e6,
+        ...     'runoff_duration_hours': 48.0,
+        ...     'total_net_rain': 85.5,
+        ...     'lag_time_hours': 6.0,
+        ...     'P_eff': np.array([...]),  # rainfall data
+        ...     'Q_obs_eff': np.array([...])  # flow data
+        ... }
+        >>> plot_event_characteristics(event, 'output/plots/')
+
+    Credit:
+        Original implementation by Zheng Zhang
+    """
     net_rain = event_analysis[net_rain_key]
     direct_runoff = event_analysis[obs_flow_key]
     event_filename = os.path.basename(event_analysis["filepath"])
@@ -1656,14 +1809,34 @@ def plot_unit_hydrograph(
     peak_violation_weight=None,
     delta_t_hours=3.0,
 ):
-    """
-    绘制单位线图
+    """Create a unit hydrograph plot with optimization parameters.
+
+    This function visualizes a unit hydrograph (UH) as a line plot with markers.
+    If optimization parameters are provided, they are included in the title.
+    The plot includes a grid and appropriate axis labels.
 
     Args:
-        U_optimized: 优化的单位线参数
-        title: 图表标题
-        smoothing_factor: 平滑因子（可选）
-        peak_violation_weight: 单峰惩罚权重（可选）
+        U_optimized (np.ndarray): Optimized unit hydrograph ordinates.
+        title (str): Base title for the plot.
+        smoothing_factor (float, optional): Smoothing factor used in optimization.
+            Defaults to None.
+        peak_violation_weight (float, optional): Weight for peak violation penalty
+            in optimization. Defaults to None.
+        delta_t_hours (float, optional): Time step in hours. Defaults to 3.0.
+
+    Note:
+        - Uses markers ('o') at each UH ordinate
+        - Includes dashed grid lines with 0.7 alpha
+        - X-axis shows time in hours
+        - Y-axis shows UH ordinates in mm/3h
+        - If optimization parameters are provided, they are shown in parentheses
+          after the title
+
+    Example:
+        >>> uh = np.array([0.1, 0.3, 0.4, 0.2, 0.0])
+        >>> plot_unit_hydrograph(uh, "Test Basin UH",
+        ...                     smoothing_factor=0.1,
+        ...                     peak_violation_weight=0.5)
     """
     if U_optimized is None:
         print(f"⚠️ 无法绘制单位线：{title} - 优化失败")

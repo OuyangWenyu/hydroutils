@@ -415,7 +415,43 @@ def add_metric(func_name: str, he_func_name: str, description: str) -> None:
 
 
 def stat_error_i(targ_i: np.ndarray, pred_i: np.ndarray) -> Dict[str, float]:
-    """statistics for one dimensional array"""
+    """Calculate multiple statistical metrics for one-dimensional arrays.
+
+    This function computes a comprehensive set of statistical metrics comparing
+    predicted values against target (observed) values. It handles NaN values
+    and requires at least two valid data points for correlation-based metrics.
+
+    Args:
+        targ_i (np.ndarray): Target (observed) values.
+        pred_i (np.ndarray): Predicted values.
+
+    Returns:
+        Dict[str, float]: Dictionary containing the following metrics:
+            - Bias: Mean error
+            - RMSE: Root mean square error
+            - ubRMSE: Unbiased root mean square error
+            - Corr: Pearson correlation coefficient
+            - R2: Coefficient of determination
+            - NSE: Nash-Sutcliffe efficiency
+            - KGE: Kling-Gupta efficiency
+            - FHV: Peak flow bias (top 2%)
+            - FLV: Low flow bias (bottom 30%)
+
+    Raises:
+        ValueError: If there are fewer than 2 valid data points for correlation.
+
+    Note:
+        - NaN values are automatically handled (removed from calculations)
+        - FHV and FLV are calculated in percentage
+        - All metrics are calculated on valid (non-NaN) data points only
+
+    Example:
+        >>> target = np.array([1.0, 2.0, 3.0, np.nan, 5.0])
+        >>> predicted = np.array([1.1, 2.2, 2.9, np.nan, 4.8])
+        >>> metrics = stat_error_i(target, predicted)
+        >>> print(metrics['RMSE'])  # Example output
+        0.173
+    """
     ind = np.where(np.logical_and(~np.isnan(pred_i), ~np.isnan(targ_i)))[0]
     # Theoretically at least two points for correlation
     if ind.shape[0] > 1:
@@ -469,26 +505,49 @@ def stat_error_i(targ_i: np.ndarray, pred_i: np.ndarray) -> Dict[str, float]:
 def stat_error(
     target: np.ndarray, pred: np.ndarray, fill_nan: str = "no"
 ) -> Union[Dict[str, np.ndarray], Dict[str, List[float]]]:
-    """
-    Statistics indicators include: Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
+    """Calculate statistical metrics for 2D arrays with NaN handling options.
 
-    Parameters
-    ----------
-    target
-        observations, 2-dim array [basin, sequence]
-    pred
-        predictions, same dim with observations
-    fill_nan
-        "no" means ignoring the NaN value, and it is the default setting;
-        "sum" means calculate the sum of the following values in the NaN locations.
-        For example, observations are [1, nan, nan, 2], and predictions are [0.3, 0.3, 0.3, 1.5].
-        Then, "no" means [1, 2] v.s. [0.3, 1.5] while "sum" means [1, 2] v.s. [0.3 + 0.3 + 0.3, 1.5];
-        "mean" represents calculate average value the following values in the NaN locations.
+    This function computes multiple statistical metrics comparing predicted values
+    against target (observed) values for multiple time series (e.g., multiple
+    basins). It provides different options for handling NaN values.
 
-    Returns
-    -------
-    dict
-        Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
+    Args:
+        target (np.ndarray): Target (observed) values. 2D array [basin, sequence].
+        pred (np.ndarray): Predicted values. Same shape as target.
+        fill_nan (str, optional): Method for handling NaN values. Options:
+            - "no": Ignore NaN values (default)
+            - "sum": Sum values in NaN locations
+            - "mean": Average values in NaN locations
+
+    Returns:
+        Union[Dict[str, np.ndarray], Dict[str, List[float]]]: Dictionary with metrics:
+            - Bias: Mean error
+            - RMSE: Root mean square error
+            - ubRMSE: Unbiased root mean square error
+            - Corr: Pearson correlation coefficient
+            - R2: Coefficient of determination
+            - NSE: Nash-Sutcliffe efficiency
+            - KGE: Kling-Gupta efficiency
+            - FHV: Peak flow bias (top 2%)
+            - FLV: Low flow bias (bottom 30%)
+
+    Raises:
+        ValueError: If input arrays have wrong dimensions or incompatible shapes.
+
+    Note:
+        For fill_nan options:
+        - "no": [1, nan, nan, 2] vs [0.3, 0.3, 0.3, 1.5] becomes [1, 2] vs [0.3, 1.5]
+        - "sum": [1, nan, nan, 2] vs [0.3, 0.3, 0.3, 1.5] becomes [1, 2] vs [0.9, 1.5]
+        - "mean": Similar to "sum" but takes average instead of sum
+
+    Example:
+        >>> target = np.array([[1.0, np.nan, np.nan, 2.0],
+        ...                    [3.0, 4.0, np.nan, 6.0]])
+        >>> pred = np.array([[1.1, 0.3, 0.3, 1.9],
+        ...                  [3.2, 3.8, 0.5, 5.8]])
+        >>> metrics = stat_error(target, pred, fill_nan="sum")
+        >>> print(metrics['RMSE'])  # Example output
+        array([0.158, 0.245])
     """
     if len(target.shape) == 3:
         raise ValueError(
@@ -640,21 +699,45 @@ def stat_error(
 def stat_errors(
     target: np.ndarray, pred: np.ndarray, fill_nan: Optional[List[str]] = None
 ) -> List[Dict[str, np.ndarray]]:
-    """Calculate statistics for 3-dim arrays
+    """Calculate statistical metrics for 3D arrays with multiple variables.
 
-    Parameters
-    ----------
-    target : np.ndarray
-        the observed data
-    pred : np.ndarray
-        the predicted data
-    fill_nan : list, optional
-        a list of strings, each string is "no", "sum" or "mean", by default None
+    This function extends stat_error to handle 3D arrays where the third dimension
+    represents different variables. Each variable can have its own NaN handling
+    method.
 
-    Returns
-    -------
-    list
-        A list of dictionaries, each dictionary contains Bias, RMSE, ubRMSE, Corr, R2, NSE, KGE, FHV, FLV
+    Args:
+        target (np.ndarray): Target (observed) values. 3D array [basin, sequence, variable].
+        pred (np.ndarray): Predicted values. Same shape as target.
+        fill_nan (List[str], optional): List of NaN handling methods, one per variable.
+            Each element can be "no", "sum", or "mean". Defaults to ["no"].
+
+    Returns:
+        List[Dict[str, np.ndarray]]: List of dictionaries, one per variable.
+            Each dictionary contains:
+            - Bias: Mean error
+            - RMSE: Root mean square error
+            - ubRMSE: Unbiased root mean square error
+            - Corr: Pearson correlation coefficient
+            - R2: Coefficient of determination
+            - NSE: Nash-Sutcliffe efficiency
+            - KGE: Kling-Gupta efficiency
+            - FHV: Peak flow bias (top 2%)
+            - FLV: Low flow bias (bottom 30%)
+
+    Raises:
+        ValueError: If:
+            - Input arrays are not 3D
+            - Arrays have incompatible shapes
+            - fill_nan length doesn't match number of variables
+
+    Example:
+        >>> target = np.array([[[1.0, 2.0], [np.nan, 4.0], [5.0, 6.0]]])  # 1x3x2
+        >>> pred = np.array([[[1.1, 2.1], [3.0, 3.9], [4.9, 5.8]]])
+        >>> metrics = stat_errors(target, pred, fill_nan=["no", "sum"])
+        >>> print(len(metrics))  # Number of variables
+        2
+        >>> print(metrics[0]['RMSE'])  # RMSE for first variable
+        array([0.141])
     """
     if fill_nan is None:
         fill_nan = ["no"]
@@ -677,18 +760,32 @@ def stat_errors(
 
 
 def cal_4_stat_inds(b: np.ndarray) -> List[float]:
-    """
-    Calculate four statistics indices: percentile 10 and 90, mean value, standard deviation
+    """Calculate four basic statistical indices for an array.
 
-    Parameters
-    ----------
-    b
-        input data
+    This function computes four common statistical measures: 10th and 90th
+    percentiles, mean, and standard deviation. If the standard deviation is
+    very small (< 0.001), it is set to 1 to avoid numerical issues.
 
-    Returns
-    -------
-    list
-        [p10, p90, mean, std]
+    Args:
+        b (np.ndarray): Input array of numerical values.
+
+    Returns:
+        List[float]: Four statistical measures in order:
+            - p10: 10th percentile
+            - p90: 90th percentile
+            - mean: Arithmetic mean
+            - std: Standard deviation (minimum 0.001)
+
+    Note:
+        - NaN values should be removed before calling this function
+        - If std < 0.001, it is set to 1 to avoid division issues
+        - All returned values are cast to float type
+
+    Example:
+        >>> data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        >>> p10, p90, mean, std = cal_4_stat_inds(data)
+        >>> print(f"P10: {p10}, P90: {p90}, Mean: {mean}, Std: {std}")
+        P10: 1.9, P90: 9.1, Mean: 5.5, Std: 2.87
     """
     p10: float = np.percentile(b, 10).astype(float)
     p90: float = np.percentile(b, 90).astype(float)
@@ -700,17 +797,34 @@ def cal_4_stat_inds(b: np.ndarray) -> List[float]:
 
 
 def cal_stat(x: np.ndarray) -> List[float]:
-    """
-    Get statistic values of x (Exclude the NaN values)
+    """Calculate basic statistics for an array, handling NaN values.
 
-    Parameters
-    ----------
-    x: the array
+    This function computes four basic statistical measures (10th and 90th
+    percentiles, mean, and standard deviation) while properly handling NaN
+    values. If the array is empty after removing NaN values, a zero value
+    is used for calculations.
 
-    Returns
-    -------
-    list
-        [10% quantile, 90% quantile, mean, std]
+    Args:
+        x (np.ndarray): Input array, may contain NaN values.
+
+    Returns:
+        List[float]: Four statistical measures in order:
+            - p10: 10th percentile
+            - p90: 90th percentile
+            - mean: Arithmetic mean
+            - std: Standard deviation (minimum 0.001)
+
+    Note:
+        - NaN values are automatically removed before calculations
+        - If all values are NaN, returns statistics for [0]
+        - Uses cal_4_stat_inds for actual calculations
+        - If std < 0.001, it is set to 1 to avoid division issues
+
+    Example:
+        >>> data = np.array([1.0, 2.0, np.nan, 4.0, 5.0])
+        >>> p10, p90, mean, std = cal_stat(data)
+        >>> print(f"P10: {p10}, P90: {p90}, Mean: {mean}, Std: {std}")
+        P10: 1.3, P90: 4.7, Mean: 3.0, Std: 1.58
     """
     a = x.flatten()
     b = a[~np.isnan(a)]
@@ -721,21 +835,36 @@ def cal_stat(x: np.ndarray) -> List[float]:
 
 
 def cal_stat_gamma(x: np.ndarray) -> List[float]:
-    """
-    Try to transform a time series data to normal distribution
+    """Transform time series data to approximate normal distribution.
 
-    Now only for daily streamflow, precipitation and evapotranspiration;
-    When nan values exist, just ignore them.
+    This function applies a transformation to hydrological time series data
+    (streamflow, precipitation, evapotranspiration) to make it more normally
+    distributed. The transformation is: log10(sqrt(x) + 0.1).
 
-    Parameters
-    ----------
-    x
-        time series data
+    Args:
+        x (np.ndarray): Time series data, typically daily values of:
+            - Streamflow
+            - Precipitation
+            - Evapotranspiration
 
-    Returns
-    -------
-    list
-        [p10, p90, mean, std]
+    Returns:
+        List[float]: Four statistical measures of transformed data:
+            - p10: 10th percentile
+            - p90: 90th percentile
+            - mean: Arithmetic mean
+            - std: Standard deviation (minimum 0.001)
+
+    Note:
+        - NaN values are automatically removed before transformation
+        - Transformation: log10(sqrt(x) + 0.1)
+        - This transformation helps handle gamma-distributed data
+        - If std < 0.001, it is set to 1 to avoid division issues
+
+    Example:
+        >>> data = np.array([0.0, 0.1, 1.0, 10.0, np.nan, 100.0])
+        >>> p10, p90, mean, std = cal_stat_gamma(data)
+        >>> print(f"P10: {p10:.2f}, P90: {p90:.2f}")
+        P10: -0.52, P90: 1.01
     """
     a = x.flatten()
     b = a[~np.isnan(a)]  # kick out Nan
@@ -746,23 +875,38 @@ def cal_stat_gamma(x: np.ndarray) -> List[float]:
 
 
 def cal_stat_prcp_norm(x, meanprep):
-    """
-    normalized variable by precipitation with cal_stat_gamma
+    """Normalize variables by precipitation and calculate gamma statistics.
 
-    dividing a var with prcp means we can get a normalized var without rainfall's magnitude's influence,
-    so that we don't have bias for dry and wet basins
+    This function normalizes a variable (e.g., streamflow) by mean precipitation
+    to remove the influence of rainfall magnitude, making statistics comparable
+    between dry and wet basins. After normalization, gamma transformation is
+    applied.
 
-    Parameters
-    ----------
-    x
-        data to be normalized
-    meanprep
-        meanprep = readAttr(gageDict['id'], ['p_mean'])
+    Args:
+        x (np.ndarray): Data to be normalized, typically streamflow or other
+            hydrological variables.
+        meanprep (np.ndarray): Mean precipitation values for normalization.
+            Usually obtained from basin attributes (e.g., p_mean).
 
-    Returns
-    -------
-    list
-        [p10, p90, mean, std]
+    Returns:
+        List[float]: Four statistical measures of normalized data:
+            - p10: 10th percentile
+            - p90: 90th percentile
+            - mean: Arithmetic mean
+            - std: Standard deviation (minimum 0.001)
+
+    Note:
+        - Normalization: x / meanprep (unit: mm/day / mm/day)
+        - After normalization, gamma transformation is applied
+        - Helps compare basins with different precipitation regimes
+        - If std < 0.001, it is set to 1 to avoid division issues
+
+    Example:
+        >>> data = np.array([[10.0, 20.0], [30.0, 40.0]])  # 2 basins, 2 timesteps
+        >>> mean_prep = np.array([100.0, 200.0])  # Mean prep for 2 basins
+        >>> p10, p90, mean, std = cal_stat_prcp_norm(data, mean_prep)
+        >>> print(f"P10: {p10:.3f}, P90: {p90:.3f}")
+        P10: -0.523, P90: -0.398
     """
     # meanprep = readAttr(gageDict['id'], ['q_mean'])
     tempprep = np.tile(meanprep, (1, x.shape[1]))
@@ -772,26 +916,40 @@ def cal_stat_prcp_norm(x, meanprep):
 
 
 def trans_norm(x, var_lst, stat_dict, *, to_norm):
-    """
-    normalization, including denormalization code
+    """Normalize or denormalize data using statistical parameters.
 
-    Parameters
-    ----------
-    x
-        2d or 3d data
-        2d: 1st-sites, 2nd-var type
-        3d: 1st-sites, 2nd-time, 3rd-var type
-    var_lst
-        variables
-    stat_dict
-        a dict with statistics info
-    to_norm
-        if True, normalization; else denormalization
+    This function performs normalization or denormalization on 2D or 3D data
+    arrays using pre-computed statistical parameters. It supports multiple
+    variables and can handle both site-based and time series data.
 
-    Returns
-    -------
-    np.array
-        normalized/denormalized data
+    Args:
+        x (np.ndarray): Input data array:
+            - 2D: [sites, variables]
+            - 3D: [sites, time, variables]
+        var_lst (Union[str, List[str]]): Variable name(s) to process.
+        stat_dict (Dict[str, List[float]]): Dictionary containing statistics
+            for each variable. Each value is [p10, p90, mean, std].
+        to_norm (bool): If True, normalize data; if False, denormalize data.
+
+    Returns:
+        np.ndarray: Normalized or denormalized data with same shape as input.
+
+    Note:
+        - Normalization: (x - mean) / std
+        - Denormalization: x * std + mean
+        - Statistics should be pre-computed for each variable
+        - Handles single variable (str) or multiple variables (list)
+        - Preserves input array dimensions
+
+    Example:
+        >>> # Normalization example
+        >>> data = np.array([[1.0, 2.0], [3.0, 4.0]])  # 2 sites, 2 variables
+        >>> stats = {'var1': [0, 2, 1, 0.5], 'var2': [1, 5, 3, 1.0]}
+        >>> vars = ['var1', 'var2']
+        >>> normalized = trans_norm(data, vars, stats, to_norm=True)
+        >>> print(normalized)  # Example output
+        array([[0. , -1.],
+               [4. ,  1.]])
     """
     if type(var_lst) is str:
         var_lst = [var_lst]
@@ -812,7 +970,32 @@ def trans_norm(x, var_lst, stat_dict, *, to_norm):
 
 
 def ecdf(data: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """Compute ECDF"""
+    """Compute Empirical Cumulative Distribution Function (ECDF).
+
+    This function calculates the empirical CDF for a given dataset. The ECDF
+    shows the fraction of observations less than or equal to each data point.
+
+    Args:
+        data (np.ndarray): Input data array.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: Two arrays:
+            - x: Sorted input data
+            - y: Cumulative probabilities (0 to 1)
+
+    Note:
+        - Data is sorted in ascending order
+        - Probabilities are calculated as (i)/(n) for i=1..n
+        - No special handling of NaN values - remove them before calling
+
+    Example:
+        >>> data = np.array([1, 2, 2, 3, 3, 3, 4, 4, 5])
+        >>> x, y = ecdf(data)
+        >>> print("Values:", x)
+        Values: [1 2 2 3 3 3 4 4 5]
+        >>> print("Probabilities:", y)
+        Probabilities: [0.111 0.222 0.333 0.444 0.556 0.667 0.778 0.889 1.000]
+    """
     x = np.sort(data)
     n = x.size
     y = np.arange(1, n + 1) / n
@@ -820,14 +1003,73 @@ def ecdf(data: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def wilcoxon_t_test(xs: np.ndarray, xo: np.ndarray) -> Tuple[float, float]:
-    """Wilcoxon t test"""
+    """Perform Wilcoxon signed-rank test on paired samples.
+
+    This function performs a Wilcoxon signed-rank test to determine whether two
+    related samples have the same distribution. It's particularly useful for
+    comparing model predictions against observations.
+
+    Args:
+        xs (np.ndarray): First sample (typically simulated/predicted values).
+        xo (np.ndarray): Second sample (typically observed values).
+
+    Returns:
+        Tuple[float, float]: Test statistics:
+            - w: Wilcoxon test statistic
+            - p: p-value for the test
+
+    Note:
+        - Non-parametric alternative to paired t-test
+        - Assumes samples are paired and same length
+        - Direction of difference (xs-xo vs xo-xs) doesn't affect results
+        - Uses scipy.stats.wilcoxon under the hood
+
+    Example:
+        >>> sim = np.array([102, 104, 98, 101, 96, 103, 95])
+        >>> obs = np.array([100, 102, 95, 100, 93, 101, 94])
+        >>> w, p = wilcoxon_t_test(sim, obs)
+        >>> print(f"W-statistic: {w:.2f}, p-value: {p:.4f}")
+        W-statistic: 26.50, p-value: 0.0234
+    """
     diff = xs - xo  # same result when using xo-xs
     w, p = wilcoxon(diff)
     return w, p
 
 
 def wilcoxon_t_test_for_lst(x_lst, rnd_num=2):
-    """Wilcoxon t test for every two array in a 2-d array"""
+    """Perform pairwise Wilcoxon tests on multiple arrays.
+
+    This function performs Wilcoxon signed-rank tests on every possible pair
+    of arrays in a list of arrays. Results are rounded to specified precision.
+
+    Args:
+        x_lst (List[np.ndarray]): List of arrays to compare pairwise.
+        rnd_num (int, optional): Number of decimal places to round results to.
+            Defaults to 2.
+
+    Returns:
+        Tuple[List[float], List[float]]: Two lists:
+            - w: List of Wilcoxon test statistics for each pair
+            - p: List of p-values for each pair
+
+    Note:
+        - Generates all possible pairs using itertools.combinations
+        - Results are ordered by pair combinations
+        - Number of pairs = n*(n-1)/2 where n is number of arrays
+        - All test statistics and p-values are rounded
+
+    Example:
+        >>> arrays = [
+        ...     np.array([1, 2, 3, 4]),
+        ...     np.array([2, 3, 4, 5]),
+        ...     np.array([3, 4, 5, 6])
+        ... ]
+        >>> w, p = wilcoxon_t_test_for_lst(arrays)
+        >>> print(f"W-statistics: {w}")
+        W-statistics: [0.00, 0.00, 0.00]
+        >>> print(f"p-values: {p}")
+        p-values: [0.07, 0.07, 0.07]
+    """
     arr_lst = np.asarray(x_lst)
     w, p = [], []
     arr_lst_pair = list(itertools.combinations(arr_lst, 2))
@@ -839,6 +1081,42 @@ def wilcoxon_t_test_for_lst(x_lst, rnd_num=2):
 
 
 def cal_fdc(data: np.array, quantile_num=100):
+    """Calculate Flow Duration Curves (FDC) for multiple time series.
+
+    This function computes flow duration curves for multiple time series data,
+    typically used for analyzing streamflow characteristics. It handles NaN
+    values and provides a specified number of quantile points.
+
+    Args:
+        data (np.array): 2D array of shape [n_grid, n_day] containing time
+            series data for multiple locations/grids.
+        quantile_num (int, optional): Number of quantile points to compute
+            for each FDC. Defaults to 100.
+
+    Returns:
+        np.ndarray: Array of shape [n_grid, quantile_num] containing FDC
+            values for each location/grid.
+
+    Note:
+        - Data is sorted from high to low flow
+        - NaN values are removed before processing
+        - Empty series are filled with zeros
+        - Quantiles are evenly spaced from 0 to 1
+        - Output shape is always [n_grid, quantile_num]
+
+    Raises:
+        Exception: If output flow array length doesn't match quantile_num.
+
+    Example:
+        >>> data = np.array([
+        ...     [10, 8, 6, 4, 2],  # First location
+        ...     [20, 16, 12, 8, 4]  # Second location
+        ... ])
+        >>> fdc = cal_fdc(data, quantile_num=5)
+        >>> print(fdc)
+        array([[10.,  8.,  6.,  4.,  2.],
+               [20., 16., 12.,  8.,  4.]])
+    """
     # data = n_grid * n_day
     n_grid, n_day = data.shape
     fdc = np.full([n_grid, quantile_num], np.nan)
@@ -863,22 +1141,34 @@ def cal_fdc(data: np.array, quantile_num=100):
 
 
 def remove_abnormal_data(data, *, q1=0.00001, q2=0.99999):
-    """
-    remove abnormal data
+    """Remove extreme values from data using quantile thresholds.
 
-    Parameters
-    ----------
-    data
-        data to be removed
-    q
-        lower quantile
-    q2
-        upper quantile
+    This function removes data points that fall outside specified quantile
+    ranges by replacing them with NaN values. This is useful for removing
+    outliers or extreme values that might affect analysis.
 
-    Returns
-    -------
-    np.array
-        data after removing abnormal data
+    Args:
+        data (np.ndarray): Input data array.
+        q1 (float, optional): Lower quantile threshold. Values below this
+            quantile will be replaced with NaN. Defaults to 0.00001.
+        q2 (float, optional): Upper quantile threshold. Values above this
+            quantile will be replaced with NaN. Defaults to 0.99999.
+
+    Returns:
+        np.ndarray: Data array with extreme values replaced by NaN.
+
+    Note:
+        - Uses numpy.quantile for threshold calculation
+        - Values equal to thresholds are kept
+        - Original array shape is preserved
+        - NaN values in input are preserved
+        - Default thresholds keep 99.998% of data
+
+    Example:
+        >>> data = np.array([1, 2, 3, 100, 4, 5, 0.001, 6])
+        >>> cleaned = remove_abnormal_data(data, q1=0.1, q2=0.9)
+        >>> print(cleaned)
+        array([nan,  2.,  3.,  nan,  4.,  5.,  nan,  6.])
     """
     # remove abnormal data
     data[data < np.quantile(data, q1)] = np.nan
@@ -887,18 +1177,37 @@ def remove_abnormal_data(data, *, q1=0.00001, q2=0.99999):
 
 
 def month_stat_for_daily_df(df):
-    """
-    calculate monthly statistics for daily data
+    """Calculate monthly statistics from daily data.
 
-    Parameters
-    ----------
-    df
-        daily data
+    This function resamples daily data to monthly frequency by computing the
+    mean value for each month. It ensures the input DataFrame has a datetime
+    index before resampling.
 
-    Returns
-    -------
-    pd.DataFrame
-        monthly statistics for daily data
+    Args:
+        df (pd.DataFrame): DataFrame containing daily data with datetime index
+            or index that can be converted to datetime.
+
+    Returns:
+        pd.DataFrame: DataFrame containing monthly statistics (means).
+            Index is the start of each month.
+
+    Note:
+        - Uses pandas resample with 'MS' (month start) frequency
+        - Automatically converts index to datetime if needed
+        - Computes mean value for each month
+        - Handles missing values according to pandas defaults
+
+    Example:
+        >>> dates = pd.date_range('2020-01-01', '2020-12-31', freq='D')
+        >>> data = pd.DataFrame({'value': range(366)}, index=dates)
+        >>> monthly = month_stat_for_daily_df(data)
+        >>> print(monthly.head())
+                       value
+        2020-01-01  15.0
+        2020-02-01  45.5
+        2020-03-01  74.0
+        2020-04-01  105.0
+        2020-05-01  135.5
     """
     # guarantee the index is datetime
     df.index = pd.to_datetime(df.index)

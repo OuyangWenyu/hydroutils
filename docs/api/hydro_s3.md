@@ -75,3 +75,7 @@ boto3_download_file(client, 'mybucket', 'data.csv', './downloaded.csv')
 - Version control support (MinIO)
 - List bucket contents after upload
 - Simple and consistent API for both services
+
+## API Reference
+
+::: hydroutils.hydro_s3
