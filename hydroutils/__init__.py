@@ -26,3 +26,4 @@ from .hydro_stat import *
 from .hydro_time import *
 from .hydro_plot import *
 from .hydro_s3 import *
+from .hydro_correct import *

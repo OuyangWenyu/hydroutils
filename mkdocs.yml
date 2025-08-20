@@ -55,6 +55,7 @@ nav:
               - File Operations: api/hydro_file.md
               - Flood Event Analysis: api/hydro_event.md
               - Unit Conversion: api/hydro_units.md
+              - Hydrograph Correction: api/hydro_correct.md
           - Advanced Modules:
               - AWS S3 Integration: api/hydro_s3.md
               - Logging Utilities: api/hydro_log.md
