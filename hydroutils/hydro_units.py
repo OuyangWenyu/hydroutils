@@ -128,12 +128,16 @@ def _normalize_unit(unit_str):
     normalized = normalized.replace("m3/s", "m^3/s")
     normalized = normalized.replace("ft3/s", "ft^3/s")
     normalized = normalized.replace("ft**3/s", "ft^3/s")
+    normalized = normalized.replace("foot^3/s", "ft^3/s")
+    normalized = normalized.replace("foot**3/s", "ft^3/s")
+    normalized = normalized.replace("foot3/s", "ft^3/s")
     normalized = normalized.replace("cubic_foot / second", "ft^3/s")
     normalized = normalized.replace("cubic_foot/second", "ft^3/s")
 
     # Handle pint format for depth units
     normalized = normalized.replace("millimeter / day", "mm/d")
     normalized = normalized.replace("millimeter/day", "mm/d")
+    normalized = normalized.replace("mm/day", "mm/d")
     normalized = normalized.replace("millimeter / hour", "mm/h")
     normalized = normalized.replace("millimeter/hour", "mm/h")
 

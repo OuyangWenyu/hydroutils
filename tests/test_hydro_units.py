@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2025-08-18 11:46:35
-LastEditTime: 2025-08-18 16:04:57
+LastEditTime: 2025-08-29 19:40:37
 LastEditors: Wenyu Ouyang
 Description: Unit tests for hydro_units module.
 FilePath: \hydroutils\tests\test_hydro_units.py
@@ -160,6 +160,59 @@ class TestStreamflowUnitConv:
         result = streamflow_unit_conv(flow_data, basin_area, "mm/d", source_unit="mm/d")
         np.testing.assert_array_equal(result, flow_data)
 
+    def test_foot_cubed_per_second_to_mm_day_conversion(self):
+        """Test conversion from foot^3/s to mm/day."""
+        flow_data = np.array([10.0, 20.0, 30.0])
+        basin_area = np.array([1000.0])  # km^2
+
+        result = streamflow_unit_conv(
+            flow_data, basin_area, "mm/day", source_unit="foot^3/s"
+        )
+
+        # Expected calculation: ft^3/s -> m^3/s -> mm/day
+        # 1 ft^3/s = 0.028316847 m^3/s
+        # For 1000 km^2 basin, 1 m^3/s = 0.0864 mm/day
+        expected_m3s = flow_data * 0.028316847
+        expected_mmday = expected_m3s * 0.0864
+
+        np.testing.assert_array_almost_equal(result, expected_mmday, decimal=5)
+
+    def test_mm_day_to_foot_cubed_per_second_conversion(self):
+        """Test conversion from mm/d to foot^3/s."""
+        flow_data = np.array([0.5, 1.0, 1.5])  # mm/d
+        basin_area = np.array([1000.0])  # km^2
+
+        result = streamflow_unit_conv(
+            flow_data, basin_area, "foot^3/s", source_unit="mm/d"
+        )
+
+        # Expected calculation: mm/d -> m^3/s -> ft^3/s
+        # For 1000 km^2 basin, 1 mm/d = 11.574074074 m^3/s
+        # 1 m^3/s = 35.314666721 ft^3/s
+        expected_m3s = flow_data * 11.574074074
+        expected_ft3s = expected_m3s * 35.314666721
+
+        np.testing.assert_array_almost_equal(result, expected_ft3s, decimal=5)
+
+    def test_mm_3h_to_foot_cubed_per_second_conversion(self):
+        """Test conversion from mm/3h to foot^3/s."""
+        flow_data = np.array([3.0, 6.0, 9.0])  # mm/3h
+        basin_area = np.array([500.0])  # km^2
+
+        result = streamflow_unit_conv(
+            flow_data, basin_area, "foot^3/s", source_unit="mm/3h"
+        )
+
+        # Expected calculation: mm/3h -> mm/h -> m^3/s -> ft^3/s
+        # mm/3h -> mm/h: divide by 3
+        # For 500 km^2 basin, 1 mm/h = 138.888889 m^3/s
+        # 1 m^3/s = 35.314666721 ft^3/s
+        expected_mmh = flow_data / 3
+        expected_m3s = expected_mmh * 138.888889
+        expected_ft3s = expected_m3s * 35.314666721
+
+        np.testing.assert_array_almost_equal(result, expected_ft3s, decimal=5)
+
     @pytest.mark.parametrize(
         "flow_values,area_values,source_unit,target_unit,area_unit,expected",
         [
@@ -221,30 +274,30 @@ class TestStreamflowUnitConv:
     def test_xarray_with_pint_quantity_data(self):
         """Test xarray Dataset containing pint.Quantity data arrays."""
         # Create xarray Dataset with pint.Quantity data (reproducing the issue scenario)
-        streamflow = xr.Dataset({
-            "streamflow": xr.DataArray(
-                np.array([[100, 200], [300, 400]]), dims=["time", "basin"]
-            )
-        })
-        area = xr.Dataset({
-            "area": xr.DataArray(np.array([1, 2]), dims=["basin"])
-        })
-        
+        streamflow = xr.Dataset(
+            {
+                "streamflow": xr.DataArray(
+                    np.array([[100, 200], [300, 400]]), dims=["time", "basin"]
+                )
+            }
+        )
+        area = xr.Dataset({"area": xr.DataArray(np.array([1, 2]), dims=["basin"])})
+
         # Attach pint units to DataArrays (as done in failing test)
         streamflow["streamflow"] = streamflow["streamflow"] * ureg.m**3 / ureg.s
         area["area"] = area["area"] * ureg.km**2
-        
+
         # Test conversion to mm/d
         result = streamflow_unit_conv(streamflow, area, "mm/d")
         expected = np.array([[8640.0, 8640.0], [25920.0, 17280.0]])
-        
+
         np.testing.assert_allclose(result["streamflow"].values, expected, rtol=1e-6)
         assert result["streamflow"].attrs.get("units") == "mm/d"
-        
+
         # Test conversion to mm/3h (custom unit)
         result2 = streamflow_unit_conv(streamflow, area, "mm/3h")
         expected2 = np.array([[1080.0, 1080.0], [3240.0, 2160.0]])
-        
+
         np.testing.assert_allclose(result2["streamflow"].values, expected2, rtol=1e-6)
         assert result2["streamflow"].attrs.get("units") == "mm/3h"
 
