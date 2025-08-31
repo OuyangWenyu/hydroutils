@@ -307,6 +307,9 @@ HYDRO_METRICS = {
     "sc": ("sc", "Spectral Correlation"),
     "sid": ("sid", "Spectral Information Divergence"),
     "sga": ("sga", "Spectral Gradient Angle"),
+    "flood_volume_error": ("flood_volume_error", "Relative Flood Volume Error"),
+    "flood_peak_error": ("flood_peak_error", "Relative Flood Peak Error"),
+    "flood_peak_timing": ("flood_peak_timing", "Flood Peak Timing Error"),
 }
 
 

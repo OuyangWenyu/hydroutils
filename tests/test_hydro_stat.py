@@ -26,6 +26,8 @@ from hydroutils.hydro_stat import (
     add_metric,
     HYDRO_METRICS,
     flood_peak_timing,
+    flood_volume_error,
+    flood_peak_error,
 )
 
 
@@ -469,6 +471,247 @@ class TestFloodPeakTiming:
 
         # 常数数据可能没有峰值，应该返回NaN
         assert np.isnan(result)
+
+
+class TestFloodMetrics:
+    """测试洪峰洪量相关指标函数"""
+
+    @pytest.fixture
+    def flood_data(self):
+        """提供洪水测试数据"""
+        # 模拟一场洪水过程：基流+洪峰
+        t = np.arange(100)
+        base_flow = 10.0
+        peak_flow = 100.0
+        peak_time = 50
+        
+        # 观测流量：高斯型洪峰
+        obs = base_flow + peak_flow * np.exp(-0.5 * ((t - peak_time) / 10) ** 2)
+        
+        # 模拟流量：峰值略低，时间略有偏移
+        sim = base_flow + 0.9 * peak_flow * np.exp(-0.5 * ((t - peak_time - 2) / 10) ** 2)
+        
+        return obs, sim
+
+    @pytest.fixture
+    def perfect_flood_data(self):
+        """提供完美匹配的洪水数据"""
+        t = np.arange(50)
+        base_flow = 5.0
+        peak_flow = 80.0
+        peak_time = 25
+        
+        flow = base_flow + peak_flow * np.exp(-0.5 * ((t - peak_time) / 8) ** 2)
+        return flow, flow.copy()
+
+    def test_flood_volume_error_calculation(self, flood_data):
+        """测试洪量误差计算"""
+        obs, sim = flood_data
+        result = flood_volume_error(obs, sim)
+        
+        assert isinstance(result, (float, np.floating))
+        # 洪量误差应该是百分比形式
+        assert not np.isnan(result)
+
+    def test_flood_volume_error_perfect_match(self, perfect_flood_data):
+        """测试洪量误差完美匹配情况"""
+        obs, sim = perfect_flood_data
+        result = flood_volume_error(obs, sim)
+        
+        # 完美匹配时洪量误差应该为0
+        assert np.isclose(result, 0.0, atol=1e-10)
+
+    def test_flood_volume_error_different_timesteps(self, flood_data):
+        """测试不同时间步长的洪量误差计算"""
+        obs, sim = flood_data
+        
+        # 3小时数据（默认）
+        result_3h = flood_volume_error(obs, sim, delta_t_seconds=10800)
+        
+        # 日数据
+        result_daily = flood_volume_error(obs, sim, delta_t_seconds=86400)
+        
+        # 小时数据
+        result_hourly = flood_volume_error(obs, sim, delta_t_seconds=3600)
+        
+        assert isinstance(result_3h, (float, np.floating))
+        assert isinstance(result_daily, (float, np.floating))
+        assert isinstance(result_hourly, (float, np.floating))
+        
+        # 不同时间步长应该产生不同的绝对误差，但相对误差应该相同
+        # 这里我们只验证它们都是有效数值
+
+    def test_flood_volume_error_zero_observed(self):
+        """测试观测流量为零的情况"""
+        obs = np.zeros(10)
+        sim = np.ones(10) * 5.0
+        
+        result = flood_volume_error(obs, sim)
+        
+        # 当观测流量为0时，应该返回NaN
+        assert np.isnan(result)
+
+    def test_flood_peak_error_calculation(self, flood_data):
+        """测试洪峰误差计算"""
+        obs, sim = flood_data
+        result = flood_peak_error(obs, sim)
+        
+        assert isinstance(result, (float, np.floating))
+        # 洪峰误差应该是百分比形式
+        assert not np.isnan(result)
+
+    def test_flood_peak_error_perfect_match(self, perfect_flood_data):
+        """测试洪峰误差完美匹配情况"""
+        obs, sim = perfect_flood_data
+        result = flood_peak_error(obs, sim)
+        
+        # 完美匹配时洪峰误差应该为0
+        assert np.isclose(result, 0.0, atol=1e-10)
+
+    def test_flood_peak_error_zero_observed(self):
+        """测试观测洪峰为零的情况"""
+        obs = np.zeros(10)
+        sim = np.ones(10) * 5.0
+        
+        result = flood_peak_error(obs, sim)
+        
+        # 当观测洪峰为0时，应该返回NaN
+        assert np.isnan(result)
+
+    def test_flood_peak_error_underestimation(self):
+        """测试洪峰低估情况"""
+        obs = np.array([10, 20, 50, 20, 10])  # 洪峰50
+        sim = np.array([10, 20, 40, 20, 10])  # 洪峰40（低估）
+        
+        result = flood_peak_error(obs, sim)
+        
+        # 低估时应该是负值
+        assert result < 0
+        assert np.isclose(result, -20.0, atol=1e-10)  # (40-50)/50 * 100 = -20%
+
+    def test_flood_peak_error_overestimation(self):
+        """测试洪峰高估情况"""
+        obs = np.array([10, 20, 50, 20, 10])  # 洪峰50
+        sim = np.array([10, 20, 60, 20, 10])  # 洪峰60（高估）
+        
+        result = flood_peak_error(obs, sim)
+        
+        # 高估时应该是正值
+        assert result > 0
+        assert np.isclose(result, 20.0, atol=1e-10)  # (60-50)/50 * 100 = 20%
+
+    def test_flood_peak_timing_calculation(self, flood_data):
+        """测试洪峰时间误差计算"""
+        obs, sim = flood_data
+        result = flood_peak_timing(obs, sim)
+        
+        assert isinstance(result, (float, np.floating))
+        # 洪峰时间误差应该是非负数（时间步数）
+        assert result >= 0 or np.isnan(result)
+
+    def test_flood_peak_timing_perfect_match(self, perfect_flood_data):
+        """测试洪峰时间误差完美匹配情况"""
+        obs, sim = perfect_flood_data
+        result = flood_peak_timing(obs, sim)
+        
+        # 完美匹配时洪峰时间误差应该为0
+        assert np.isclose(result, 0.0, atol=1.0)  # 允许一些数值误差
+
+    def test_flood_peak_timing_different_resolutions(self, flood_data):
+        """测试不同时间分辨率的洪峰时间误差"""
+        obs, sim = flood_data
+        
+        # 测试不同分辨率
+        result_hourly = flood_peak_timing(obs, sim, resolution="1H")
+        result_daily = flood_peak_timing(obs, sim, resolution="1D")
+        result_3hourly = flood_peak_timing(obs, sim, resolution="3H")
+        
+        assert isinstance(result_hourly, (float, np.floating)) or np.isnan(result_hourly)
+        assert isinstance(result_daily, (float, np.floating)) or np.isnan(result_daily)
+        assert isinstance(result_3hourly, (float, np.floating)) or np.isnan(result_3hourly)
+
+    def test_flood_peak_timing_different_windows(self, flood_data):
+        """测试不同窗口大小的洪峰时间误差"""
+        obs, sim = flood_data
+        
+        # 测试不同窗口大小
+        result_small = flood_peak_timing(obs, sim, window=2)
+        result_medium = flood_peak_timing(obs, sim, window=5)
+        result_large = flood_peak_timing(obs, sim, window=10)
+        
+        assert isinstance(result_small, (float, np.floating)) or np.isnan(result_small)
+        assert isinstance(result_medium, (float, np.floating)) or np.isnan(result_medium)
+        assert isinstance(result_large, (float, np.floating)) or np.isnan(result_large)
+
+    def test_flood_metrics_with_nan_values(self):
+        """测试包含NaN值的洪水数据"""
+        obs = np.array([10, 20, np.nan, 50, 20, 10])
+        sim = np.array([10, 20, 30, 45, 20, 10])
+        
+        # 洪量误差应该能处理NaN值
+        volume_error = flood_volume_error(obs, sim)
+        assert isinstance(volume_error, (float, np.floating)) or np.isnan(volume_error)
+        
+        # 洪峰误差应该能处理NaN值
+        peak_error = flood_peak_error(obs, sim)
+        assert isinstance(peak_error, (float, np.floating)) or np.isnan(peak_error)
+        
+        # 洪峰时间误差应该能处理NaN值
+        timing_error = flood_peak_timing(obs, sim)
+        assert isinstance(timing_error, (float, np.floating)) or np.isnan(timing_error)
+
+    def test_flood_metrics_edge_cases(self):
+        """测试边界情况"""
+        # 空数组 
+        empty_volume_error = flood_volume_error(np.array([]), np.array([]))
+        assert np.isnan(empty_volume_error)
+        
+        # 空数组 - flood_peak_error 应该抛出 ValueError
+        with pytest.raises(ValueError):
+            flood_peak_error(np.array([]), np.array([]))
+        
+        # 单值数组
+        single_obs = np.array([50.0])
+        single_sim = np.array([45.0])
+        
+        volume_error = flood_volume_error(single_obs, single_sim)
+        peak_error = flood_peak_error(single_obs, single_sim)
+        
+        assert isinstance(volume_error, (float, np.floating))
+        assert isinstance(peak_error, (float, np.floating))
+        
+        # 验证单值数组的计算结果
+        # 洪量误差: (45-50)/50 * 100 = -10%
+        assert np.isclose(volume_error, -10.0, atol=1e-10)
+        # 洪峰误差: (45-50)/50 * 100 = -10%
+        assert np.isclose(peak_error, -10.0, atol=1e-10)
+
+    def test_flood_metrics_consistency(self, flood_data):
+        """测试指标计算的一致性"""
+        obs, sim = flood_data
+        
+        # 多次计算应该得到相同结果
+        result1 = flood_volume_error(obs, sim)
+        result2 = flood_volume_error(obs, sim)
+        assert np.isclose(result1, result2, rtol=1e-10)
+        
+        result1 = flood_peak_error(obs, sim)
+        result2 = flood_peak_error(obs, sim)
+        assert np.isclose(result1, result2, rtol=1e-10)
+        
+        result1 = flood_peak_timing(obs, sim)
+        result2 = flood_peak_timing(obs, sim)
+        if not (np.isnan(result1) and np.isnan(result2)):
+            assert np.isclose(result1, result2, rtol=1e-10)
+
+    def test_flood_metrics_in_hydro_metrics_dict(self):
+        """测试洪峰洪量指标是否在HYDRO_METRICS字典中"""
+        flood_metrics = ["flood_volume_error", "flood_peak_error", "flood_peak_timing"]
+        
+        for metric in flood_metrics:
+            assert metric in HYDRO_METRICS
+            assert isinstance(HYDRO_METRICS[metric], tuple)
+            assert len(HYDRO_METRICS[metric]) == 2  # (function_name, description)
 
 
 if __name__ == "__main__":
