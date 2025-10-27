@@ -132,7 +132,7 @@ hydroutils = "hydroutils.cli:main"
 # Hatch 版本管理
 [tool.hatch.version]
 source = "vcs"
-fallback-version = "0.0.14"
+fallback-version = "0.1.0"
 
 [tool.hatch.version.raw-options]
 local_scheme = "no-local-version"
@@ -295,7 +295,7 @@ ignore_missing_imports = true
 
 # Bump2version 配置
 [tool.bumpversion]
-current_version = "0.0.14"
+current_version = "0.1.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
