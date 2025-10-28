@@ -137,6 +137,8 @@ jobs:
         needs: [publish-pypi]
         runs-on: ubuntu-latest
         if: github.event_name == 'release' && github.event.action == 'published'
+        permissions:
+            contents: write  # Required to update release
 
         steps:
             - name: Checkout code
