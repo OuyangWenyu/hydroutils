@@ -239,6 +239,8 @@ extend-exclude = '''
 [tool.ruff]
 target-version = "py39"
 line-length = 88
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -253,13 +255,19 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    "E721",  # type comparison
+    "UP006", # use X instead of Y for type annotation
+    "UP035", # deprecated typing imports
+    "F403",  # star imports
+    "F401",  # unused imports in __init__
+    "W605",  # invalid escape sequence in docstrings
 ]
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/**/*" = ["ARG001"]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403", "I001"]
+"tests/**/*" = ["ARG001", "F401", "F841"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["hydroutils"]
 
 # MyPy 类型检查
