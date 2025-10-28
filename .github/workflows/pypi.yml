@@ -80,9 +80,16 @@ jobs:
             - name: Create virtual environment
               run: uv venv
 
+            - name: Find wheel file
+              id: find_wheel
+              shell: bash
+              run: |
+                  WHEEL_FILE=$(ls dist/*.whl | head -n 1)
+                  echo "wheel=$WHEEL_FILE" >> $GITHUB_OUTPUT
+
             - name: Test wheel installation
               run: |
-                  uv pip install dist/*.whl --force-reinstall
+                  uv pip install "${{ steps.find_wheel.outputs.wheel }}" --force-reinstall
                   uv run python -c "import hydroutils; print(hydroutils.__version__)"
 
     publish-testpypi:
