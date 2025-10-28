@@ -74,7 +74,8 @@ def t_range_days_timedelta(t_array, td=12, td_type="h"):
     Raises:
         AssertionError: If td_type is not one of 'Y','M','D','h','m','s'.
     """
-    assert td_type in ["Y", "M", "D", "h", "m", "s"]
+    if td_type not in ["Y", "M", "D", "h", "m", "s"]:
+        raise ValueError(f"td_type must be one of 'Y','M','D','h','m','s', got {td_type}")
     t_array_final = [t + np.timedelta64(td, td_type) for t in t_array]
     return np.array(t_array_final)
 

@@ -151,8 +151,8 @@ include = [
 ]
 
 # UV 工具配置
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=6.0",
     "pytest-cov",
     "black[jupyter]",

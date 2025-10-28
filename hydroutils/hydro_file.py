@@ -119,7 +119,7 @@ def download_one_zip(data_url, data_dir):
     if not is_there_file(zipfile_path, unzip_dir):
         if not os.path.isdir(unzip_dir):
             os.makedirs(unzip_dir)
-        r = requests.get(data_url, stream=True)
+        r = requests.get(data_url, stream=True, timeout=30)
         with open(zipfile_path, "wb") as py_file:
             for chunk in r.iter_content(chunk_size=1024):  # 1024 bytes
                 if chunk:
@@ -181,7 +181,7 @@ def download_small_file(data_url, temp_file):
     Note:
         Uses requests library for downloading.
     """
-    r = requests.get(data_url)
+    r = requests.get(data_url, timeout=30)
     with open(temp_file, "w") as f:
         f.write(r.text)
 
