@@ -1,10 +1,10 @@
 """
 Author: Wenyu Ouyang
 Date: 2025-01-17
-LastEditTime: 2025-08-17 09:29:42
+LastEditTime: 2025-10-28 08:22:40
 LastEditors: Wenyu Ouyang
-Description: 
-FilePath: \hydromodeld:\Code\hydroutils\hydroutils\hydro_event.py
+Description:
+FilePath: \hydroutils\hydroutils\hydro_correct.py
 Copyright (c) 2023-2026 Wenyu Ouyang. All rights reserved.
 """
 
@@ -455,7 +455,6 @@ def apply_water_balance_correction(
     discharge_column: str = "gen_discharge",
     time_column: str = "time",
     net_rain_column: str = "net_rain",
-    time_step_hours: float = 1.0,
 ) -> pd.DataFrame:
     """Apply water balance correction to discharge data.
 
@@ -473,7 +472,6 @@ def apply_water_balance_correction(
         discharge_column (str, optional): Name of discharge column. Defaults to "gen_discharge".
         time_column (str, optional): Name of time column. Defaults to "time".
         net_rain_column (str, optional): Name of net rainfall column. Defaults to "net_rain".
-        time_step_hours (float, optional): Time step in hours. Defaults to 1.0.
 
     Returns:
         pd.DataFrame: Data with water balance correction applied.
@@ -482,7 +480,7 @@ def apply_water_balance_correction(
         ValueError: If required columns are missing from the data.
 
     Note:
-        - Volumes are calculated in mm for consistency
+        - Assumes discharge and net_rain are in the same units (e.g., both in mm)
         - If net_rain_column is missing, returns the input data unchanged
         - Ensures all discharge values remain non-negative
     """
@@ -497,18 +495,17 @@ def apply_water_balance_correction(
 
     # 3. 计算水量平衡
     if net_rain_column in modified_data.columns:
-        # 计算净雨总量（mm）
+        # 计算净雨总量（假设单位与径流一致）
         total_net_rain = modified_data[net_rain_column].sum()
-        
-        # 计算径流总量（mm）
-        time_step_seconds = time_step_hours * 3600
-        total_discharge = np.sum(discharge_values) * time_step_seconds / 1000
-        
+
+        # 计算径流总量（假设单位与净雨一致）
+        total_discharge = np.sum(discharge_values)
+
         # 计算并应用水量平衡系数
         if total_net_rain > 0 and total_discharge > 0:
             # 计算修正系数
             volume_ratio = total_net_rain / total_discharge
-            
+
             # 应用体积修正
             corrected_discharge = discharge_values * volume_ratio
         else:
@@ -529,13 +526,12 @@ def calculate_water_balance_metrics(
     data: pd.DataFrame,
     net_rain_column: str = "net_rain",
     discharge_column: str = "gen_discharge",
-    time_step_hours: float = 1.0,
 ) -> dict:
     """Calculate water balance and discharge statistics metrics.
 
     Computes various metrics to assess water balance and discharge characteristics:
-        - Total net rainfall (mm)
-        - Total discharge volume (mm)
+        - Total net rainfall
+        - Total discharge volume
         - Water balance error (%)
         - Basic discharge statistics (mean, max, min, std)
         - Peak timing information
@@ -544,12 +540,11 @@ def calculate_water_balance_metrics(
         data (pd.DataFrame): Input data containing discharge and optionally net rainfall.
         net_rain_column (str, optional): Name of net rainfall column. Defaults to "net_rain".
         discharge_column (str, optional): Name of discharge column. Defaults to "gen_discharge".
-        time_step_hours (float, optional): Time step in hours. Defaults to 1.0.
 
     Returns:
         dict: Dictionary containing the following metrics:
-            - total_net_rain_mm (float): Total net rainfall in mm (if available)
-            - total_discharge_mm (float): Total discharge volume in mm
+            - total_net_rain (float): Total net rainfall (if available)
+            - total_discharge (float): Total discharge volume
             - balance_error_percent (float): Water balance error percentage
             - discharge_stats (dict): Dictionary containing:
                 - mean (float): Mean discharge
@@ -559,30 +554,25 @@ def calculate_water_balance_metrics(
                 - peak_time_index: Index of peak discharge
 
     Note:
-        - Discharge volume is converted to mm for comparison with rainfall
+        - Assumes discharge and net_rain are in the same units
         - Water balance error is only calculated if net rainfall data is available
         - All statistics are computed ignoring any NaN values
     """
     metrics = {}
 
-    # 计算净雨总量（mm）
+    # 计算净雨总量
     if net_rain_column in data.columns:
         total_net_rain = data[net_rain_column].sum()
-        metrics["total_net_rain_mm"] = total_net_rain
+        metrics["total_net_rain"] = total_net_rain
 
-    # 计算径流总量（转换为mm）
+    # 计算径流总量
     if discharge_column in data.columns:
-        # 假设单位流域面积（1 km²）
-        # 流量 m³/s × 时间步长(h) × 3600(s/h) / 1000000(m²/km²) × 1000(mm/m) = mm
-        time_step_seconds = time_step_hours * 3600
-        discharge_volume_mm = data[discharge_column].sum() * time_step_seconds / 1000
-        metrics["total_discharge_mm"] = discharge_volume_mm
+        discharge_volume = data[discharge_column].sum()
+        metrics["total_discharge"] = discharge_volume
 
         # 计算水量平衡误差
         if net_rain_column in data.columns and total_net_rain > 0:
-            balance_error = (
-                (discharge_volume_mm - total_net_rain) / total_net_rain * 100
-            )
+            balance_error = (discharge_volume - total_net_rain) / total_net_rain * 100
             metrics["balance_error_percent"] = balance_error
 
     # 径流统计

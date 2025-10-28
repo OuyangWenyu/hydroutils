@@ -1,7 +1,7 @@
 """
 Author: Wenyu Ouyang
 Date: 2022-12-02 10:42:19
-LastEditTime: 2025-08-18 14:40:03
+LastEditTime: 2025-10-28 08:16:56
 LastEditors: Wenyu Ouyang
 Description: Top-level package for hydroutils.
 FilePath: \hydroutils\hydroutils\__init__.py
@@ -25,5 +25,4 @@ from .hydro_file import *
 from .hydro_stat import *
 from .hydro_time import *
 from .hydro_plot import *
-from .hydro_s3 import *
 from .hydro_correct import *

@@ -1508,7 +1508,7 @@ def plot_rainfall_runoff(
 
     # Now need to fix the axis labels
     # max_pre = max(p)
-    max_pre = p.max().item()
+    max_pre = np.nanmax(p).item()
     ax2.set_ylim(-max_pre * 5, 0)
     y2_ticks = np.arange(0, max_pre, prcp_interval)
     y2_ticklabels = [str(i) for i in y2_ticks]
