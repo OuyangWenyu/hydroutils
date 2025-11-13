@@ -37,9 +37,10 @@
 - CSV and text file processing
 - Data import/export utilities
 
-### ☁️ Cloud Integration
-- AWS S3 integration for large dataset handling
-- Cloud-based data storage and retrieval
+### 🔧 Data Correction
+- Interactive hydrograph correction tools
+- Smoothing algorithms and spline interpolation
+- Quality control for flood forecasting
 
 ## Quick Start
 

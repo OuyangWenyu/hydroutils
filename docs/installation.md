@@ -23,7 +23,6 @@ The following packages are automatically installed:
 
 For extended functionality:
 
-- `boto3` - AWS S3 integration (for cloud features)
 - `jupyter` - For notebook examples
 
 ## Installation Methods
@@ -70,7 +69,6 @@ pip install hydroutils[all]
 Or install specific optional dependencies:
 
 ```bash
-pip install hydroutils[aws]     # For S3 functionality
 pip install hydroutils[viz]     # For advanced visualization
 pip install hydroutils[dev]     # For development tools
 ```

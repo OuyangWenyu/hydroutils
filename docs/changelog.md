@@ -20,9 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 水文数据专用绘图函数
   - 模型评价可视化工具
   - 发布级别图表输出
-- AWS S3集成模块 (`hydro_s3`)
-  - 支持大规模水文数据云存储
-  - 批量数据上传下载
+- 数据校正模块 (`hydro_correct`)
+  - 交互式洪水过程线校正工具
+  - 五点二次平滑和三次样条插值
 - 日志工具模块 (`hydro_log`)
   - 专业的水文分析日志记录
   - 性能监控和错误追踪

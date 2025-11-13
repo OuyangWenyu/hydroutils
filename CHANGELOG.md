@@ -60,13 +60,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Basic hydro statistics functionality
 - File handling utilities
-- S3 integration support
+- Hydrograph correction tools
 - Plotting capabilities
 - Time series utilities
 
 ### Initial Features
 - HydroErr integration for statistical metrics
-- AWS S3 and MinIO support
+- Data quality control and correction
 - Matplotlib and Seaborn plotting
 - Cartopy for GIS plotting
 - Rich console output

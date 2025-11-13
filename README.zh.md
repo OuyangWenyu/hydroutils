@@ -19,6 +19,12 @@ Hydroutils 是一个专为水文建模工作流设计的现代 Python 包，提�
 
 ## ✨ 功能特性
 
+### 🔧 数据校正 (`hydro_correct`)
+- **洪水过程线校正**: 交互式洪水过程线校正工具
+- **平滑算法**: 五点二次平滑算法降低噪声
+- **样条插值**: 三次样条插值精化数据
+- **组合校正**: 集成校正流程提高数据质量
+
 ### 📊 统计分析 (`hydro_stat`)
 - **动态指标函数**: 自动生成的统计函数（NSE、RMSE、MAE 等）
 - **多维分析**: 支持 2D/3D 数组进行流域尺度分析
@@ -35,7 +41,6 @@ Hydroutils 是一个专为水文建模工作流设计的现代 Python 包，提�
 
 ### 📁 文件操作 (`hydro_file`)
 - **JSON 序列化**: 使用 `NumpyArrayEncoder` 支持 NumPy 数组
-- **云存储**: S3 和 MinIO 集成用于远程数据访问
 - **ZIP 处理**: 嵌套 ZIP 文件提取和管理
 - **缓存管理**: 自动缓存目录创建和管理
 - **异步操作**: 异步数据检索功能
@@ -56,12 +61,6 @@ Hydroutils 是一个专为水文建模工作流设计的现代 Python 包，提�
 - **水文事件检测**: 洪峰流量、枯水流量和洪水事件识别
 - **事件特征化**: 持续时间、规模和时机分析
 - **多变量事件**: 多个变量的复合事件分析
-
-### ☁️ 云集成 (`hydro_s3`)
-- **AWS S3 支持**: 直接集成 Amazon S3 服务
-- **MinIO 兼容**: 本地和私有云存储解决方案
-- **异步下载**: 高性能异步数据检索
-- **凭证管理**: 安全的凭证处理和配置
 
 ### 📝 日志记录 (`hydro_log`)
 - **富文本控制台输出**: 彩色和格式化控制台日志
@@ -176,11 +175,11 @@ make build
 hydroutils/
 ├── hydroutils/
 │   ├── __init__.py              # 包初始化和导出
+│   ├── hydro_correct.py         # 数据校正和质量控制
 │   ├── hydro_event.py           # 水文事件分析
 │   ├── hydro_file.py            # 文件 I/O 和云存储
 │   ├── hydro_log.py             # 日志记录和控制台输出
 │   ├── hydro_plot.py            # 可视化函数
-│   ├── hydro_s3.py              # AWS S3 和 MinIO 集成
 │   ├── hydro_stat.py            # 统计分析引擎
 │   ├── hydro_time.py            # 时间序列工具
 │   └── hydro_units.py           # 单位转换和验证
@@ -218,7 +217,6 @@ hydroutils/
 - **核心依赖**: numpy, pandas, matplotlib, seaborn
 - **科学计算**: scipy, HydroErr, numba
 - **可视化**: cartopy（用于地理空间图表）
-- **云存储**: boto3, minio, s3fs
 - **工具**: tqdm, rich, xarray, pint
 
 ## 📄 许可证

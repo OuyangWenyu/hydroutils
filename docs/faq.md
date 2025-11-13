@@ -161,23 +161,23 @@ colors = hu.get_hydro_colors(data_type='streamflow')
 
 ## Advanced Features
 
-### Q: How do I use AWS S3 integration?
+### Q: How do I correct hydrograph data?
 
-**A:** First configure your AWS credentials, then use S3 functions:
+**A:** Use the HydrographCorrector class for interactive data correction:
 ```python
-# Upload data to S3
-hu.upload_to_s3(
-    local_file='data.csv',
-    bucket='my-hydro-data',
-    s3_key='station_001/data.csv'
-)
+from hydroutils.hydro_correct import HydrographCorrector
 
-# Download from S3
-hu.download_from_s3(
-    bucket='my-hydro-data',
-    s3_key='station_001/data.csv',
-    local_file='downloaded_data.csv'
-)
+# Create corrector instance
+corrector = HydrographCorrector(time_series_data)
+
+# Apply five-point quadratic smoothing
+smoothed_data = corrector.five_point_smooth()
+
+# Apply cubic spline interpolation
+interpolated_data = corrector.cubic_spline_interpolate()
+
+# Combined correction
+corrected_data = corrector.correct()
 ```
 
 ### Q: How do I enable logging for my analysis?

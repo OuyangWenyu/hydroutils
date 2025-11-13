@@ -19,8 +19,14 @@ Hydroutils is a Python package designed for hydrological modeling workflows, pro
 
 ## ✨ Features
 
+### 🔧 Data Correction (`hydro_correct`)
+- **Hydrograph Correction**: Interactive flood hydrograph correction tools
+- **Smoothing Algorithms**: Five-point quadratic smoothing for noise reduction
+- **Spline Interpolation**: Cubic spline interpolation for data refinement
+- **Combined Correction**: Integrated correction process for improved data quality
+
 ### 📊 Statistical Analysis (`hydro_stat`)
-- **Dynamic Metric Functions**: Automatically generated statistical functions (NSE, RMSE, MAE, etc.) 
+- **Dynamic Metric Functions**: Automatically generated statistical functions (NSE, RMSE, MAE, etc.)
 - **Multi-dimensional Analysis**: Support for 2D/3D arrays for basin-scale analysis
 - **HydroErr Integration**: Standardized hydrological metrics through HydroErr package
 - **NaN Handling**: Flexible strategies ('no', 'sum', 'mean') for missing data
@@ -35,7 +41,6 @@ Hydroutils is a Python package designed for hydrological modeling workflows, pro
 
 ### 📁 File Operations (`hydro_file`)
 - **JSON Serialization**: NumPy array support with `NumpyArrayEncoder`
-- **Cloud Storage**: S3 and MinIO integration for remote data access
 - **ZIP Handling**: Nested ZIP file extraction and management
 - **Cache Management**: Automatic cache directory creation and management
 - **Async Operations**: Asynchronous data retrieval capabilities
@@ -55,11 +60,6 @@ Hydroutils is a Python package designed for hydrological modeling workflows, pro
 ### 🌊 Event Analysis (`hydro_event`)
 - **Hydrological Event Detection**: Flood event identification
 - **Event Characterization**: Duration, magnitude, and timing analysis
-
-### ☁️ Cloud Integration (`hydro_s3`)
-- **AWS S3 Support**: Direct integration with Amazon S3 services
-- **MinIO Compatibility**: Local and private cloud storage solutions
-- **Credential Management**: Secure credential handling and configuration
 
 ### 📝 Logging (`hydro_log`)
 - **Rich Console Output**: Colored and formatted console logging
@@ -160,11 +160,11 @@ make build
 hydroutils/
 ├── hydroutils/
 │   ├── __init__.py              # Package initialization and exports
+│   ├── hydro_correct.py         # Data correction and quality control
 │   ├── hydro_event.py           # Hydrological event analysis
 │   ├── hydro_file.py            # File I/O and cloud storage
 │   ├── hydro_log.py             # Logging and console output
 │   ├── hydro_plot.py            # Visualization functions
-│   ├── hydro_s3.py              # AWS S3 and MinIO integration
 │   ├── hydro_stat.py            # Statistical analysis engine
 │   ├── hydro_time.py            # Time series utilities
 │   └── hydro_units.py           # Unit conversion and validation
@@ -202,7 +202,6 @@ Comprehensive documentation is available at [https://OuyangWenyu.github.io/hydro
 - **Core Dependencies**: numpy, pandas, matplotlib, seaborn
 - **Scientific Computing**: scipy, HydroErr, numba
 - **Visualization**: cartopy (for geospatial plots)
-- **Cloud Storage**: boto3, minio, s3fs
 - **Utilities**: tqdm, rich, xarray, pint
 
 ## 📄 License
