@@ -342,6 +342,7 @@ def _determine_conversion_direction(source_unit, target_unit):
 
     volume_patterns = [
         r"m(?:\*\*3|\^3|3)/s$",  # m**3/s, m^3/s, m3/s
+        r"mm\^3/s$",  # mm^3/s
         r"ft(?:\*\*3|\^3|3)/s$",  # ft**3/s, ft^3/s, ft3/s
         r"l/s$",  # l/s
         r"gal/s$",  # gal/s
@@ -704,7 +705,7 @@ def _convert_numpy_pandas(
         ...                               'km^2', 'm^3/s', 1, True)
         >>> print(result)  # Values in m^3/s
         array([277.77..., 555.55..., 833.33...])
-        
+
         >>> # Pandas Series example
         >>> data = pd.Series([1, 2, 3], index=['a', 'b', 'c'])
         >>> result = _convert_numpy_pandas(data, area, 'mm/h', 1,
@@ -882,12 +883,12 @@ def detect_time_interval(
         >>> time_index = pd.date_range("2024-01-01", periods=8, freq="3h")
         >>> detect_time_interval(time_index)
         '3h'
-        
+
         >>> # Daily data
         >>> dates = ["2024-01-01", "2024-01-02", "2024-01-03"]
         >>> detect_time_interval(dates)
         '1d'
-        
+
         >>> # Mixed intervals (most common is 6h)
         >>> times = pd.to_datetime([
         ...     "2024-01-01 00:00",
@@ -963,13 +964,13 @@ def get_time_interval_info(time_interval: str) -> Tuple[int, str]:
         (3, 'h')
         >>> get_time_interval_info("24h")
         (24, 'h')
-        
+
         >>> # Daily intervals
         >>> get_time_interval_info("1d")
         (1, 'd')
         >>> get_time_interval_info("7d")
         (7, 'd')
-        
+
         >>> # Invalid format raises error
         >>> get_time_interval_info("3hours")  # doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
@@ -1018,7 +1019,7 @@ def validate_unit_compatibility(source_unit: str, target_unit: str) -> bool:
         True
         >>> validate_unit_compatibility("mm/h", "mm/d")
         True
-        
+
         >>> # Incompatible conversions
         >>> validate_unit_compatibility("mm/h", "celsius")
         False
