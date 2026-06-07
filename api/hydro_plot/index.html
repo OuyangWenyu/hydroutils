@@ -846,6 +846,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_correct/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydrograph Correction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -899,7 +922,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../hydro_s3/" class="md-nav__link">
+      <a href="../hydro_s3.md" class="md-nav__link">
         
   
   
@@ -5243,7 +5266,7 @@ fig, ax = plot_rainfall_runoff(t, p, [q1, q2],
 
     <span class="c1"># Now need to fix the axis labels</span>
     <span class="c1"># max_pre = max(p)</span>
-    <span class="n">max_pre</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="n">max_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="n">max_pre</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">y2_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_pre</span><span class="p">,</span> <span class="n">prcp_interval</span><span class="p">)</span>
     <span class="n">y2_ticklabels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">y2_ticks</span><span class="p">]</span>

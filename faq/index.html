@@ -566,9 +566,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#q-how-do-i-use-aws-s3-integration" class="md-nav__link">
+  <a href="#q-how-do-i-correct-hydrograph-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Q: How do I use AWS S3 integration?
+      Q: How do I correct hydrograph data?
     </span>
   </a>
   
@@ -943,6 +943,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/hydro_correct/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydrograph Correction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -996,7 +1019,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/hydro_s3/" class="md-nav__link">
+      <a href="../api/hydro_s3.md" class="md-nav__link">
         
   
   
@@ -1369,9 +1392,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#q-how-do-i-use-aws-s3-integration" class="md-nav__link">
+  <a href="#q-how-do-i-correct-hydrograph-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Q: How do I use AWS S3 integration?
+      Q: How do I correct hydrograph data?
     </span>
   </a>
   
@@ -1690,8 +1713,8 @@ pip<span class="w"> </span>install<span class="w"> </span>hydroutils
 <span class="n">colors</span> <span class="o">=</span> <span class="n">hu</span><span class="o">.</span><span class="n">get_hydro_colors</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;streamflow&#39;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div></p>
 <h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">&para;</a></h2>
-<h3 id="q-how-do-i-use-aws-s3-integration">Q: How do I use AWS S3 integration?<a class="headerlink" href="#q-how-do-i-use-aws-s3-integration" title="Permanent link">&para;</a></h3>
-<p><strong>A:</strong> First configure your AWS credentials, then use S3 functions:
+<h3 id="q-how-do-i-correct-hydrograph-data">Q: How do I correct hydrograph data?<a class="headerlink" href="#q-how-do-i-correct-hydrograph-data" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Use the HydrographCorrector class for interactive data correction:
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -1704,19 +1727,19 @@ pip<span class="w"> </span>install<span class="w"> </span>hydroutils
 <span class="normal">10</span>
 <span class="normal">11</span>
 <span class="normal">12</span>
-<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Upload data to S3</span>
-<span class="n">hu</span><span class="o">.</span><span class="n">upload_to_s3</span><span class="p">(</span>
-    <span class="n">local_file</span><span class="o">=</span><span class="s1">&#39;data.csv&#39;</span><span class="p">,</span>
-    <span class="n">bucket</span><span class="o">=</span><span class="s1">&#39;my-hydro-data&#39;</span><span class="p">,</span>
-    <span class="n">s3_key</span><span class="o">=</span><span class="s1">&#39;station_001/data.csv&#39;</span>
-<span class="p">)</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hydroutils.hydro_correct</span><span class="w"> </span><span class="kn">import</span> <span class="n">HydrographCorrector</span>
 
-<span class="c1"># Download from S3</span>
-<span class="n">hu</span><span class="o">.</span><span class="n">download_from_s3</span><span class="p">(</span>
-    <span class="n">bucket</span><span class="o">=</span><span class="s1">&#39;my-hydro-data&#39;</span><span class="p">,</span>
-    <span class="n">s3_key</span><span class="o">=</span><span class="s1">&#39;station_001/data.csv&#39;</span><span class="p">,</span>
-    <span class="n">local_file</span><span class="o">=</span><span class="s1">&#39;downloaded_data.csv&#39;</span>
-<span class="p">)</span>
+<span class="c1"># Create corrector instance</span>
+<span class="n">corrector</span> <span class="o">=</span> <span class="n">HydrographCorrector</span><span class="p">(</span><span class="n">time_series_data</span><span class="p">)</span>
+
+<span class="c1"># Apply five-point quadratic smoothing</span>
+<span class="n">smoothed_data</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">five_point_smooth</span><span class="p">()</span>
+
+<span class="c1"># Apply cubic spline interpolation</span>
+<span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">cubic_spline_interpolate</span><span class="p">()</span>
+
+<span class="c1"># Combined correction</span>
+<span class="n">corrected_data</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">correct</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div></p>
 <h3 id="q-how-do-i-enable-logging-for-my-analysis">Q: How do I enable logging for my analysis?<a class="headerlink" href="#q-how-do-i-enable-logging-for-my-analysis" title="Permanent link">&para;</a></h3>
 <p><strong>A:</strong> Use the logging utilities:
@@ -1850,7 +1873,7 @@ pip<span class="w"> </span>install<span class="w"> </span>hydroutils
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2025-08-20
+    2025-11-13
   </span>
 
     

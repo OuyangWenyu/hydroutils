@@ -873,6 +873,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydro_correct/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydrograph Correction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -926,7 +949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../hydro_s3/" class="md-nav__link">
+      <a href="../hydro_s3.md" class="md-nav__link">
         
   
   
@@ -1614,8 +1637,7 @@ assign_time_start_end(ranges, "union")
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">291</span>
-<span class="normal">292</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
@@ -1645,7 +1667,8 @@ assign_time_start_end(ranges, "union")
 <span class="normal">319</span>
 <span class="normal">320</span>
 <span class="normal">321</span>
-<span class="normal">322</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">assign_time_start_end</span><span class="p">(</span><span class="n">time_ranges</span><span class="p">,</span> <span class="n">assign_way</span><span class="o">=</span><span class="s2">&quot;intersection&quot;</span><span class="p">):</span>
+<span class="normal">322</span>
+<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">assign_time_start_end</span><span class="p">(</span><span class="n">time_ranges</span><span class="p">,</span> <span class="n">assign_way</span><span class="o">=</span><span class="s2">&quot;intersection&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine start and end times from multiple time ranges.</span>
 
 <span class="sd">    Args:</span>
@@ -1802,8 +1825,7 @@ calculate_utc_offset(51.5074, -0.1278)   # London, UK
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
-<span class="normal">202</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span>
@@ -1834,7 +1856,8 @@ calculate_utc_offset(51.5074, -0.1278)   # London, UK
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
-<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_utc_offset</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lng</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">233</span>
+<span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_utc_offset</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lng</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the UTC offset for a geographic location.</span>
 
 <span class="sd">    This function determines the timezone and UTC offset for a given latitude and</span>
@@ -1943,8 +1966,7 @@ If string, must be in format 'YYYY-MM-DD'.</p>
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
-<span class="normal">169</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
@@ -1959,7 +1981,8 @@ If string, must be in format 'YYYY-MM-DD'.</p>
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">date_to_julian</span><span class="p">(</span><span class="n">a_time</span><span class="p">):</span>
+<span class="normal">184</span>
+<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">date_to_julian</span><span class="p">(</span><span class="n">a_time</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a date to Julian day of the year.</span>
 
 <span class="sd">    Args:</span>
@@ -2114,8 +2137,7 @@ DatetimeIndex(['2020-03-15', '2020-03-25', '2020-04-04', ...,
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">236</span>
-<span class="normal">237</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
@@ -2166,7 +2188,8 @@ DatetimeIndex(['2020-03-15', '2020-03-25', '2020-04-04', ...,
 <span class="normal">285</span>
 <span class="normal">286</span>
 <span class="normal">287</span>
-<span class="normal">288</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_start0101_time_range</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;8D&quot;</span><span class="p">):</span>
+<span class="normal">288</span>
+<span class="normal">289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_start0101_time_range</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;8D&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a time range with annual reset to January 1st.</span>
 
 <span class="sd">    This function creates a time range with a specified frequency, but with the special</span>
@@ -2300,8 +2323,7 @@ For strings, assumes YYYY is at the start.</p>
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
-<span class="normal">133</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
@@ -2318,7 +2340,8 @@ For strings, assumes YYYY is at the start.</p>
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_year</span><span class="p">(</span><span class="n">a_time</span><span class="p">):</span>
+<span class="normal">150</span>
+<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_year</span><span class="p">(</span><span class="n">a_time</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract year from various time formats.</span>
 
 <span class="sd">    Args:</span>
@@ -2437,8 +2460,7 @@ For strings, assumes YYYY is at the start.</p>
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
-<span class="normal">154</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
@@ -2449,7 +2471,8 @@ For strings, assumes YYYY is at the start.</p>
 <span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect</span><span class="p">(</span><span class="n">t_lst1</span><span class="p">,</span> <span class="n">t_lst2</span><span class="p">):</span>
+<span class="normal">165</span>
+<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect</span><span class="p">(</span><span class="n">t_lst1</span><span class="p">,</span> <span class="n">t_lst2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find indices of common elements between two time lists.</span>
 
 <span class="sd">    Args:</span>
@@ -2697,8 +2720,7 @@ For strings, assumes YYYY is at the start.</p>
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 82</span>
-<span class="normal"> 83</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
 <span class="normal"> 84</span>
 <span class="normal"> 85</span>
 <span class="normal"> 86</span>
@@ -2718,7 +2740,8 @@ For strings, assumes YYYY is at the start.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_days_lst2range</span><span class="p">(</span><span class="n">t_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">103</span>
+<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_days_lst2range</span><span class="p">(</span><span class="n">t_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a list of dates into a start-end interval.</span>
 
 <span class="sd">    Args:</span>
@@ -3026,7 +3049,8 @@ array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
-<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_range_days_timedelta</span><span class="p">(</span><span class="n">t_array</span><span class="p">,</span> <span class="n">td</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">td_type</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_range_days_timedelta</span><span class="p">(</span><span class="n">t_array</span><span class="p">,</span> <span class="n">td</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">td_type</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a time delta to each date in an array.</span>
 
 <span class="sd">    Args:</span>
@@ -3040,7 +3064,8 @@ array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
 <span class="sd">    Raises:</span>
 <span class="sd">        AssertionError: If td_type is not one of &#39;Y&#39;,&#39;M&#39;,&#39;D&#39;,&#39;h&#39;,&#39;m&#39;,&#39;s&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="n">td_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">td_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;td_type must be one of &#39;Y&#39;,&#39;M&#39;,&#39;D&#39;,&#39;h&#39;,&#39;m&#39;,&#39;s&#39;, got </span><span class="si">{</span><span class="n">td_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">t_array_final</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="n">td</span><span class="p">,</span> <span class="n">td_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">t_array</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t_array_final</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3118,8 +3143,7 @@ array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
-<span class="normal">188</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
@@ -3129,7 +3153,8 @@ array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
-<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_range_to_julian</span><span class="p">(</span><span class="n">t_range</span><span class="p">):</span>
+<span class="normal">198</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_range_to_julian</span><span class="p">(</span><span class="n">t_range</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a date range to a list of Julian days.</span>
 
 <span class="sd">    Args:</span>
@@ -3226,8 +3251,7 @@ array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
 
             <details class="quote">
               <summary>Source code in <code>hydroutils/hydro_time.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
-<span class="normal">107</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
@@ -3249,7 +3273,8 @@ array(['2000-01-01', '2000-01-02', '2000-01-03', '2000-01-04'],
 <span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
-<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_range_years</span><span class="p">(</span><span class="n">t_range</span><span class="p">):</span>
+<span class="normal">129</span>
+<span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">t_range_years</span><span class="p">(</span><span class="n">t_range</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get array of years covered by a date range.</span>
 
 <span class="sd">    Args:</span>
