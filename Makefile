@@ -11,7 +11,6 @@ help:
 	@echo "  format      - Format code (black + ruff)"
 	@echo "  clean       - Clean build artifacts"
 	@echo "  build       - Build package"
-	@echo "  bump-patch  - Bump patch version"
 
 # Installation
 install-dev:
@@ -42,10 +41,6 @@ clean:
 # Building
 build: clean
 	uv run python -m build
-
-# Version bump
-bump-patch:
-	uv run bump2version patch
 
 # Development setup
 setup-dev: install-dev

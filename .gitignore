@@ -111,3 +111,7 @@ CLAUDE.md
 .codegraph/
 .specify/
 .playwright-mcp/
+.firecrawl/
+
+# hatch-vcs 构建时自动生成的版本文件
+hydroutils/_version.py

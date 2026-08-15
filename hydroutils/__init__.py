@@ -10,7 +10,12 @@ Copyright (c) 2023-2024 Wenyu Ouyang. All rights reserved.
 
 __author__ = """Wenyu Ouyang"""
 __email__ = 'wenyuouyang@outlook.com'
-__version__ = '0.1.0'
+
+# 版本号由 hatch-vcs 在构建时生成于 _version.py（唯一来源：git tag）
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "0.0.0"
 
 from .hydro_event import *
 from .hydro_units import (
