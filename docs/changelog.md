@@ -5,6 +5,17 @@ All notable changes to the hydroutils project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 移除
+- AWS S3 / MinIO 云存储支持 (`hydro_s3`) 及死依赖 (boto3, minio, s3fs)
+- 误加的 `mm^3/s` 体积流量单位支持
+- `hydro_log` 模块（与标准库 logging 冗余）
+
+### 修复
+- `_normalize_unit` 损坏 "millimeter ** 3 / second" 的问题
+- 损坏的文档示例（FAQ 数据校正示例、Quick Start 单位、hydro_correct API 文档）
+
 ## [v0.0.14] - 2025-08-19
 
 ### Added
@@ -20,9 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 水文数据专用绘图函数
   - 模型评价可视化工具
   - 发布级别图表输出
-- 数据校正模块 (`hydro_correct`)
-  - 交互式洪水过程线校正工具
-  - 五点二次平滑和三次样条插值
 - 日志工具模块 (`hydro_log`)
   - 专业的水文分析日志记录
   - 性能监控和错误追踪
@@ -53,15 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - 基础功能实现和测试
 
-## [Unreleased]
-
-### Planned
-- 增加机器学习模块支持
-- 添加更多水文模型评价指标
-- 改进数据可视化功能
-- 优化大规模数据处理性能
-- 添加更多单元测试和集成测试
-
 ---
 
 ## Version Number Guide
@@ -71,5 +70,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PATCH** version (0.0.x) - 向后兼容的问题修复
 
 ## Links
-- [v0.0.14]: https://github.com/zhuanglaihong/hydroutils/releases/tag/v0.0.14
-- [v0.0.13]: https://github.com/zhuanglaihong/hydroutils/releases/tag/v0.0.13
+- [v0.0.14]: https://github.com/OuyangWenyu/hydroutils/releases/tag/v0.0.14
+- [v0.0.13]: https://github.com/OuyangWenyu/hydroutils/releases/tag/v0.0.13

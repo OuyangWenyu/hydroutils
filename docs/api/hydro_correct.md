@@ -142,20 +142,18 @@ def calculate_water_balance_metrics(
     data: pd.DataFrame,
     net_rain_column: str = "net_rain",
     discharge_column: str = "gen_discharge",
-    time_step_hours: float = 1.0,
 ) -> dict:
-    """Calculate water balance metrics.
+    """Calculate water balance and discharge statistics metrics.
 
     Args:
         data (pd.DataFrame): Input data.
         net_rain_column (str): Name of net rain column. Defaults to "net_rain".
         discharge_column (str): Name of discharge column. Defaults to "gen_discharge".
-        time_step_hours (float): Time step in hours. Defaults to 1.0.
 
     Returns:
         dict: Dictionary containing water balance metrics:
-            - total_net_rain_mm: Total net rainfall in mm
-            - total_discharge_mm: Total discharge in mm
+            - total_net_rain: Total net rainfall (if available)
+            - total_discharge: Total discharge volume
             - balance_error_percent: Water balance error percentage
             - discharge_stats: Dictionary of discharge statistics
     """

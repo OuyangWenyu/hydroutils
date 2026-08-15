@@ -11,7 +11,7 @@ pip install hydroutils
 
 For the latest development version:
 ```bash
-pip install git+https://github.com/zhuanglaihong/hydroutils.git
+pip install git+https://github.com/OuyangWenyu/hydroutils.git
 ```
 
 ### Q: What Python versions are supported?
@@ -66,7 +66,7 @@ stats = hu.stat_error(obs_with_nan, sim_with_nan)
 ```python
 # Convert from cubic meters per second to cubic feet per second
 flow_cms = np.array([10.5, 12.3, 8.7])
-flow_cfs = hu.streamflow_unit_conv(flow_cms, from_unit='cms', to_unit='cfs')
+flow_cfs = hu.streamflow_unit_conv(flow_cms, np.array([1000.0]), 'ft^3/s', source_unit='m^3/s')
 ```
 
 ### Q: What performance metrics are available?
@@ -168,33 +168,16 @@ colors = hu.get_hydro_colors(data_type='streamflow')
 from hydroutils.hydro_correct import HydrographCorrector
 
 # Create corrector instance
-corrector = HydrographCorrector(time_series_data)
+corrector = HydrographCorrector(time_points, discharge_values)
 
 # Apply five-point quadratic smoothing
-smoothed_data = corrector.five_point_smooth()
+smoothed_data = corrector.five_point_smooth(discharge_values)
 
 # Apply cubic spline interpolation
-interpolated_data = corrector.cubic_spline_interpolate()
+interpolated_data = corrector.cubic_spline_interpolation(time_points, discharge_values)
 
 # Combined correction
-corrected_data = corrector.correct()
-```
-
-### Q: How do I enable logging for my analysis?
-
-**A:** Use the logging utilities:
-```python
-# Setup logger
-logger = hu.setup_hydro_logger(
-    name='my_analysis',
-    log_file='analysis.log',
-    level='INFO'
-)
-
-# Log your analysis steps
-logger.info("Starting streamflow analysis")
-stats = hu.stat_error(observed, simulated)
-logger.info(f"NSE calculated: {stats['NSE'][0]:.3f}")
+corrected_data = corrector.apply_correction(discharge_values)
 ```
 
 ## Troubleshooting
@@ -255,9 +238,9 @@ def process_large_dataset(large_array, chunk_size=10000):
 ### Q: How do I report bugs or request features?
 
 **A:** Please use the GitHub Issues:
-1. **Bug Reports**: [Create a bug report](https://github.com/zhuanglaihong/hydroutils/issues/new?template=bug_report.md)
-2. **Feature Requests**: [Request a new feature](https://github.com/zhuanglaihong/hydroutils/issues/new?template=feature_request.md)
-3. **Questions**: Use the [Discussions](https://github.com/zhuanglaihong/hydroutils/discussions) section
+1. **Bug Reports**: [Create a bug report](https://github.com/OuyangWenyu/hydroutils/issues/new?template=bug_report.md)
+2. **Feature Requests**: [Request a new feature](https://github.com/OuyangWenyu/hydroutils/issues/new?template=feature_request.md)
+3. **Questions**: Use the [Discussions](https://github.com/OuyangWenyu/hydroutils/discussions) section
 
 ### Q: Can I contribute to the project?
 
@@ -274,7 +257,7 @@ def process_large_dataset(large_array, chunk_size=10000):
 @software{hydroutils,
   author = {Your Name},
   title = {hydroutils: A Python package for hydrological analysis},
-  url = {https://github.com/zhuanglaihong/hydroutils},
+  url = {https://github.com/OuyangWenyu/hydroutils},
   version = {X.X.X},
   year = {2024}
 }
@@ -286,8 +269,8 @@ def process_large_dataset(large_array, chunk_size=10000):
 
 If your question isn't answered here:
 
-1. **Search existing issues**: [GitHub Issues](https://github.com/zhuanglaihong/hydroutils/issues)
-2. **Ask a question**: [GitHub Discussions](https://github.com/zhuanglaihong/hydroutils/discussions)
+1. **Search existing issues**: [GitHub Issues](https://github.com/OuyangWenyu/hydroutils/issues)
+2. **Ask a question**: [GitHub Discussions](https://github.com/OuyangWenyu/hydroutils/discussions)
 3. **Email support**: [Contact Information]
 
 We're here to help you succeed with your hydrological analysis!

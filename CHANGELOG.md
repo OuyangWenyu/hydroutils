@@ -31,10 +31,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Legacy setup.py configuration
 - Old GitHub Actions workflows
+- AWS S3 / MinIO cloud storage support (`hydro_s3`) and dead dependencies (boto3, minio, s3fs)
+- Mistaken `mm^3/s` volume-flow unit support
+- `hydro_log` module (redundant with stdlib logging)
 
 ### Fixed
 - Code style consistency across the project
 - Dependency version conflicts
+- `_normalize_unit` corrupting "millimeter ** 3 / second" into "millim^3/s"
+- Broken doctest expected outputs and doc examples (FAQ, Quick Start, hydro_correct docs)
 
 ### Security
 - Added security scanning to CI/CD pipeline
@@ -60,13 +65,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Basic hydro statistics functionality
 - File handling utilities
-- Hydrograph correction tools
 - Plotting capabilities
 - Time series utilities
 
 ### Initial Features
 - HydroErr integration for statistical metrics
-- Data quality control and correction
 - Matplotlib and Seaborn plotting
 - Cartopy for GIS plotting
 - Rich console output

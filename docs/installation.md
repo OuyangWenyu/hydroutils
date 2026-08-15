@@ -42,7 +42,7 @@ This is the preferred method as it installs the most recent stable release with 
 For the latest features and bug fixes, install from GitHub:
 
 ```bash
-pip install git+https://github.com/zhuanglaihong/hydroutils.git
+pip install git+https://github.com/OuyangWenyu/hydroutils.git
 ```
 
 ### 3. From Source
@@ -51,7 +51,7 @@ If you want to contribute or modify the code:
 
 ```bash
 # Clone the repository
-git clone https://github.com/zhuanglaihong/hydroutils.git
+git clone https://github.com/OuyangWenyu/hydroutils.git
 cd hydroutils
 
 # Install in development mode
@@ -69,7 +69,7 @@ pip install hydroutils[all]
 Or install specific optional dependencies:
 
 ```bash
-pip install hydroutils[viz]     # For advanced visualization
+pip install hydroutils[docs]    # For building documentation
 pip install hydroutils[dev]     # For development tools
 ```
 
@@ -164,8 +164,8 @@ print(f"NSE: {stats['NSE'][0]:.3f}")
 If you encounter any installation issues:
 
 1. Check the [FAQ](faq.md) for common solutions
-2. Search [existing issues](https://github.com/zhuanglaihong/hydroutils/issues)
-3. Create a [new issue](https://github.com/zhuanglaihong/hydroutils/issues/new) with:
+2. Search [existing issues](https://github.com/OuyangWenyu/hydroutils/issues)
+3. Create a [new issue](https://github.com/OuyangWenyu/hydroutils/issues/new) with:
    - Your operating system and Python version
    - Complete error message
    - Steps to reproduce the problem

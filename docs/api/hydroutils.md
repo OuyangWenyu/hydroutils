@@ -17,6 +17,5 @@ The `hydroutils` package consists of several specialized modules:
 - **[hydro_file](hydro_file.md)** - File I/O operations
 - **[hydro_units](hydro_units.md)** - Unit conversion utilities
 - **[hydro_event](hydro_event.md)** - Flood event extraction and analysis
-- **[hydro_log](hydro_log.md)** - Logging utilities
 
 Click on any module above for detailed function documentation.

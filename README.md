@@ -61,11 +61,6 @@ Hydroutils is a Python package designed for hydrological modeling workflows, pro
 - **Hydrological Event Detection**: Flood event identification
 - **Event Characterization**: Duration, magnitude, and timing analysis
 
-### 📝 Logging (`hydro_log`)
-- **Rich Console Output**: Colored and formatted console logging
-- **Progress Tracking**: Advanced progress bars and status indicators
-- **Debug Support**: Comprehensive debugging and error reporting
-
 ## 🚀 Quick Start
 
 ### Installation
@@ -162,8 +157,7 @@ hydroutils/
 │   ├── __init__.py              # Package initialization and exports
 │   ├── hydro_correct.py         # Data correction and quality control
 │   ├── hydro_event.py           # Hydrological event analysis
-│   ├── hydro_file.py            # File I/O and cloud storage
-│   ├── hydro_log.py             # Logging and console output
+│   ├── hydro_file.py            # File I/O utilities
 │   ├── hydro_plot.py            # Visualization functions
 │   ├── hydro_stat.py            # Statistical analysis engine
 │   ├── hydro_time.py            # Time series utilities

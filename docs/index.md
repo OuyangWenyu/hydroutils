@@ -10,7 +10,7 @@
 # Welcome to hydroutils
 
 [![image](https://img.shields.io/pypi/v/hydroutils.svg)](https://pypi.python.org/pypi/hydroutils)
-[![image](https://pyup.io/repos/github/zhuanglaihong/hydroutils/shield.svg)](https://pyup.io/repos/github/zhuanglaihong/hydroutils)
+[![image](https://pyup.io/repos/github/OuyangWenyu/hydroutils/shield.svg)](https://pyup.io/repos/github/OuyangWenyu/hydroutils)
 
 **A collection of commonly used utility functions for hydrological modeling and analysis**
 
@@ -54,7 +54,7 @@ nse = hu.stat_error(observed, simulated)['NSE']
 events = hu.extract_flood_events(dataframe)
 
 # Convert streamflow units
-converted = hu.streamflow_unit_conv(data, basin_area, source_unit='cms', target_unit='mm/3h')
+converted = hu.streamflow_unit_conv(data, basin_area, source_unit='m^3/s', target_unit='mm/3h')
 ```
 
 ## Installation
@@ -74,5 +74,5 @@ pip install hydroutils
 ## License & Credits
 
 - Free software: MIT license
-- Documentation: <https://zhuanglaihong.github.io/hydroutils>
+- Documentation: <https://ouyangwenyu.github.io/hydroutils>
 - Created with [Cookiecutter](https://github.com/cookiecutter/cookiecutter) and the [giswqs/pypackage](https://github.com/giswqs/pypackage) project template
