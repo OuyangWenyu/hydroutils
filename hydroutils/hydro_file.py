@@ -42,7 +42,7 @@ def zip_extract(the_dir) -> None:
             zf.extractall(the_dir.joinpath(f.stem))
 
 
-def unzip_file(data_zip, path_unzip):
+def unzip_file(data_zip, path_unzip) -> None:
     """Extract a zip file to the specified directory.
 
     Args:
@@ -101,7 +101,7 @@ def is_there_file(zipfile_path, unzip_dir):
         return True
 
 
-def download_one_zip(data_url, data_dir):
+def download_one_zip(data_url, data_dir) -> None:
     """Download one zip file from URL and extract it.
 
     Args:
@@ -127,7 +127,7 @@ def download_one_zip(data_url, data_dir):
         unzip_nested_zip(zipfile_path, unzip_dir), download_small_file
 
 
-def download_zip_files(urls, the_dir: Path):
+def download_zip_files(urls, the_dir: Path) -> None:
     """Download multiple files from multiple URLs.
 
     Args:
@@ -147,7 +147,7 @@ def download_zip_files(urls, the_dir: Path):
         [files[i].write_bytes(io.BytesIO(r[i]).getbuffer()) for i in range(len(files))]
 
 
-def download_small_zip(data_url, data_dir):
+def download_small_zip(data_url, data_dir) -> None:
     """Download a small zip file and extract it.
 
     Args:
@@ -168,7 +168,7 @@ def download_small_zip(data_url, data_dir):
         unzip_nested_zip(zipfile_path, unzip_dir)
 
 
-def download_small_file(data_url, temp_file):
+def download_small_file(data_url, temp_file) -> None:
     """Download a small file from URL.
 
     Args:
@@ -186,7 +186,7 @@ def download_small_file(data_url, temp_file):
         f.write(r.text)
 
 
-def download_excel(data_url, temp_file):
+def download_excel(data_url, temp_file) -> None:
     """Download an Excel file from URL.
 
     Args:
@@ -203,7 +203,7 @@ def download_excel(data_url, temp_file):
         urllib.request.urlretrieve(data_url, temp_file)
 
 
-def download_a_file_from_google_drive(drive, dir_id, download_dir):
+def download_a_file_from_google_drive(drive, dir_id, download_dir) -> None:
     """Download files from Google Drive.
 
     Args:
@@ -240,7 +240,7 @@ def download_a_file_from_google_drive(drive, dir_id, download_dir):
             print("Downloading file finished")
 
 
-def serialize_json(my_dict, my_file, encoding="utf-8", ensure_ascii=True):
+def serialize_json(my_dict, my_file, encoding="utf-8", ensure_ascii=True) -> None:
     """Serialize a dictionary to a JSON file.
 
     Args:
@@ -291,7 +291,7 @@ class NumpyArrayEncoder(json.JSONEncoder):
     that can be serialized by the standard JSON encoder.
     """
 
-    def default(self, obj):
+    def default(self, obj) -> object:
         """Convert NumPy types to JSON serializable objects.
 
         Args:
@@ -327,7 +327,7 @@ class NumpyArrayEncoder(json.JSONEncoder):
         ]
 
 
-def serialize_json_np(my_dict, my_file):
+def serialize_json_np(my_dict, my_file) -> None:
     """Serialize a dictionary containing NumPy arrays to a JSON file.
 
     Args:
@@ -344,7 +344,7 @@ def serialize_json_np(my_dict, my_file):
         json.dump(my_dict, FP, cls=NumpyArrayEncoder)
 
 
-def serialize_pickle(my_object, my_file):
+def serialize_pickle(my_object, my_file) -> None:
     """Serialize an object to a pickle file.
 
     Args:
@@ -372,7 +372,7 @@ def unserialize_pickle(my_file):
     return my_object
 
 
-def serialize_numpy(my_array, my_file):
+def serialize_numpy(my_array, my_file) -> None:
     """Save a NumPy array to a binary file.
 
     Args:
