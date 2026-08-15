@@ -119,8 +119,10 @@ def _normalize_unit(unit_str):
         return unit_str
 
     # Handle pint verbose format
-    normalized = unit_str.replace("meter ** 3 / second", "m^3/s")
-    normalized = normalized.replace("meter**3/second", "m^3/s")
+    # Use word boundaries so "millimeter ** 3 / second" is not corrupted by the
+    # "meter" substring (it must not normalize to the invalid token "millim^3/s").
+    normalized = re.sub(r"\bmeter \*\* 3 / second\b", "m^3/s", unit_str)
+    normalized = re.sub(r"\bmeter\*\*3/second\b", "m^3/s", normalized)
     normalized = normalized.replace("cubic_meter / second", "m^3/s")
     normalized = normalized.replace("cubic_meter/second", "m^3/s")
 
@@ -342,7 +344,6 @@ def _determine_conversion_direction(source_unit, target_unit):
 
     volume_patterns = [
         r"m(?:\*\*3|\^3|3)/s$",  # m**3/s, m^3/s, m3/s
-        r"mm\^3/s$",  # mm^3/s
         r"ft(?:\*\*3|\^3|3)/s$",  # ft**3/s, ft^3/s, ft3/s
         r"l/s$",  # l/s
         r"gal/s$",  # gal/s
@@ -487,7 +488,7 @@ def _convert_xarray(
         >>> result = _convert_xarray(data, area, 'mm/h', 1,
         ...                         'km^2', 'm^3/s', 1, 'm^3/s', True)
         >>> print(result.flow.attrs['units'])
-        'm^3/s'
+        m^3/s
     """
     data_key = list(data.keys())[0]
 
@@ -618,8 +619,8 @@ def _convert_pint_quantity(
         >>> area = 1000 * ureg('km^2')
         >>> result = _convert_pint_quantity(data, area, 'mm/h', 1,
         ...                                'km^2', 'm^3/s', 1, True)
-        >>> print(result)  # Values in m^3/s
-        array([277.77..., 555.55..., 833.33...])
+        >>> print(result)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        [277.777... 555.555... 833.333...]
     """
     # Extract values and handle source factor
     data_values = data.magnitude / source_factor
@@ -703,8 +704,8 @@ def _convert_numpy_pandas(
         >>> area = np.array([1000])  # km²
         >>> result = _convert_numpy_pandas(data, area, 'mm/h', 1,
         ...                               'km^2', 'm^3/s', 1, True)
-        >>> print(result)  # Values in m^3/s
-        array([277.77..., 555.55..., 833.33...])
+        >>> print(result)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        [277.777... 555.555... 833.333...]
 
         >>> # Pandas Series example
         >>> data = pd.Series([1, 2, 3], index=['a', 'b', 'c'])

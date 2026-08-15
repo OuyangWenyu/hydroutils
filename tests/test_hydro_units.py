@@ -414,6 +414,22 @@ class TestValidateUnitCompatibility:
         assert validate_unit_compatibility("m^3/s", "kg") is False
         assert validate_unit_compatibility("invalid", "mm/d") is False
 
+    def test_mm_cubed_per_second_not_supported(self):
+        """mm^3/s is not a hydrologic flow unit; it must be rejected.
+
+        Regression guard: mm^3/s was added by mistake (2025-12-18) and later
+        revoked. The public validator and the converter must agree on it.
+        """
+        assert validate_unit_compatibility("mm^3/s", "m^3/s") is False
+        assert validate_unit_compatibility("mm^3/s", "mm/d") is False
+        with pytest.raises(ValueError):
+            streamflow_unit_conv(
+                np.array([1.0, 2.0, 3.0]),
+                np.array([1000.0]),
+                "m^3/s",
+                source_unit="mm^3/s",
+            )
+
 
 class TestHelperFunctions:
     """Test cases for internal helper functions."""
@@ -425,6 +441,21 @@ class TestHelperFunctions:
         assert _normalize_unit("meter ** 3 / second") == "m^3/s"
         assert _normalize_unit("millimeter / day") == "mm/d"
         assert _normalize_unit("millimeter / hour") == "mm/h"
+
+    def test_normalize_pint_millimeter_not_mangled(self):
+        """pint's verbose mm^3/s form must not be corrupted to millim^3/s.
+
+        The substring replacement of "meter ** 3 / second" used to fire inside
+        "millimeter ** 3 / second", silently producing the invalid token
+        "millim^3/s".
+        """
+        result = _normalize_unit("millimeter ** 3 / second")
+        assert "millim^3/s" not in result
+        assert "millimeter" in result
+        # No-space variant of the same pint format must also survive.
+        result_nospace = _normalize_unit("millimeter**3/second")
+        assert "millim^3/s" not in result_nospace
+        assert "millimeter" in result_nospace
 
     def test_is_inverse_conversion(self):
         """Test inverse conversion detection."""
