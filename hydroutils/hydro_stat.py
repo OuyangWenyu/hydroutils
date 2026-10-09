@@ -37,9 +37,71 @@ def _validate_inputs(obs: np.ndarray, sim: np.ndarray) -> None:
 
 
 def _mask_valid(obs: np.ndarray, sim: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """Remove NaN values from both time series."""
-    mask = ~(np.isnan(obs) | np.isnan(sim))
+    """Return observation/prediction values from the same finite positions."""
+    obs = np.asarray(obs)
+    sim = np.asarray(sim)
+    if obs.shape != sim.shape:
+        raise ValueError("obs and sim must have the same shape")
+    mask = np.isfinite(obs) & np.isfinite(sim)
     return obs[mask], sim[mask]
+
+
+def _scaled_mean(values: np.ndarray) -> float:
+    """Compute a mean without overflowing the intermediate sum when possible."""
+    scale = np.max(np.abs(values))
+    if scale == 0:
+        return 0.0
+    return float(scale * np.mean(values / scale))
+
+
+def _scaled_std(values: np.ndarray) -> float:
+    """Compute a population standard deviation with bounded intermediate values."""
+    scale = np.max(np.abs(values))
+    if scale == 0:
+        return 0.0
+    return float(scale * np.std(values / scale))
+
+
+def _scaled_rms(values: np.ndarray) -> float:
+    """Compute an RMS with scaled squares to avoid avoidable overflow."""
+    if values.size == 0:
+        return np.nan
+    if not np.isfinite(values).all():
+        return np.nan
+    scale = np.max(np.abs(values))
+    if scale == 0:
+        return 0.0
+    return float(scale * np.sqrt(np.mean((values / scale) ** 2)))
+
+
+def _nse_from_pairs(observed: np.ndarray, simulated: np.ndarray) -> float:
+    """Compute NSE from a finite paired sample using scaled sums of squares."""
+    if observed.size < 2:
+        return np.nan
+    centered = observed - _scaled_mean(observed)
+    errors = simulated - observed
+    denominator_scale = np.max(np.abs(centered))
+    if denominator_scale == 0 or not np.isfinite(denominator_scale):
+        return np.nan
+    if not np.isfinite(errors).all():
+        return np.nan
+    numerator_scale = np.max(np.abs(errors))
+    if numerator_scale == 0:
+        return 1.0
+    denominator_sum = np.sum((centered / denominator_scale) ** 2)
+    numerator_sum = np.sum((errors / numerator_scale) ** 2)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        ratio = (numerator_scale / denominator_scale) ** 2 * (
+            numerator_sum / denominator_sum
+        )
+        result = 1.0 - ratio
+    return float(result) if np.isfinite(result) else np.nan
+
+
+def _safe_metric_value(value: Any) -> float:
+    """Return a finite scalar metric, or NaN when its result is not representable."""
+    scalar = float(value)
+    return scalar if np.isfinite(scalar) else np.nan
 
 
 def _get_frequency_factor(target_freq: str, current_freq: str) -> float:
@@ -286,10 +348,35 @@ def KGE(xs: np.ndarray, xo: np.ndarray) -> float:
     output:
         KGE: Kling Gupta Efficiency
     """
-    r = np.corrcoef(xo, xs)[0, 1]
-    alpha = np.std(xs) / np.std(xo)
-    beta = np.mean(xs) / np.mean(xo)
-    return 1 - np.sqrt((r - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    xs, xo = _mask_valid(np.asarray(xs), np.asarray(xo))
+    if xs.size < 2:
+        return np.nan
+
+    # Scale before computing moments so large, but finite, values do not
+    # overflow while evaluating the correlation and variability components.
+    sim_scale = np.max(np.abs(xs))
+    obs_scale = np.max(np.abs(xo))
+    scaled_sim = xs / sim_scale if sim_scale else xs
+    scaled_obs = xo / obs_scale if obs_scale else xo
+    sim_std_scaled = np.std(scaled_sim)
+    obs_std_scaled = np.std(scaled_obs)
+    obs_mean_scaled = np.mean(scaled_obs)
+    if (
+        sim_std_scaled == 0
+        or obs_std_scaled == 0
+        or obs_mean_scaled == 0
+        or not np.isfinite(sim_std_scaled)
+        or not np.isfinite(obs_std_scaled)
+        or not np.isfinite(obs_mean_scaled)
+    ):
+        return np.nan
+
+    correlation = np.corrcoef(scaled_obs, scaled_sim)[0, 1]
+    alpha = (sim_scale / obs_scale) * (sim_std_scaled / obs_std_scaled)
+    beta = (sim_scale / obs_scale) * (np.mean(scaled_sim) / obs_mean_scaled)
+    with np.errstate(over="ignore", invalid="ignore"):
+        value = 1 - np.sqrt((correlation - 1) ** 2 + (alpha - 1) ** 2 + (beta - 1) ** 2)
+    return float(value) if np.isfinite(value) else np.nan
 
 
 # 定义指标函数映射字典，方便添加新指标
@@ -338,8 +425,21 @@ def _create_metric_function(
         float
             Calculated metric value
         """
+        observed = np.asarray(observed)
+        simulated = np.asarray(simulated)
+        observed, simulated = _mask_valid(observed, simulated)
+        if observed.size == 0:
+            return np.nan
+        if he_func_name in {"pearson_r", "r_squared", "nse", "kge_2009"}:
+            if observed.size < 2 or _scaled_std(observed) == 0:
+                return np.nan
+        if he_func_name in {"pearson_r", "kge_2009"} and _scaled_std(simulated) == 0:
+            return np.nan
+        if he_func_name == "kge_2009" and not kwargs:
+            return KGE(simulated, observed)
         he_func = getattr(he, he_func_name)
-        return he_func(observed, simulated, **kwargs)
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            return _safe_metric_value(he_func(observed, simulated, **kwargs))
 
     # 更新函数的文档字符串
     if metric_func.__doc__ is not None:
@@ -384,15 +484,16 @@ def pbias(
     observed = np.asarray(observed)
     simulated = np.asarray(simulated)
 
-    # Remove NaN values
-    mask = ~(np.isnan(observed) | np.isnan(simulated))
-    observed = observed[mask]
-    simulated = simulated[mask]
+    observed, simulated = _mask_valid(observed, simulated)
 
     if len(observed) == 0:
         return np.nan
-
-    return np.sum(simulated - observed) / np.sum(observed) * 100
+    denominator = np.sum(observed)
+    if denominator == 0 or not np.isfinite(denominator):
+        return np.nan
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        value = np.sum(simulated - observed) / denominator * 100
+    return float(value) if np.isfinite(value) else np.nan
 
 
 def add_metric(func_name: str, he_func_name: str, description: str) -> None:
@@ -440,11 +541,10 @@ def stat_error_i(targ_i: np.ndarray, pred_i: np.ndarray) -> Dict[str, float]:
             - FHV: Peak flow bias (top 2%)
             - FLV: Low flow bias (bottom 30%)
 
-    Raises:
-        ValueError: If there are fewer than 2 valid data points for correlation.
-
     Note:
-        - NaN values are automatically handled (removed from calculations)
+        - Non-finite values are removed using a common observation/prediction mask.
+        - Bias, RMSE, and ubRMSE are defined for one valid pair; correlation,
+          R2, NSE, and KGE are NaN when their mathematical requirements fail.
         - FHV and FLV are calculated in percentage
         - All metrics are calculated on valid (non-NaN) data points only
 
@@ -455,29 +555,51 @@ def stat_error_i(targ_i: np.ndarray, pred_i: np.ndarray) -> Dict[str, float]:
         >>> print(metrics['RMSE'])  # Example output
         0.173
     """
-    ind = np.where(np.logical_and(~np.isnan(pred_i), ~np.isnan(targ_i)))[0]
-    # Theoretically at least two points for correlation
-    if ind.shape[0] > 1:
-        xx = pred_i[ind]
-        yy = targ_i[ind]
-        bias = he.me(xx, yy)
-        # RMSE
-        rmse = he.rmse(xx, yy)
-        # ubRMSE
-        pred_mean = np.nanmean(xx)
-        target_mean = np.nanmean(yy)
-        pred_anom = xx - pred_mean
-        target_anom = yy - target_mean
-        ubrmse = np.sqrt(np.nanmean((pred_anom - target_anom) ** 2))
-        # rho R2 NSE
-        corr = he.pearson_r(xx, yy)
-        r2 = he.r_squared(xx, yy)
-        nse = he.nse(xx, yy)
-        kge = he.kge_2009(xx, yy)
-        # percent bias
-        pbias = np.sum(xx - yy) / np.sum(yy) * 100
-        # FHV the peak flows bias 2%
-        # FLV the low flows bias bottom 30%, log space
+    pred_i = np.asarray(pred_i)
+    targ_i = np.asarray(targ_i)
+    if pred_i.shape != targ_i.shape:
+        raise ValueError("target and prediction must have the same shape")
+    xx, yy = _mask_valid(pred_i, targ_i)
+    result = {
+        "Bias": np.nan,
+        "RMSE": np.nan,
+        "ubRMSE": np.nan,
+        "Corr": np.nan,
+        "R2": np.nan,
+        "NSE": np.nan,
+        "KGE": np.nan,
+        "FHV": np.nan,
+        "FLV": np.nan,
+    }
+    if xx.size == 0:
+        return result
+
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        errors = xx - yy
+        result["Bias"] = _safe_metric_value(_scaled_mean(errors))
+        result["RMSE"] = _safe_metric_value(_scaled_rms(errors))
+        pred_anom = xx - _scaled_mean(xx)
+        target_anom = yy - _scaled_mean(yy)
+        result["ubRMSE"] = _safe_metric_value(_scaled_rms(pred_anom - target_anom))
+
+        if xx.size >= 2:
+            pred_std = _scaled_std(xx)
+            target_std = _scaled_std(yy)
+            target_mean = _scaled_mean(yy)
+            if pred_std > 0 and target_std > 0:
+                pred_scale = np.max(np.abs(xx))
+                target_scale = np.max(np.abs(yy))
+                result["Corr"] = _safe_metric_value(
+                    np.corrcoef(xx / pred_scale, yy / target_scale)[0, 1]
+                )
+            if target_std > 0:
+                result["R2"] = _safe_metric_value(he.r_squared(xx, yy))
+                result["NSE"] = _safe_metric_value(_nse_from_pairs(yy, xx))
+            if pred_std > 0 and target_std > 0 and target_mean != 0:
+                result["KGE"] = _safe_metric_value(KGE(xx, yy))
+
+        # FHV/FLV are percent errors. A missing/zero denominator or an empty
+        # selected tail makes the corresponding statistic undefined.
         pred_sort = np.sort(xx)
         target_sort = np.sort(yy)
         indexlow = round(0.3 * len(pred_sort))
@@ -486,28 +608,61 @@ def stat_error_i(targ_i: np.ndarray, pred_i: np.ndarray) -> Dict[str, float]:
         highpred = pred_sort[indexhigh:]
         lowtarget = target_sort[:indexlow]
         hightarget = target_sort[indexhigh:]
-        pbiaslow = np.sum(lowpred - lowtarget) / np.sum(lowtarget) * 100
-        pbiashigh = np.sum(highpred - hightarget) / np.sum(hightarget) * 100
-        return dict(
-            Bias=bias,
-            RMSE=rmse,
-            ubRMSE=ubrmse,
-            Corr=corr,
-            R2=r2,
-            NSE=nse,
-            KGE=kge,
-            FHV=pbiashigh,
-            FLV=pbiaslow,
-        )
-    else:
-        raise ValueError(
-            "The number of data is less than 2, we don't calculate the statistics."
-        )
+        if lowtarget.size and np.sum(lowtarget) != 0:
+            result["FLV"] = _safe_metric_value(
+                np.sum(lowpred - lowtarget) / np.sum(lowtarget) * 100
+            )
+        if hightarget.size and np.sum(hightarget) != 0:
+            result["FHV"] = _safe_metric_value(
+                np.sum(highpred - hightarget) / np.sum(hightarget) * 100
+            )
+    return result
+
+
+def _pairing_qc(target: np.ndarray, pred: np.ndarray) -> Dict[str, np.ndarray]:
+    """Summarize raw observation/prediction coverage independently per basin."""
+    observation_finite = np.isfinite(target)
+    prediction_finite = np.isfinite(pred)
+    valid = observation_finite & prediction_finite
+    total = np.full(target.shape[0], target.shape[1], dtype=np.int64)
+    valid_count = valid.sum(axis=1, dtype=np.int64)
+    return {
+        "total_pairs": total,
+        "valid_pairs": valid_count,
+        "missing_observation_pairs": (~observation_finite).sum(axis=1, dtype=np.int64),
+        "nonfinite_prediction_pairs": (~prediction_finite).sum(axis=1, dtype=np.int64),
+        "nonfinite_prediction_at_finite_observation_pairs": (
+            observation_finite & ~prediction_finite
+        ).sum(axis=1, dtype=np.int64),
+        "nan_observation_pairs": np.isnan(target).sum(axis=1, dtype=np.int64),
+        "inf_observation_pairs": np.isinf(target).sum(axis=1, dtype=np.int64),
+        "nan_prediction_pairs": np.isnan(pred).sum(axis=1, dtype=np.int64),
+        "inf_prediction_pairs": np.isinf(pred).sum(axis=1, dtype=np.int64),
+        "both_nonfinite_pairs": (~observation_finite & ~prediction_finite).sum(
+            axis=1, dtype=np.int64
+        ),
+        "metric_input_pairs": valid_count.copy(),
+        "valid_fraction": np.divide(
+            valid_count,
+            total,
+            out=np.full(target.shape[0], np.nan, dtype=np.float64),
+            where=total != 0,
+        ),
+    }
 
 
 def stat_error(
-    target: np.ndarray, pred: np.ndarray, fill_nan: str = "no"
-) -> Union[Dict[str, np.ndarray], Dict[str, List[float]]]:
+    target: np.ndarray,
+    pred: np.ndarray,
+    fill_nan: str = "no",
+    *,
+    return_qc: bool = False,
+) -> Union[
+    Dict[str, np.ndarray],
+    Dict[str, List[float]],
+    Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]],
+    Tuple[Dict[str, List[float]], Dict[str, np.ndarray]],
+]:
     """Calculate statistical metrics for 2D arrays with NaN handling options.
 
     This function computes multiple statistical metrics comparing predicted values
@@ -518,9 +673,12 @@ def stat_error(
         target (np.ndarray): Target (observed) values. 2D array [basin, sequence].
         pred (np.ndarray): Predicted values. Same shape as target.
         fill_nan (str, optional): Method for handling NaN values. Options:
-            - "no": Ignore NaN values (default)
+            - "no": Ignore non-finite observation/prediction pairs (default)
             - "sum": Sum values in NaN locations
             - "mean": Average values in NaN locations
+        return_qc (bool, optional): If true, return ``(metrics, qc)`` where ``qc``
+            contains per-basin raw pair counts and valid fractions. The default
+            preserves the historical metrics-only return value.
 
     Returns:
         Union[Dict[str, np.ndarray], Dict[str, List[float]]]: Dictionary with metrics:
@@ -538,8 +696,12 @@ def stat_error(
         ValueError: If input arrays have wrong dimensions or incompatible shapes.
 
     Note:
+        For ``fill_nan="no"``, only positions where both observation and
+        prediction are finite contribute to any metric. For the historical
+        ``"sum"`` and ``"mean"`` modes, the configured prediction aggregation
+        remains unchanged; the optional QC counts describe the raw inputs.
         For fill_nan options:
-        - "no": [1, nan, nan, 2] vs [0.3, 0.3, 0.3, 1.5] becomes [1, 2] vs [0.3, 1.5]
+        - "no": [1, nan, nan, 2] vs [0.3, 0.3, 0.3, 1.5] uses paired finite values only
         - "sum": [1, nan, nan, 2] vs [0.3, 0.3, 0.3, 1.5] becomes [1, 2] vs [0.9, 1.5]
         - "mean": Similar to "sum" but takes average instead of sum
 
@@ -560,6 +722,9 @@ def stat_error(
         raise ValueError("fill_nan should be a string.")
     if target.shape != pred.shape:
         raise ValueError("The shape of target and pred should be the same.")
+    if target.ndim != 2:
+        raise ValueError("target and pred must be 2-d arrays [basin, sequence].")
+    qc = _pairing_qc(target, pred)
     if fill_nan != "no":
         each_non_nan_idx = []
         all_non_nan_idx: list[int] = []
@@ -588,10 +753,16 @@ def stat_error(
     if fill_nan == "sum":
         for i in range(target.shape[0]):
             tmp = target[i]
-            # non_nan_idx = each_non_nan_idx[i]
-            targ_i = tmp[non_nan_idx]
-            pred_i = np.add.reduceat(pred[i], non_nan_idx)
+            if non_nan_idx:
+                targ_i = tmp[non_nan_idx]
+                pred_i = np.add.reduceat(pred[i], non_nan_idx)
+            else:
+                targ_i = np.array([], dtype=target.dtype)
+                pred_i = np.array([], dtype=pred.dtype)
             dict_i = stat_error_i(targ_i, pred_i)
+            qc["metric_input_pairs"][i] = np.count_nonzero(
+                np.isfinite(targ_i) & np.isfinite(pred_i)
+            )
             out_dict["Bias"].append(dict_i["Bias"])
             out_dict["RMSE"].append(dict_i["RMSE"])
             out_dict["ubRMSE"].append(dict_i["ubRMSE"])
@@ -601,20 +772,26 @@ def stat_error(
             out_dict["KGE"].append(dict_i["KGE"])
             out_dict["FHV"].append(dict_i["FHV"])
             out_dict["FLV"].append(dict_i["FLV"])
-        return out_dict
+        return (out_dict, qc) if return_qc else out_dict
     elif fill_nan == "mean":
         for i in range(target.shape[0]):
             tmp = target[i]
-            # non_nan_idx = each_non_nan_idx[i]
-            targ_i = tmp[non_nan_idx]
-            pred_i_sum = np.add.reduceat(pred[i], non_nan_idx)
-            if non_nan_idx[-1] < len(pred[i]):
-                idx4mean = non_nan_idx + [len(pred[i])]
+            if non_nan_idx:
+                targ_i = tmp[non_nan_idx]
+                pred_i_sum = np.add.reduceat(pred[i], non_nan_idx)
+                if non_nan_idx[-1] < len(pred[i]):
+                    idx4mean = non_nan_idx + [len(pred[i])]
+                else:
+                    idx4mean = copy.copy(non_nan_idx)
+                idx_interval = [y - x for x, y in zip(idx4mean, idx4mean[1:])]
+                pred_i = pred_i_sum / idx_interval
             else:
-                idx4mean = copy.copy(non_nan_idx)
-            idx_interval = [y - x for x, y in zip(idx4mean, idx4mean[1:])]
-            pred_i = pred_i_sum / idx_interval
+                targ_i = np.array([], dtype=target.dtype)
+                pred_i = np.array([], dtype=pred.dtype)
             dict_i = stat_error_i(targ_i, pred_i)
+            qc["metric_input_pairs"][i] = np.count_nonzero(
+                np.isfinite(targ_i) & np.isfinite(pred_i)
+            )
             out_dict["Bias"].append(dict_i["Bias"])
             out_dict["RMSE"].append(dict_i["RMSE"])
             out_dict["ubRMSE"].append(dict_i["ubRMSE"])
@@ -624,84 +801,38 @@ def stat_error(
             out_dict["KGE"].append(dict_i["KGE"])
             out_dict["FHV"].append(dict_i["FHV"])
             out_dict["FLV"].append(dict_i["FLV"])
-        return out_dict
-    ngrid, nt = pred.shape
-    # Bias
-    Bias = np.nanmean(pred - target, axis=1)
-    # RMSE
-    RMSE = np.sqrt(np.nanmean((pred - target) ** 2, axis=1))
-    # ubRMSE
-    predMean = np.tile(np.nanmean(pred, axis=1), (nt, 1)).transpose()
-    targetMean = np.tile(np.nanmean(target, axis=1), (nt, 1)).transpose()
-    predAnom = pred - predMean
-    targetAnom = target - targetMean
-    ubRMSE = np.sqrt(np.nanmean((predAnom - targetAnom) ** 2, axis=1))
-    # rho R2 NSE
-    Corr = np.full(ngrid, np.nan)
-    R2 = np.full(ngrid, np.nan)
-    NSE = np.full(ngrid, np.nan)
-    KGe = np.full(ngrid, np.nan)
-    PBiaslow = np.full(ngrid, np.nan)
-    PBiashigh = np.full(ngrid, np.nan)
-    PBias = np.full(ngrid, np.nan)
-    num_lowtarget_zero = 0
-    for k in range(ngrid):
-        x = pred[k, :]
-        y = target[k, :]
-        ind = np.where(np.logical_and(~np.isnan(x), ~np.isnan(y)))[0]
-        if ind.shape[0] > 0:
-            xx = x[ind]
-            yy = y[ind]
-            # percent bias
-            PBias[k] = np.sum(xx - yy) / np.sum(yy) * 100
-            if ind.shape[0] > 1:
-                # Theoretically at least two points for correlation
-                Corr[k] = scipy.stats.pearsonr(xx, yy)[0]
-                yymean = yy.mean()
-                SST: float = np.sum((yy - yymean) ** 2)
-                SSReg: float = np.sum((xx - yymean) ** 2)
-                SSRes: float = np.sum((yy - xx) ** 2)
-                R2[k] = 1 - SSRes / SST
-                NSE[k] = 1 - SSRes / SST
-                KGe[k] = KGE(xx, yy)
-            # FHV the peak flows bias 2%
-            # FLV the low flows bias bottom 30%, log space
-            pred_sort = np.sort(xx)
-            target_sort = np.sort(yy)
-            indexlow = round(0.3 * len(pred_sort))
-            indexhigh = round(0.98 * len(pred_sort))
-            lowpred = pred_sort[:indexlow]
-            highpred = pred_sort[indexhigh:]
-            lowtarget = target_sort[:indexlow]
-            hightarget = target_sort[indexhigh:]
-            if np.sum(lowtarget) == 0:
-                num_lowtarget_zero = num_lowtarget_zero + 1
-            with warnings.catch_warnings():
-                # Sometimes the lowtarget is all 0, which will cause a warning
-                # but I know it is not an error, so I ignore it
-                warnings.simplefilter("ignore", category=RuntimeWarning)
-                PBiaslow[k] = np.sum(lowpred - lowtarget) / np.sum(lowtarget) * 100
-            PBiashigh[k] = np.sum(highpred - hightarget) / np.sum(hightarget) * 100
-    outDict = dict(
-        Bias=Bias,
-        RMSE=RMSE,
-        ubRMSE=ubRMSE,
-        Corr=Corr,
-        R2=R2,
-        NSE=NSE,
-        KGE=KGe,
-        FHV=PBiashigh,
-        FLV=PBiaslow,
-    )
-    # "The CDF of BFLV will not reach 1.0 because some basins have all zero flow observations for the "
-    # "30% low flow interval, the percent bias can be infinite\n"
-    # "The number of these cases is " + str(num_lowtarget_zero)
-    return outDict
+        return (out_dict, qc) if return_qc else out_dict
+
+    metric_names = ("Bias", "RMSE", "ubRMSE", "Corr", "R2", "NSE", "KGE", "FHV", "FLV")
+    out_dict = {name: np.full(target.shape[0], np.nan) for name in metric_names}
+    for basin_idx in range(target.shape[0]):
+        valid = np.isfinite(target[basin_idx]) & np.isfinite(pred[basin_idx])
+        yy = target[basin_idx, valid]
+        xx = pred[basin_idx, valid]
+        if not yy.size:
+            continue
+
+        # Keep this path's established R2=NSE definition while using exactly
+        # the same finite pairs for all metrics, including the unbiased means.
+        row = stat_error_i(yy, xx)
+        for name in metric_names:
+            if name == "R2":
+                out_dict[name][basin_idx] = row["NSE"]
+            else:
+                out_dict[name][basin_idx] = row[name]
+    return (out_dict, qc) if return_qc else out_dict
 
 
 def stat_errors(
-    target: np.ndarray, pred: np.ndarray, fill_nan: Optional[List[str]] = None
-) -> List[Dict[str, np.ndarray]]:
+    target: np.ndarray,
+    pred: np.ndarray,
+    fill_nan: Optional[List[str]] = None,
+    *,
+    return_qc: bool = False,
+) -> Union[
+    List[Dict[str, np.ndarray]],
+    Tuple[List[Dict[str, np.ndarray]], List[Dict[str, np.ndarray]]],
+]:
     """Calculate statistical metrics for 3D arrays with multiple variables.
 
     This function extends stat_error to handle 3D arrays where the third dimension
@@ -713,6 +844,8 @@ def stat_errors(
         pred (np.ndarray): Predicted values. Same shape as target.
         fill_nan (List[str], optional): List of NaN handling methods, one per variable.
             Each element can be "no", "sum", or "mean". Defaults to ["no"].
+        return_qc (bool, optional): If true, return ``(metrics, qc_by_variable)``.
+            The default preserves the historical metrics-only return value.
 
     Returns:
         List[Dict[str, np.ndarray]]: List of dictionaries, one per variable.
@@ -743,7 +876,7 @@ def stat_errors(
         array([0.141])
     """
     if fill_nan is None:
-        fill_nan = ["no"]
+        fill_nan = ["no"] * target.shape[-1]
     if len(target.shape) != 3:
         raise ValueError(
             "The input data should be 3-dim, not 2-dim. If you want to calculate "
@@ -756,10 +889,21 @@ def stat_errors(
             "Please give same length of fill_nan as the number of variables."
         )
     dict_list = []
+    qc_list = []
     for k in range(target.shape[-1]):
-        k_dict = stat_error(target[:, :, k], pred[:, :, k], fill_nan=fill_nan[k])
+        result = stat_error(
+            target[:, :, k],
+            pred[:, :, k],
+            fill_nan=fill_nan[k],
+            return_qc=return_qc,
+        )
+        if return_qc:
+            k_dict, k_qc = result
+            qc_list.append(k_qc)
+        else:
+            k_dict = result
         dict_list.append(k_dict)
-    return dict_list
+    return (dict_list, qc_list) if return_qc else dict_list
 
 
 def cal_4_stat_inds(b: np.ndarray) -> List[float]:
